@@ -1,0 +1,6 @@
+"material","category","xmin"
+"pottery","base",521
+"pottery","body",521
+"pottery","handle",521
+"pottery","rim",521
+"pottery","spout",2069

@@ -1,0 +1,5 @@
+"utm_hemisphere","utm_zone","area_utm_easting_meters","area_utm_northing_meters","type","longitude_decimal_degrees","latitude_decimal_degrees","xmin"
+"N",38,478020,4419550,"excavation trench, 10 by 10 meter","44.742779","39.925768",6255
+"N",38,478130,4419430,"excavation trench, 10 by 10 meter","44.744071","39.92469",6256
+"N",38,478200,4419510,"excavation trench, 10 by 10 meter","44.744887","39.925413",6257
+"N",38,478230,4419490,,,,6258
