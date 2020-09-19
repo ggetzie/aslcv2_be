@@ -279,7 +279,5 @@ pip-selfcheck.json
 ### Project template
 
 aslcv2_be/media/
-
 .pytest_cache/
-
-
+logs/
