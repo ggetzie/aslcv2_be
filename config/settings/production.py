@@ -83,14 +83,11 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
 # COLLECTFAST_STRATEGY = "collectfast.strategies.boto3.Boto3Strategy"
 # STATIC_URL = f"https://{aws_s3_domain}/static/"
 
-STATIC_URL = f"/static/"
-
 # MEDIA
 # ------------------------------------------------------------------------------
 # DEFAULT_FILE_STORAGE = "aslcv2_be.utils.storages.MediaRootS3Boto3Storage"
 # MEDIA_URL = f"https://{aws_s3_domain}/media/"
 
-MEDIA_URL = f"/media/"
 
 # TEMPLATES
 # ------------------------------------------------------------------------------
