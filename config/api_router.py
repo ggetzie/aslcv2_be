@@ -17,7 +17,7 @@ router.register("users", UserViewSet)
 app_name = "api"
 urlpatterns = [
     path("areas/", views.SpatialAreaList.as_view()),
-    path("areas/<int:pk>/", views.SpatialAreaDetail.as_view()),
-    path("context/<uuid:pk>/", views.SpatialContextDetail.as_view()),
-    path("objectfind/<uuid:pk>/", views.ObjectFindDetail.as_view()),
+    path("areas/<uuid:area_id>/", views.SpatialAreaDetail.as_view()),
+    path("context/<uuid:context_id>/", views.SpatialContextDetail.as_view()),
+    path("context/<uuid:context_id>/photo/", views.ObjectPhotoUpload.as_view()),
 ] + router.urls

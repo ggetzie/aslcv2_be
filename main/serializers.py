@@ -8,7 +8,7 @@ class ContextListingField(serializers.RelatedField):
     spatial area is selected.
     """
     def to_representation(self, value):
-        return value.context_number
+        return (value.id, value.context_number)
 
 
 class SpatialAreaSerializer(serializers.ModelSerializer):
@@ -44,12 +44,13 @@ class SpatialContextSerializer(serializers.ModelSerializer):
         model=SpatialContext
         fields = ["spatial_area",
                   "context_number",
+                  "id",
                   "type",
                   "opening_date",
                   "closing_date",
                   "description",
                   "director_notes",
-                  "objectfind_set"]
+                  "objectphoto_set"]
 
 
 class SpatialContextNestedSerializer(serializers.ModelSerializer):
@@ -74,13 +75,4 @@ class ObjectFindSerializer(serializers.ModelSerializer):
                   "material_category",
                   "director_notes"]
 
-        
-class ObjectPhotoSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ObjectPhoto
-        fields = [
-            "object_find",
-            "photo",
-            "user"]
-            
+                    

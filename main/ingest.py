@@ -97,3 +97,8 @@ def object_finds():
     ObjectFind.objects.bulk_create(objs)
 
 
+def load_all():
+    spatial_areas()
+    spatial_contexts()
+    material_categories()
+    object_finds()

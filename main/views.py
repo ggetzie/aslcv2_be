@@ -3,12 +3,16 @@ from django.shortcuts import render
 
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ParseError
+from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+
 from main.models import SpatialArea, SpatialContext, ObjectFind, ObjectPhoto
 from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
-                              ObjectFindSerializer, ObjectPhotoSerializer)
+                              ObjectFindSerializer)
 
 # api views
 class SpatialAreaList(APIView):
@@ -24,37 +28,30 @@ class SpatialAreaList(APIView):
         serializer = SpatialAreaSerializer(qs, many=True)
         return Response(serializer.data)
 
-    def post(self, request, format=None):
-        serializer = SpatialAreaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class SpatialAreaDetail(APIView):
 
-    def get_object(self, pk):
+    def get_object(self, area_id):
         try:
-            return SpatialArea.objects.get(pk=pk)
+            return SpatialArea.objects.get(id=area_id)
         except SpatialArea.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk, format=None):
-        sa = self.get_object(pk)
+    def get(self, request, area_id, format=None):
+        sa = self.get_object(area_id)
         serializer = SpatialAreaSerializer(sa)
         return Response(serializer.data)
 
 
 class SpatialContextDetail(APIView):
-    def get_object(self, pk):
+    def get_object(self, context_id):
         try:
-            return SpatialContext.objects.get(pk=pk)
+            return SpatialContext.objects.get(id=context_id)
         except SpatialContext.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk, format=None):
-        sc = self.get_object(pk)
+    def get(self, request, context_id, format=None):
+        sc = self.get_object(context_id)
         serializer = SpatialContextSerializer(sc)
         return Response(serializer.data)
 
@@ -70,5 +67,24 @@ class ObjectFindDetail(APIView):
         obj = self.get_object(pk)
         serializer = ObjectFindSerializer(obj)
         return Response(serializer.data)
+
+
+class ImageUploadParser(FileUploadParser):
+    media_type = 'image/*'
+
         
-        
+class ObjectPhotoUpload(APIView):
+    parser_class = (ImageUploadParser,)
+
+    def put(self, request, context_id, format=None):
+        if "file" not in request.data:
+            raise ParserError("Request data must contain 'file' key")
+
+        f = request.data["file"]
+        sc = SpatialContext.objects.get(id=context_id)
+        op = ObjectPhoto(user=request.user,
+                         context=sc,
+                         photo=f)
+        op.save()
+        return Response(status=status.HTTP_201_CREATED)
+                         
