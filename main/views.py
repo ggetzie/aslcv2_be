@@ -74,17 +74,13 @@ class ImageUploadParser(FileUploadParser):
 
         
 class ObjectPhotoUpload(APIView):
-    parser_class = (ImageUploadParser,)
 
     def put(self, request, context_id, format=None):
-        if "file" not in request.data:
-            raise ParserError("Request data must contain 'file' key")
-
-        f = request.data["file"]
+        
         sc = SpatialContext.objects.get(id=context_id)
         op = ObjectPhoto(user=request.user,
                          context=sc,
-                         photo=f)
+                         photo=request.FILES["photo"])
         op.save()
         return Response(status=status.HTTP_201_CREATED)
                          
