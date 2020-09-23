@@ -52,6 +52,23 @@ class SpatialContextSerializer(serializers.ModelSerializer):
                   "director_notes",
                   "objectphoto_set"]
 
+        
+class SpatialContextEditSerializer(serializers.ModelSerializer):
+    spatial_area = serializers.PrimaryKeyRelatedField(required=False,
+                                                      read_only=True)
+
+    class Meta:
+        model=SpatialContext
+
+        fields = ["id",
+                  "spatial_area",
+                  "context_number",
+                  "type",
+                  "opening_date",
+                  "closing_date",
+                  "description",
+                  "director_notes"]
+
 
 class SpatialContextNestedSerializer(serializers.ModelSerializer):
     spatial_area = SpatialAreaNestedSerializer()

@@ -64,7 +64,9 @@ class SpatialContext(models.Model):
                                      on_delete = models.CASCADE)
     context_number = models.IntegerField("Context Number", editable=False)
     type = models.CharField("Context Type",
-                            max_length=255)
+                            max_length=255,
+                            default="",
+                            blank=True)
     opening_date = models.DateTimeField("Opening Date",
                                         null=True,
                                         blank=True)
@@ -87,8 +89,8 @@ class SpatialContext(models.Model):
                   .objects
                   .filter(spatial_area=self.spatial_area)
                   .aggregate(models
-                             .Max("context_number"))["context_number__max"] + 1)
-            self.context_number = nc
+                             .Max("context_number"))["context_number__max"])
+            self.context_number = nc + 1 if nc else 1
         super().save(*args, **kwargs)
                                    
     class Meta:
@@ -151,8 +153,8 @@ class ObjectFind(models.Model):
         if not self.find_number and self.spatial_context:
             nf = (self.__class__
                   .filter(spatial_context=self.spatial_context)
-                  .aggregate(models.Max("find_number")["find_number__max"])+1)
-            self.find_number = nf
+                  .aggregate(models.Max("find_number")["find_number__max"]))
+            self.find_number = nf +1 if nf else 1
         super().save(*args, **kwargs)
         
     def __str__(self):
@@ -218,10 +220,3 @@ class ObjectPhoto(models.Model):
     def __str__(self):
         return self.photo.name
         
-
-
-
-
-
-    
-

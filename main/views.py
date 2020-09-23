@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 
 from main.models import SpatialArea, SpatialContext, ObjectFind, ObjectPhoto
 from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
-                              ObjectFindSerializer)
+                              ObjectFindSerializer, SpatialContextEditSerializer)
 
 # api views
 class SpatialAreaList(APIView):
@@ -43,6 +43,21 @@ class SpatialAreaDetail(APIView):
         return Response(serializer.data)
 
 
+class SpatialContextList(ListCreateAPIView):
+
+    def get(self, request, format=None):
+        contexts = SpatialContext.objects.all()
+        serializer = SpatialContextSerializer(contexts, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = SpatialContextEditSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class SpatialContextDetail(APIView):
     def get_object(self, context_id):
         try:
@@ -54,6 +69,14 @@ class SpatialContextDetail(APIView):
         sc = self.get_object(context_id)
         serializer = SpatialContextSerializer(sc)
         return Response(serializer.data)
+
+    def put(self, request, context_id, format=None):
+        sc = self.get_object(context_id)
+        serializer = SpatialContextEditSerializer(sc, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
 class ObjectFindDetail(APIView):
