@@ -44,6 +44,8 @@ class SpatialAreaDetail(APIView):
 
 
 class SpatialContextList(ListCreateAPIView):
+    serializer_class = SpatialContextSerializer
+    queryset = SpatialContext.objects.all()
 
     def get(self, request, format=None):
         contexts = SpatialContext.objects.all()
