@@ -154,10 +154,11 @@ LOGGING = {
         }
     },
     "handlers": {
-        "mail_admins": {
+        "file": {
             "level": "ERROR",
             "filters": ["require_debug_false"],
-            "class": "django.utils.log.AdminEmailHandler",
+            "class": "logging.FileHandler",
+            "filename": "/usr/local/src/aslcv2_be/logs/debug.log"
         },
         "console": {
             "level": "DEBUG",
@@ -168,13 +169,13 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
     "loggers": {
         "django.request": {
-            "handlers": ["mail_admins"],
+            "handlers": ["file"],
             "level": "ERROR",
             "propagate": True,
         },
         "django.security.DisallowedHost": {
             "level": "ERROR",
-            "handlers": ["console", "mail_admins"],
+            "handlers": ["console", "file"],
             "propagate": True,
         },
     },
