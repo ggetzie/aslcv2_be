@@ -1,7 +1,7 @@
 import requests
 
-def get_token(username, password):
-    r = requests.post("http://localhost:3000/auth-token/",
+def get_token(username, password, url="http://localhost:3000/auth-token/"):
+    r = requests.post(url,
                       data={"username":username,
                             "password": password})
     if r.status_code == 200:

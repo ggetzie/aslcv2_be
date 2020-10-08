@@ -54,8 +54,12 @@ class SpatialContextSerializer(serializers.ModelSerializer):
 
         
 class SpatialContextEditSerializer(serializers.ModelSerializer):
-    spatial_area = serializers.PrimaryKeyRelatedField(required=False,
-                                                      read_only=True)
+    spatial_area = (serializers
+                    .PrimaryKeyRelatedField(queryset=SpatialArea.objects.all(),
+                                            required=False))
+
+    def create(self, validated_data):
+        return SpatialContext.objects.create(**validated_data)
 
     class Meta:
         model=SpatialContext
