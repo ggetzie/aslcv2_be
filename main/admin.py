@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from main.models import (SpatialArea, SpatialContext, ObjectFind,
-                         MaterialCategory, ObjectPhoto)
+                         MaterialCategory, ContextPhoto)
 
 @admin.register(SpatialArea)
 class SpatialAreaAdmin(admin.ModelAdmin):
@@ -23,6 +23,6 @@ class MaterialCategoryAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(ObjectPhoto)
-class ObjectPhotoAdmin(admin.ModelAdmin):
+@admin.register(ContextPhoto)
+class ContextPhotoAdmin(admin.ModelAdmin):
     pass

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from main.models import SpatialArea, SpatialContext, ObjectFind, ObjectPhoto
+from main.models import SpatialArea, SpatialContext, ObjectFind
 
 
 class ContextListingField(serializers.RelatedField):

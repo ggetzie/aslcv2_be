@@ -42,17 +42,34 @@ LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
 DATABASES = {
-	"default": {
-		"ENGINE": "django.db.backends.postgresql_psycopg2",
-		"NAME": "aslcv2_be_db",
-		"USER": "aslcv2_be_user",
-		"PASSWORD": env("aslcv2_be_DB_PW"), # store in environment variable
-		"HOST": "localhost",
-		"PORT": "",                      # Set to empty string for default.
-	}
+    "default": {
+	"ENGINE": "django.contrib.gis.db.backends.postgis",
+        "OPTIONS": {
+            "options": "-c search_path=django,public"
+        },
+	"NAME": env("ARCHAEOLOGY_DB"),
+	"USER": env("ARCHAEOLOGY_DB_USER"),
+	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
+	"HOST": "localhost",
+	"PORT": "",                      # Set to empty string for default.
+    },
+    "archaeology": {
+	"ENGINE": "django.contrib.gis.db.backends.postgis",
+        "OPTIONS": {
+            "options": "-c search_path=spatial,options,object"
+        },
+	"NAME": env("ARCHAEOLOGY_DB"),
+	"USER": env("ARCHAEOLOGY_DB_USER"),
+	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
+	"HOST": "localhost",
+	"PORT": "",                      # Set to empty string for default.
+    },
+    
 }
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
+DATABASE_ROUTERS = ["config.routers.ArchaeologyRouter",
+                    "config.routers.DefaultRouter"]
 
 # URLS
 # ------------------------------------------------------------------------------

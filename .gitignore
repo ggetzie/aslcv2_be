@@ -282,3 +282,5 @@ aslcv2_be/media/
 .pytest_cache/
 logs/
 media/
+
+.vscode

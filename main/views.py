@@ -10,14 +10,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-from main.models import SpatialArea, SpatialContext, ObjectFind, ObjectPhoto
+from main.models import SpatialArea, SpatialContext, ObjectFind, ContextPhoto
 from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
                               ObjectFindSerializer, SpatialContextEditSerializer)
 
 # api views
 class SpatialAreaList(APIView):
 
-    def get(self, request, format=None):
+    def get(self, request):
         qs = SpatialArea.objects.all()
         for var in ["utm_hemisphere",
                     "utm_zone",
@@ -98,14 +98,17 @@ class ImageUploadParser(FileUploadParser):
     media_type = 'image/*'
 
         
-class ObjectPhotoUpload(APIView):
+class ContextPhotoUpload(APIView):
 
     def put(self, request, context_id, format=None):
         
         sc = SpatialContext.objects.get(id=context_id)
-        op = ObjectPhoto(user=request.user,
-                         context=sc,
-                         photo=request.FILES["photo"])
+        op = ContextPhoto(user=request.user,
+                          utm_hemisphere=sc.utm_hemisphere,
+                          utm_zone=sc.utm_zone,
+                          area_utm_easting_meters=sc.area_utm_easting_meters,
+                          area_utm_northing_meters=sc.area_utm_northing_meters,
+                          photo=request.FILES["photo"])
         op.save()
         return Response(status=status.HTTP_201_CREATED)
                          

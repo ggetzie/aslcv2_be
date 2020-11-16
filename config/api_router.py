@@ -20,5 +20,5 @@ urlpatterns = [
     path("area/<uuid:area_id>/", views.SpatialAreaDetail.as_view()),
     path("context/", views.SpatialContextList.as_view()),
     path("context/<uuid:context_id>/", views.SpatialContextDetail.as_view()),
-    path("context/<uuid:context_id>/photo/", views.ObjectPhotoUpload.as_view()),
+    path("context/<uuid:context_id>/photo/", views.ContextPhotoUpload.as_view()),
 ] + router.urls
