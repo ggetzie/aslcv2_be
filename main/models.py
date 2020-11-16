@@ -179,7 +179,6 @@ class ObjectFind(models.Model):
 
     context_number = models.IntegerField("Context Number", editable=False)    
     find_number = models.IntegerField("Find Number")
-    created = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User,
                              null=True,
                              on_delete=models.SET_NULL)
@@ -217,8 +216,13 @@ class ObjectFind(models.Model):
     def __str__(self):
         return (f"{self.utm_hemisphere}-{self.utm_zone}-"
                 f"{self.area_utm_easting_meters}-"
-                f"{self.area_utm_northing_meters}-{self.context_number}"
+                f"{self.area_utm_northing_meters}-{self.context_number}-"
                 f"{self.find_number}")
+
+    @property
+    def material_category(self):
+        return MaterialCategory.objects.get(material=self.material,
+                                            category=self.category)
 
     
 class MaterialCategory(models.Model):
@@ -232,10 +236,6 @@ class MaterialCategory(models.Model):
     class Meta:
         db_table = "material_category"
         managed = False
-        constraints = [
-            models.UniqueConstraint(fields=["material", "category"],
-                                    name="unique_material_category")
-            ]
         verbose_name = "Material Category"
         verbose_name_plural = "Material Categories"
 

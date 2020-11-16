@@ -1,5 +1,5 @@
-unmanaged = ["spatialarea", "spatialcontext", "objectfind", 
-             "materialcategory", "areatype", "contexttype"]
+unmanaged = ["spatialarea", "areatype", "spatialcontext", "contexttype",
+             "objectfind", "materialcategory",  ]
 
 class DefaultRouter:
     def db_for_read(self, model, **hints):
@@ -31,4 +31,5 @@ class ArchaeologyRouter:
         return True
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
-        return False
+        if model_name in unmanaged:
+            return False
