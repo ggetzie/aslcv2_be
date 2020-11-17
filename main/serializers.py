@@ -38,34 +38,41 @@ class SpatialAreaNestedSerializer(serializers.ModelSerializer):
 
         
 class SpatialContextSerializer(serializers.ModelSerializer):
-    spatial_area = SpatialAreaNestedSerializer()
     
     class Meta:
         model=SpatialContext
-        fields = ["spatial_area",
+        fields = ["id",
+                  "utm_hemisphere",
+                  "utm_zone",
+                  "area_utm_easting_meters",
+                  "area_utm_northing_meters",
                   "context_number",
-                  "id",
                   "type",
                   "opening_date",
                   "closing_date",
                   "description",
                   "director_notes",
-                  "objectphoto_set"]
+                  "contextphoto_set"]
 
         
 class SpatialContextEditSerializer(serializers.ModelSerializer):
-    spatial_area = (serializers
-                    .PrimaryKeyRelatedField(queryset=SpatialArea.objects.all(),
-                                            required=False))
 
     def create(self, validated_data):
+        sa, _ = SpatialArea.objects.get_or_create(
+            utm_hemisphere=validated_data["utm_hemisphere"],
+            utm_zone=validated_data["utm_zone"],
+            area_utm_easting_meters=validated_data["area_utm_easting_meters"],
+            area_utm_northing_meters=validated_data["area_utm_northing_meters"])
         return SpatialContext.objects.create(**validated_data)
 
     class Meta:
         model=SpatialContext
 
         fields = ["id",
-                  "spatial_area",
+                  "utm_hemisphere",
+                  "utm_zone",
+                  "area_utm_easting_meters",
+                  "area_utm_northing_meters",
                   "context_number",
                   "type",
                   "opening_date",
@@ -75,25 +82,15 @@ class SpatialContextEditSerializer(serializers.ModelSerializer):
 
 
 class SpatialContextNestedSerializer(serializers.ModelSerializer):
-    spatial_area = SpatialAreaNestedSerializer()
 
     class Meta:
         model = SpatialContext
-        fields = ["spatial_area",
+        fields = ["utm_hemisphere",
+                  "utm_zone",
+                  "area_utm_easting_meters",
+                  "area_utm_northing_meters",
                   "context_number"]
 
         
-class ObjectFindSerializer(serializers.ModelSerializer):
-    spatial_context = SpatialContextNestedSerializer()
-    
-    class Meta:
-        model = ObjectFind
-        fields = ["id",
-                  "spatial_context",
-                  "find_number",
-                  "created",
-                  "user",
-                  "material_category",
-                  "director_notes"]
 
                     

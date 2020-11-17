@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 
 from main.models import SpatialArea, SpatialContext, ObjectFind, ContextPhoto
 from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
-                              ObjectFindSerializer, SpatialContextEditSerializer)
+                              SpatialContextEditSerializer)
 
 # api views
 class SpatialAreaList(APIView):
@@ -81,19 +81,6 @@ class SpatialContextDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
-class ObjectFindDetail(APIView):
-    def get_object(self, pk):
-        try:
-            return ObjectFind.objects.get(pk=pk)
-        except ObjectFind.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        obj = self.get_object(pk)
-        serializer = ObjectFindSerializer(obj)
-        return Response(serializer.data)
-
-
 class ImageUploadParser(FileUploadParser):
     media_type = 'image/*'
 
