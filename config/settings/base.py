@@ -52,6 +52,9 @@ DATABASES = {
 	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
 	"HOST": "localhost",
 	"PORT": "",                      # Set to empty string for default.
+        "TEST": {
+            "NAME": "archaeology_test"
+        },
     },
     "archaeology": {
 	"ENGINE": "django.contrib.gis.db.backends.postgis",
@@ -63,6 +66,9 @@ DATABASES = {
 	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
 	"HOST": "localhost",
 	"PORT": "",                      # Set to empty string for default.
+        "TEST": {
+            "NAME": "archaeology_test",
+        },
     },
     
 }
@@ -107,6 +113,11 @@ LOCAL_APPS = [
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+# django-extensions
+# ------------------------------------------------------------------------------
+# https://django-extensions.readthedocs.io/en/latest/installation_instructions.html#configuration
+INSTALLED_APPS += ["django_extensions"]  # noqa F405
 
 # MIGRATIONS
 # ------------------------------------------------------------------------------
