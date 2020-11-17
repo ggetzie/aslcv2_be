@@ -56,7 +56,7 @@ class SpatialArea(models.Model):
                 f"{self.area_utm_northing_meters}")
 
     @property
-    def contexts(self):
+    def spatialcontext_set(self):
         return (SpatialContext
                 .objects
                 .filter(utm_hemisphere=self.utm_hemisphere,
@@ -72,6 +72,11 @@ class AreaType(models.Model):
     class Meta:
         db_table = "area_types"
         managed = False
+        verbose_name = "Area Type"
+        verbose_name_plural = "Area Types"
+
+    def __str__(self):
+        return self.type
 
 
 class SpatialContext(models.Model):
@@ -94,13 +99,13 @@ class SpatialContext(models.Model):
                              on_delete=models.SET_NULL,
                              db_column="type")
                              
-    opening_date = models.DateTimeField("Opening Date",
-                                        null=True,
-                                        blank=True)
+    opening_date = models.DateField("Opening Date",
+                                    null=True,
+                                    blank=True)
 
-    closing_date = models.DateTimeField("Closing Date",
-                                        null=True,
-                                        blank=True)
+    closing_date = models.DateField("Closing Date",
+                                    null=True,
+                                    blank=True)
     description = models.CharField("Description",
                                    max_length=255,
                                    default="",
@@ -160,6 +165,8 @@ class ContextType(models.Model):
     class Meta:
         db_table = "context_types"
         managed=False
+        verbose_name = "Context Type"
+        verbose_name_plural = "Context Types"
 
     def __str__(self):
         return self.type
