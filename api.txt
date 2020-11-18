@@ -1,0 +1,19 @@
+items in angle brackets <> indicate a value should be provided
+
+/api/area/ - GET list all SpatialAreas
+/api/area/<utm_hemisphere> - GET list all SpatialAreas with hemisphere "N or S"
+/api/area/<utm_hemisphere>/<utm_zone> - GET list all SpatialAreas with hemisphere "N or S" and zone
+/api/area/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters - GET list all SpatialAreas with hemisphere "N or S" and Zone and easting
+/api/area/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters>/<area_utm_nothing_meters> - GET list all SpatialAreas with hemisphere "N or S",  Zone,  Easting, Northing - note this will only be one area, but will be in a list
+/api/area/<uuid> - GET detail of Spatial Area with given uuid
+/api/area/types - GET list SpatialArea types
+
+/api/context/ - GET list all SpatialContexts
+	      - POST create new Spatial Context
+/api/context/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters>/<area_utm_nothing_meters>/ - GET list all SpatialContexts for the SpatialArea with the given values
+/api/context/<uuid> - GET detail of Spatial Context with given uuid
+		    - PUT update Spatial Context with given uuid
+/api/context/<uuid>/photo/ - PUT upload photo
+/api/context/types/ - GET list all Spatial Context Types
+
+

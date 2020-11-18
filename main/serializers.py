@@ -52,8 +52,7 @@ class SpatialContextSerializer(serializers.ModelSerializer):
                   "opening_date",
                   "closing_date",
                   "description",
-                  "director_notes",
-                  "contextphoto_set"]
+                  "director_notes"]
 
         
 class SpatialContextEditSerializer(serializers.ModelSerializer):
@@ -115,3 +114,4 @@ class ContextPhotoSerializer(serializers.ModelSerializer):
                   "area_utm_easting_meters",
                   "area_utm_northing_meters",
                   "context_number"]
+        

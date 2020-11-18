@@ -7,6 +7,7 @@ Import and call from the shell
 Current test runner doesn't work with mutli-schema setup
 TODO: fix that
 """
+import datetime
 import glob
 import pathlib
 import random
@@ -69,7 +70,7 @@ def test_area():
                                       args=[test_utm_hemisphere]),
                      headers=headers)
     assert r.status_code == 200
-    assert n.count() == len(r.json())
+    assert sa_h.count() == len(r.json())
     print("SpatialArea List Hemisphere OK")
 
     url404 = (base_url+reverse("api:spatialarea_list_h",
@@ -85,7 +86,7 @@ def test_area():
                                             test_utm_zone]),
                      headers=headers)
     assert r.status_code == 200
-    assert n_38.count() == len(r.json())
+    assert sa_hz.count() == len(r.json())
     print("SpatialArea List Hemisphere Zone OK")
 
     r = requests.get(base_url+reverse("api:spatialarea_list_hze",
@@ -104,14 +105,14 @@ def test_area():
                                             test_area_utm_northing_meters]),
                      headers=headers)
     assert r.status_code == 200
-    assert n_38_478130_4419430.count() == len(r.json())
+    assert sa_hzen.count() == len(r.json())
     print("SpatialArea List Hemisphere Zone Easting Northing OK")
 
     r = requests.get(base_url + reverse("api:spatialarea_detail",
-                                        args=[n_38_478130_4419430[0].id]),
+                                        args=[sa_hzen[0].id]),
                      headers=headers)
     assert r.status_code == 200
-    assert r.json()["id"] == str(n_38_478130_4419430[0].id)
+    assert r.json()["id"] == str(sa_hzen[0].id)
     print("SpatialArea Detail by uuid OK")
     
 
@@ -145,7 +146,10 @@ def test_context():
             "type": sc_type.type}
     old_max = (SpatialContext
                .objects
-               .filter(**data)
+               .filter(utm_hemisphere=test_utm_hemisphere,
+                       utm_zone=test_utm_zone,
+                       area_utm_easting_meters=test_area_utm_easting_meters,
+                       area_utm_northing_meters=test_area_utm_northing_meters)
                .aggregate(Max("context_number"))["context_number__max"] or 0)
 
     r = requests.post(base_url + reverse("api:spatialcontext_list"),
@@ -164,6 +168,25 @@ def test_context():
                      headers=headers)
     assert r.status_code == 200
     assert r.json()["id"] == str(sc.id)
+
+    # test edit spatial context
+    sc = random.choice(SpatialContext.objects.filter(opening_date__isnull=True))
+    data = {"opening_date": datetime.date.today(),
+            "utm_hemisphere": sc.utm_hemisphere,
+            "utm_zone": sc.utm_zone,
+            "area_utm_easting_meters": sc.area_utm_easting_meters,
+            "area_utm_northing_meters": sc.area_utm_northing_meters}
+    r = requests.put(base_url + reverse("api:spatialcontext_detail",
+                                        args=[sc.id]),
+                     headers=headers,
+                     data=data)
+    assert r.status_code == 200
+    sc = SpatialContext.objects.get(id=r.json()["id"])
+    assert sc.opening_date == datetime.date.today()
+    sc.opening_date = None
+    sc.save()
+    print("SpatialContext edit OK")
+    
 
 def test_types():
 
@@ -192,8 +215,13 @@ def test_photo_upload():
 
     r = requests.put(url, headers=headers,
                      files={"photo": open(photo_path, "rb")})
-    print(r.json())
     assert r.status_code == 201
     p = ContextPhoto.objects.get(id=r.json()["id"])
     assert pathlib.Path(p.photo.path).exists()
     print("Context Photo upload OK")
+
+def test_all():
+    test_area()
+    test_context()
+    test_types()
+    test_photo_upload()
