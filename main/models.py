@@ -74,6 +74,7 @@ class AreaType(models.Model):
         managed = False
         verbose_name = "Area Type"
         verbose_name_plural = "Area Types"
+        ordering = ["type"]
 
     def __str__(self):
         return self.type
@@ -178,6 +179,7 @@ class ContextType(models.Model):
         managed=False
         verbose_name = "Context Type"
         verbose_name_plural = "Context Types"
+        ordering = ["type"]
 
     def __str__(self):
         return self.type

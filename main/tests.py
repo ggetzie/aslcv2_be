@@ -28,16 +28,6 @@ class HomePageTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Sign Out")
 
-class ApiTestMixin:
-    def setUp(self):
-        self.user = User.objects.create_user(username="test",
-                                             password="top_secret",
-                                             email="test@example.com")
-        auth_url = reverse("auth_token")
-        c = Client()
-        response = c.post(auth_url, {"username": "test", "password": "top_secret"})
-        self.token = response.json()["token"]
-        self.api_client = Client(Authorization=f"Token: {self.token}")
 
 
         

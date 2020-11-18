@@ -10,9 +10,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-from main.models import SpatialArea, SpatialContext, ObjectFind, ContextPhoto
+from main.models import (SpatialArea, SpatialContext, ObjectFind, ContextPhoto,
+                         AreaType, ContextType)
 from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
-                              SpatialContextEditSerializer)
+                              SpatialContextEditSerializer, AreaTypeSerializer,
+                              ContextTypeSerializer)
 
 # api views
 class SpatialAreaList(ListAPIView):
@@ -105,4 +107,16 @@ class ContextPhotoUpload(APIView):
                           photo=request.FILES["photo"])
         op.save()
         return Response(status=status.HTTP_201_CREATED)
+    
+
+class AreaTypeList(ListAPIView):
+    model = AreaType
+    serializer_class = AreaTypeSerializer
+    queryset = AreaType.objects.all()
+
+
+class ContextTypeList(ListAPIView):
+    model = ContextType
+    serializer_class = ContextTypeSerializer
+    queryset = ContextType.objects.all()
                          

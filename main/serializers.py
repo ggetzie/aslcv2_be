@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from main.models import SpatialArea, SpatialContext, ObjectFind
+from main.models import (SpatialArea, SpatialContext, ObjectFind,
+                         AreaType, ContextType)
 
 
 class ContextListingField(serializers.RelatedField):
@@ -93,5 +94,13 @@ class SpatialContextNestedSerializer(serializers.ModelSerializer):
                   "context_number"]
 
         
+class AreaTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AreaType
+        fields = ["type"]
 
-                    
+        
+class ContextTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContextType
+        fields = ["type"]        

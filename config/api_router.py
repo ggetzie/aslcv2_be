@@ -49,7 +49,9 @@ area_urls = [
     path("<uuid:area_id>/",
          views.SpatialAreaDetail.as_view(),
          name="spatialarea_detail"),
-    
+    path("types/",
+         views.AreaTypeList.as_view(),
+         name="spatialarea_types")
     ]
 
 context_urls = [
@@ -68,7 +70,11 @@ context_urls = [
     path("<uuid:context_id>/photo/",
          views.ContextPhotoUpload.as_view(),
          name="spatialcontext_photo"),
+    path("types/",
+         views.ContextTypeList.as_view(),
+         name="spatialcontext_types")
     ]
+
 
 urlpatterns = [
     path("area/", include(area_urls)),
