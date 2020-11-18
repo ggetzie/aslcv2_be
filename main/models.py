@@ -265,14 +265,11 @@ class MaterialCategory(models.Model):
 
 
 def get_context_folder(instance, filename):
-    s_context = instance.context
-    s_area = s_context.spatial_area
-    extension = filename.split(".")[-1]
-    res = "{0}/{1}/{2}/{3}/{4}/{5}".format(s_area.utm_hemisphere,
-                                           s_area.utm_zone,
-                                           s_area.area_utm_easting_meters,
-                                           s_area.area_utm_northing_meters,
-                                           s_context.context_number,
+    res = "{0}/{1}/{2}/{3}/{4}/{5}".format(instance.utm_hemisphere,
+                                           instance.utm_zone,
+                                           instance.area_utm_easting_meters,
+                                           instance.area_utm_northing_meters,
+                                           instance.context_number,
                                            filename)
     return res
 

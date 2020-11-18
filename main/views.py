@@ -14,7 +14,7 @@ from main.models import (SpatialArea, SpatialContext, ObjectFind, ContextPhoto,
                          AreaType, ContextType)
 from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
                               SpatialContextEditSerializer, AreaTypeSerializer,
-                              ContextTypeSerializer)
+                              ContextTypeSerializer, ContextPhotoSerializer)
 
 # api views
 class SpatialAreaList(ListAPIView):
@@ -104,9 +104,11 @@ class ContextPhotoUpload(APIView):
                           utm_zone=sc.utm_zone,
                           area_utm_easting_meters=sc.area_utm_easting_meters,
                           area_utm_northing_meters=sc.area_utm_northing_meters,
+                          context_number=sc.context_number,
                           photo=request.FILES["photo"])
         op.save()
-        return Response(status=status.HTTP_201_CREATED)
+        ser = ContextPhotoSerializer(op)
+        return Response(ser.data, status=status.HTTP_201_CREATED)
     
 
 class AreaTypeList(ListAPIView):

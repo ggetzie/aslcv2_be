@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from main.models import (SpatialArea, SpatialContext, ObjectFind,
-                         AreaType, ContextType)
+                         AreaType, ContextType, ContextPhoto)
 
 
 class ContextListingField(serializers.RelatedField):
@@ -104,3 +104,14 @@ class ContextTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContextType
         fields = ["type"]        
+
+
+class ContextPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContextPhoto
+        fields = ["id",
+                  "utm_hemisphere",
+                  "utm_zone",
+                  "area_utm_easting_meters",
+                  "area_utm_northing_meters",
+                  "context_number"]

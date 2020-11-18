@@ -7,9 +7,11 @@ Import and call from the shell
 Current test runner doesn't work with mutli-schema setup
 TODO: fix that
 """
+import glob
 import pathlib
 import random
 
+from django.conf import settings
 from django.db.models import Max
 from django.urls import reverse
 
@@ -184,4 +186,14 @@ def test_types():
     print("Spatial Context Types List OK")
 
 def test_photo_upload():
-    url = base_url + reverse("api:contextphoto_upload")
+    sc = random.choice(SpatialContext.objects.all())
+    url = base_url + reverse("api:spatialcontext_photo", args=[sc.id])
+    photo_path = random.choice(glob.glob("/media/gabe/data/pictures/*.jpg"))
+
+    r = requests.put(url, headers=headers,
+                     files={"photo": open(photo_path, "rb")})
+    print(r.json())
+    assert r.status_code == 201
+    p = ContextPhoto.objects.get(id=r.json()["id"])
+    assert pathlib.Path(p.photo.path).exists()
+    print("Context Photo upload OK")
