@@ -35,13 +35,6 @@ class SpatialArea(models.Model):
     class Meta:
         db_table = "areas"
         managed = False
-        constraints = [
-            models.UniqueConstraint(fields=["utm_hemisphere",
-                                            "utm_zone",
-                                            "area_utm_easting_meters",
-                                            "area_utm_northing_meters"],
-                                    name="unique_spatial_area")
-            ]
         ordering = ["utm_hemisphere",
                     "utm_zone",
                     "area_utm_easting_meters",
@@ -118,11 +111,6 @@ class SpatialContext(models.Model):
     class Meta:
         db_table = "contexts"
         managed = False
-        constraints = [
-            models.UniqueConstraint(fields=["spatial_area",
-                                           "context_number"],
-                                    name="unique_spatial_context")
-            ]
         verbose_name = "Spatial Context"
         verbose_name_plural = "Spatial Contexts"
         

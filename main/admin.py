@@ -13,6 +13,10 @@ class SpatialAreaAdmin(admin.ModelAdmin):
                           "utm_zone",
                           "area_utm_easting_meters",
                           "area_utm_northing_meters"]
+    list_filter = ["utm_hemisphere",
+                   "utm_zone",
+                   "area_utm_easting_meters",
+                   "area_utm_northing_meters"]
 
 
 @admin.register(SpatialContext)
@@ -26,7 +30,11 @@ class SpatialContextAdmin(admin.ModelAdmin):
                           "utm_zone",
                           "area_utm_easting_meters",
                           "area_utm_northing_meters",
-                          "context_number"]    
+                          "context_number"]
+    list_filter = ["utm_hemisphere",
+                    "utm_zone",
+                    "area_utm_easting_meters",
+                    "area_utm_northing_meters"]
 
     
 @admin.register(ObjectFind)
