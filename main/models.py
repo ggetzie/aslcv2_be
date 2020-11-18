@@ -138,10 +138,13 @@ class SpatialContext(models.Model):
 
     def save(self, *args, **kwargs):
         # increment to next context_number
-        if not self.context_number and self.spatial_area:
+        if not self.context_number:
             nc = (self.__class__
                   .objects
-                  .filter(spatial_area=self.spatial_area)
+                  .filter(utm_hemisphere=self.utm_hemisphere,
+                          utm_zone=self.utm_zone,
+                          area_utm_easting_meters=self.area_utm_easting_meters,
+                          area_utm_northing_meters=self.area_utm_northing_meters)
                   .aggregate(models
                              .Max("context_number"))["context_number__max"])
             self.context_number = nc + 1 if nc else 1
@@ -155,6 +158,14 @@ class SpatialContext(models.Model):
                      utm_zone=self.utm_zone,
                      area_utm_easting_meters=self.area_utm_easting_meters,
                      area_utm_northing_meters=self.area_utm_northing_meters))
+    @property
+    def contextphoto_set(self):
+        return (ContextPhoto
+                .objects
+                .filter(utm_hemisphere=self.utm_hemisphere,
+                        utm_zone=self.utm_zone,
+                        area_utm_easting_meters=self.area_utm_easting_meters,
+                        area_utm_northing_meters=self.area_utm_northing_meters))
 
 
 class ContextType(models.Model):

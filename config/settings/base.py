@@ -53,7 +53,8 @@ DATABASES = {
 	"HOST": "localhost",
 	"PORT": "",                      # Set to empty string for default.
         "TEST": {
-            "NAME": "archaeology_test"
+            "NAME": "archaeology_test",
+            "MIGRATE": False
         },
     },
     "archaeology": {
@@ -68,9 +69,9 @@ DATABASES = {
 	"PORT": "",                      # Set to empty string for default.
         "TEST": {
             "NAME": "archaeology_test",
+            "MIGRATE": False
         },
     },
-    
 }
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True

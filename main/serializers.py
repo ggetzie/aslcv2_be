@@ -63,6 +63,7 @@ class SpatialContextEditSerializer(serializers.ModelSerializer):
             utm_zone=validated_data["utm_zone"],
             area_utm_easting_meters=validated_data["area_utm_easting_meters"],
             area_utm_northing_meters=validated_data["area_utm_northing_meters"])
+        print(validated_data)
         return SpatialContext.objects.create(**validated_data)
 
     class Meta:

@@ -15,18 +15,20 @@ from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
                               SpatialContextEditSerializer)
 
 # api views
-class SpatialAreaList(APIView):
+class SpatialAreaList(ListAPIView):
+    serializer_class = SpatialAreaSerializer
+    model = SpatialArea
+    paginate_by = 100
 
-    def get(self, request):
+    def get_queryset(self):
         qs = SpatialArea.objects.all()
         for var in ["utm_hemisphere",
                     "utm_zone",
                     "area_utm_easting_meters",
                     "area_utm_northing_meters"]:
-            if var in request.GET:
-                qs = qs.filter(**{var: request.GET[var]})
-        serializer = SpatialAreaSerializer(qs, many=True)
-        return Response(serializer.data)
+            if var in self.kwargs:
+                qs = qs.filter(**{var: self.kwargs[var]})
+        return qs
 
 
 class SpatialAreaDetail(APIView):
@@ -45,12 +47,17 @@ class SpatialAreaDetail(APIView):
 
 class SpatialContextList(ListCreateAPIView):
     serializer_class = SpatialContextSerializer
-    queryset = SpatialContext.objects.all()
 
-    def get(self, request, format=None):
-        contexts = SpatialContext.objects.all()
-        serializer = SpatialContextSerializer(contexts, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        vars = ["utm_hemisphere",
+                "utm_zone",
+                "area_utm_easting_meters",
+                "area_utm_northing_meters"]
+        qs = SpatialContext.objects.all()
+        if all([v in self.kwargs for v in vars]):
+            qs = qs.filter(**{var: self.kwargs[var] for var in vars})
+        return qs
+    
 
     def post(self, request, format=None):
         serializer = SpatialContextEditSerializer(data=request.data)
