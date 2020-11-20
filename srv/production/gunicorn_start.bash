@@ -6,7 +6,7 @@ USER=aslcv2_be_user
 GROUP=webapps
 NUM_WORKERS=3
 TIMEOUT=120
-DJANGO_SETTINGS_MODULE=config.settings.local
+DJANGO_SETTINGS_MODULE=config.settings.production
 DJANGO_WSGI_MODULE=config.wsgi
 
 echo "Starting $NAME as `whoami`"
