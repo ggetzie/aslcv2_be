@@ -33,7 +33,7 @@ class SpatialAreaList(ListAPIView):
             if var in self.kwargs:
                 qs = qs.filter(**{var: self.kwargs[var]})
             elif var in self.request.GET:
-                val = self.request.GET[var]
+                val = self.request.GET[var].strip('"\' ')
                 qs = qs.filter(**{var: int(val) if val.isnumeric() else val})
         return qs
 
@@ -60,7 +60,7 @@ class SpatialContextList(ListCreateAPIView):
         if all([v in self.kwargs for v in FILTER_VARS]):
             qs = qs.filter(**{var: self.kwargs[var] for var in FILTER_VARS})
         elif any([v in self.request.GET for v in FILTER_VARS]):
-            val = self.request.GET[var]
+            val = self.request.GET[var].strip('"\' ')
             qs = qs.filter(**{var: int(val) if val.isnumeric else val
                               for var in FILTER_VARS if var in self.request.GET})
         return qs
