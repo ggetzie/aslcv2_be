@@ -40,10 +40,10 @@ LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 # DATABASES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
-
+# "django.contrib.gis.db.backends.postgis",
 DATABASES = {
     "default": {
-	"ENGINE": "django.contrib.gis.db.backends.postgis",
+	"ENGINE": "django.db.backends.postgresql_psycopg2",
         "OPTIONS": {
             "options": "-c search_path=django,public"
         },
@@ -58,7 +58,7 @@ DATABASES = {
         },
     },
     "archaeology": {
-	"ENGINE": "django.contrib.gis.db.backends.postgis",
+	"ENGINE": "django.db.backends.postgresql_psycopg2",
         "OPTIONS": {
             "options": "-c search_path=spatial,options,object"
         },

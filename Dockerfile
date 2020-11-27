@@ -12,14 +12,22 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 # create root directory for our project in the container
-RUN mkdir -p /usr/local/src/aslcv2_be
+ENV APP_HOME=/usr/local/src/aslcv2_be
+RUN mkdir -p $APP_HOME/staticfiles
+
+
 
 # Set the working directory 
-WORKDIR /usr/local/src/aslcv2_be
+WORKDIR $APP_HOME
 
-# Copy the current directory contents into the container 
-ADD . /usr/local/src/aslcv2_be/
+COPY requirements.txt $APP_HOME
 
-# Install any needed packages specified in requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+
+# Copy the current directory contents into the container 
+ADD . $APP_HOME
+RUN chown -R aslcv2_be_user:webapps $APP_HOME
+USER aslcv2_be_user:webapps
+
+ENTRYPOINT ["/usr/local/src/aslcv2_be/entrypoint.sh"]

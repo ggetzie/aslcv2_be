@@ -79,8 +79,6 @@ def test_area():
     assert r.status_code == 404
     print("SpatialArea List Hemisphere 404 OK")
 
-    
-
     r = requests.get(base_url+reverse("api:spatialarea_list_hz",
                                       args=[test_utm_hemisphere,
                                             test_utm_zone]),

@@ -16,6 +16,11 @@ from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
                               SpatialContextEditSerializer, AreaTypeSerializer,
                               ContextTypeSerializer, ContextPhotoSerializer)
 
+FILTER_VARS = ["utm_hemisphere",
+               "utm_zone",
+               "area_utm_easting_meters",
+               "area_utm_northing_meters"]
+
 # api views
 class SpatialAreaList(ListAPIView):
     serializer_class = SpatialAreaSerializer
@@ -24,12 +29,12 @@ class SpatialAreaList(ListAPIView):
 
     def get_queryset(self):
         qs = SpatialArea.objects.all()
-        for var in ["utm_hemisphere",
-                    "utm_zone",
-                    "area_utm_easting_meters",
-                    "area_utm_northing_meters"]:
+        for var in FILTER_VARS:
             if var in self.kwargs:
                 qs = qs.filter(**{var: self.kwargs[var]})
+            elif var in self.request.GET:
+                val = self.request.GET[var]
+                qs = qs.filter(**{var: int(val) if val.isnumeric() else val})
         return qs
 
 
@@ -51,13 +56,13 @@ class SpatialContextList(ListCreateAPIView):
     serializer_class = SpatialContextSerializer
 
     def get_queryset(self):
-        vars = ["utm_hemisphere",
-                "utm_zone",
-                "area_utm_easting_meters",
-                "area_utm_northing_meters"]
         qs = SpatialContext.objects.all()
-        if all([v in self.kwargs for v in vars]):
-            qs = qs.filter(**{var: self.kwargs[var] for var in vars})
+        if all([v in self.kwargs for v in FILTER_VARS]):
+            qs = qs.filter(**{var: self.kwargs[var] for var in FILTER_VARS})
+        elif any([v in self.request.GET for v in FILTER_VARS]):
+            val = self.request.GET[var]
+            qs = qs.filter(**{var: int(val) if val.isnumeric else val
+                              for var in FILTER_VARS if var in self.request.GET})
         return qs
     
 

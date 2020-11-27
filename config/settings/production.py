@@ -6,7 +6,11 @@ from .base import env
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 SECRET_KEY = env("aslcv2_be_SECRET_KEY")
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["j20200007.kotsf.com", "aslcv2_be"])
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["j20200007.kotsf.com",
+                                                          "aslcv2",
+                                                          "localhost",
+                                                          "127.0.0.1",
+                                                          "gpuserver.edu.hku.hk"])
 
 # DATABASES
 # ------------------------------------------------------------------------------

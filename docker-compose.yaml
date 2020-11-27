@@ -3,8 +3,20 @@ version: '3'
 services:
   web:
     container_name: aslcv2_be
-    build: aslcv2_be/
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: /usr/local/src/aslcv2_be/srv/docker/gunicorn_start.bash
     ports:
       - 8009:8009
     network_mode: "host"
+    env_file:
+      - aslcv2_be.env
+    volumes:
+     - ./staticfiles:/usr/local/src/aslcv2_be/staticfiles
+     - ./media:/usr/local/src/aslcv2_be/media
+
+# volumes:
+#      staticfiles:
+#      media:
+
