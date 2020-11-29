@@ -88,7 +88,9 @@ class SpatialContextDetail(APIView):
 
     def put(self, request, context_id, format=None):
         sc = self.get_object(context_id)
-        serializer = SpatialContextEditSerializer(sc, data=request.data)
+        serializer = SpatialContextEditSerializer(sc,
+                                                  data=request.data,
+                                                  partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

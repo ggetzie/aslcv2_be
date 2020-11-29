@@ -169,11 +169,7 @@ def test_context():
 
     # test edit spatial context
     sc = random.choice(SpatialContext.objects.filter(opening_date__isnull=True))
-    data = {"opening_date": datetime.date.today(),
-            "utm_hemisphere": sc.utm_hemisphere,
-            "utm_zone": sc.utm_zone,
-            "area_utm_easting_meters": sc.area_utm_easting_meters,
-            "area_utm_northing_meters": sc.area_utm_northing_meters}
+    data = {"opening_date": datetime.date.today()}
     r = requests.put(base_url + reverse("api:spatialcontext_detail",
                                         args=[sc.id]),
                      headers=headers,
