@@ -61,7 +61,8 @@ class MaterialCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(ContextPhoto)
 class ContextPhotoAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["__str__", "user"]
+    list_display_links = ["__str__"]
 
 @admin.register(AreaType)
 class AreaTypeAdmin(admin.ModelAdmin):
