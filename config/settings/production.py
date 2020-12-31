@@ -151,43 +151,43 @@ ANYMAIL = {
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-    "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s "
-            "%(process)d %(thread)d %(message)s"
-        }
-    },
-    "handlers": {
-        "file": {
-            "level": "ERROR",
-            "filters": ["require_debug_false"],
-            "class": "logging.FileHandler",
-            "filename": "/usr/local/src/aslcv2_be/logs/debug.log"
-        },
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
-    },
-    "root": {"level": "INFO", "handlers": ["console"]},
-    "loggers": {
-        "django.request": {
-            "handlers": ["file"],
-            "level": "ERROR",
-            "propagate": True,
-        },
-        "django.security.DisallowedHost": {
-            "level": "ERROR",
-            "handlers": ["console", "file"],
-            "propagate": True,
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
+#     "formatters": {
+#         "verbose": {
+#             "format": "%(levelname)s %(asctime)s %(module)s "
+#             "%(process)d %(thread)d %(message)s"
+#         }
+#     },
+#     "handlers": {
+#         "file": {
+#             "level": "ERROR",
+#             "filters": ["require_debug_false"],
+#             "class": "logging.FileHandler",
+#             "filename": "/usr/local/src/aslcv2_be/logs/debug.log"
+#         },
+#         "console": {
+#             "level": "DEBUG",
+#             "class": "logging.StreamHandler",
+#             "formatter": "verbose",
+#         },
+#     },
+#     "root": {"level": "INFO", "handlers": ["console"]},
+#     "loggers": {
+#         "django.request": {
+#             "handlers": ["file"],
+#             "level": "ERROR",
+#             "propagate": True,
+#         },
+#         "django.security.DisallowedHost": {
+#             "level": "ERROR",
+#             "handlers": ["console", "file"],
+#             "propagate": True,
+#         },
+#     },
+# }
 
 # Your stuff...
 # ------------------------------------------------------------------------------
