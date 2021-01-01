@@ -63,9 +63,9 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["j20200007.kotsf.com",
 # https://django-storages.readthedocs.io/en/latest/#installation
 # INSTALLED_APPS += ["storages"]  # noqa F405
 # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#settings
-AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+# AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
 # # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#settings
-AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+# AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
 # # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#settings
 # AWS_STORAGE_BUCKET_NAME = env("DJANGO_AWS_STORAGE_BUCKET_NAME")
 # # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#settings
@@ -124,19 +124,15 @@ EMAIL_SUBJECT_PREFIX = env(
 # Django Admin URL regex.
 # ADMIN_URL = env("DJANGO_ADMIN_URL")
 
-# Anymail
+# EMAIL
 # ------------------------------------------------------------------------------
 # https://anymail.readthedocs.io/en/stable/installation/#installing-anymail
-INSTALLED_APPS += ["anymail"]  # noqa F405
+# INSTALLED_APPS += ["anymail"]  # noqa F405
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
 # https://anymail.readthedocs.io/en/stable/installation/#anymail-settings-reference
 # https://anymail.readthedocs.io/en/stable/esps/amazon_ses/
-EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
-ANYMAIL = {
-    "AMAZON_SES_CLIENT_PARAMS": {
-        "region_name": "us-east-1"
-    }
-}
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = ROOT_DIR / "logs" / "email"
 
 # Collectfast
 # ------------------------------------------------------------------------------
@@ -151,43 +147,43 @@ ANYMAIL = {
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-#     "formatters": {
-#         "verbose": {
-#             "format": "%(levelname)s %(asctime)s %(module)s "
-#             "%(process)d %(thread)d %(message)s"
-#         }
-#     },
-#     "handlers": {
-#         "file": {
-#             "level": "ERROR",
-#             "filters": ["require_debug_false"],
-#             "class": "logging.FileHandler",
-#             "filename": "/usr/local/src/aslcv2_be/logs/debug.log"
-#         },
-#         "console": {
-#             "level": "DEBUG",
-#             "class": "logging.StreamHandler",
-#             "formatter": "verbose",
-#         },
-#     },
-#     "root": {"level": "INFO", "handlers": ["console"]},
-#     "loggers": {
-#         "django.request": {
-#             "handlers": ["file"],
-#             "level": "ERROR",
-#             "propagate": True,
-#         },
-#         "django.security.DisallowedHost": {
-#             "level": "ERROR",
-#             "handlers": ["console", "file"],
-#             "propagate": True,
-#         },
-#     },
-# }
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(module)s "
+            "%(process)d %(thread)d %(message)s"
+        }
+    },
+    "handlers": {
+        "file": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "class": "logging.FileHandler",
+            "filename": "/usr/local/src/aslcv2_be/logs/debug.log"
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {"level": "INFO", "handlers": ["console"]},
+    "loggers": {
+        "django.request": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+        "django.security.DisallowedHost": {
+            "level": "ERROR",
+            "handlers": ["console", "file"],
+            "propagate": True,
+        },
+    },
+}
 
 # Your stuff...
 # ------------------------------------------------------------------------------
