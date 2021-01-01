@@ -9,12 +9,12 @@ services:
     command: /usr/local/src/aslcv2_be/srv/docker/gunicorn_start.bash
     ports:
       - 8009:8009
-    network_mode: "host"
+    network_mode: "bridge"
     env_file:
       - aslcv2_be.env
     volumes:
-     - ./staticfiles:/usr/local/src/aslcv2_be/staticfiles
-     - ./media:/usr/local/src/aslcv2_be/media
+      - ./staticfiles://C/Users/ggetz/Documents/GitHub/aslcv2_be/staticfiles
+      - ./media://C/Users/ggetz/Documents/GitHub/aslcv2_be/media
 
 # volumes:
 #      staticfiles:
