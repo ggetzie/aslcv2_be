@@ -15,8 +15,6 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV APP_HOME=/usr/local/src/aslcv2_be
 RUN mkdir -p $APP_HOME/staticfiles
 
-
-
 # Set the working directory 
 WORKDIR $APP_HOME
 
@@ -27,7 +25,11 @@ RUN pip install -r requirements.txt
 
 # Copy the current directory contents into the container 
 ADD . $APP_HOME
+RUN mkdir -p $APP_HOME/logs/email
+RUN touch $APP_HOME/logs/debug.log
+RUN touch $APP_HOME/logs/gunicorn_supervisor.log
+
 RUN chown -R aslcv2_be_user:webapps $APP_HOME
 USER aslcv2_be_user:webapps
 
-ENTRYPOINT ["/usr/local/src/aslcv2_be/entrypoint.sh"]
+ENTRYPOINT ["sh", "/usr/local/src/aslcv2_be/entrypoint.sh"]

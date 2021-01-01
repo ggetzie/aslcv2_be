@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 NAME="aslcv2_be"
 DJANGODIR="/usr/local/src/aslcv2_be/"
 SOCKFILE="/usr/local/src/aslcv2_be/run/gunicorn.sock"

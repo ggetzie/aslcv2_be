@@ -6,7 +6,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: /usr/local/src/aslcv2_be/srv/docker/gunicorn_start.bash
+    command: >
+      gunicorn config.wsgi:application --name aslcv2_be --workers 4 --timeout 120 --bind 0.0.0.0:8009
     ports:
       - 8009:8009
     network_mode: "bridge"
