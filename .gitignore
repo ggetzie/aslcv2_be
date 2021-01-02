@@ -286,3 +286,4 @@ media/
 .vscode
 scratch/
 aslcv2_be.env
+wintest/
