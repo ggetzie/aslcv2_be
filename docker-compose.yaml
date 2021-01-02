@@ -3,6 +3,7 @@ version: '3'
 services:
   web:
     container_name: aslcv2_be
+    image: ggetzie/aslcv2_be_web:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,8 +15,9 @@ services:
     env_file:
       - aslcv2_be.env
     volumes:
-      - ./staticfiles://C/Users/ggetz/Documents/GitHub/aslcv2_be/staticfiles
-      - ./media://C/Users/ggetz/Documents/GitHub/aslcv2_be/media
+      - /C/aslcv2_be/staticfiles:/usr/local/src/aslcv2_be/staticfiles
+      - /C/aslcv2_be/media:/usr/local/src/aslcv2_be/media
+      - /C/aslcv2_be/logs:/usr/local/src/aslcv2_be/logs
 
 # volumes:
 #      staticfiles:
