@@ -22,8 +22,8 @@ services:
       - aslcv2_be.env
     volumes:
       - /C/aslcv2_be/staticfiles:/usr/local/src/aslcv2_be/staticfiles
-      - /C/Users/ggetz/Documents/GitHub/aslcv2_be/media:/usr/local/src/aslcv2_be/media
-      # - /D/ararat/data/files:/usr/local/src/aslcv2_be/media
+      # - /C/Users/ggetz/Documents/GitHub/aslcv2_be/media:/usr/local/src/aslcv2_be/media
+      - /D/ararat/data/files:/usr/local/src/aslcv2_be/media
       - /C/aslcv2_be/logs:/usr/local/src/aslcv2_be/logs
     depends_on:
       - redis
@@ -41,8 +41,8 @@ services:
       - redis
     volumes:
       - /C/Users/ggetz/Documents/GitHub/aslcv2_be/media:/usr/local/src/aslcv2_be/media
-      # - /D/ararat/data/files:/usr/local/src/aslcv2_be/media
-      - /C/aslcv2_be/logs:/usr/local/src/aslcv2_be/logs
+      - /D/ararat/data/files:/usr/local/src/aslcv2_be/media
+      # - /C/aslcv2_be/logs:/usr/local/src/aslcv2_be/logs
     links:
       - redis:redis
 
