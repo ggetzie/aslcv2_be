@@ -110,7 +110,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "aslcv2_be.users.apps.UsersConfig",
-    "main",
+    "main.apps.MainConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -273,24 +273,24 @@ MANAGERS = ADMINS
 # https://docs.djangoproject.com/en/dev/ref/settings/#logging
 # See https://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "formatters": {
-#         "verbose": {
-#             "format": "%(levelname)s %(asctime)s %(module)s "
-#             "%(process)d %(thread)d %(message)s"
-#         }
-#     },
-#     "handlers": {
-#         "console": {
-#             "level": "DEBUG",
-#             "class": "logging.StreamHandler",
-#             "formatter": "verbose",
-#         }
-#     },
-#     "root": {"level": "INFO", "handlers": ["console"]},
-# }
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(module)s "
+            "%(process)d %(thread)d %(message)s"
+        }
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        }
+    },
+    "root": {"level": "INFO", "handlers": ["console"]},
+}
 
 
 # django-allauth
@@ -323,3 +323,6 @@ CORS_URLS_REGEX = r"^/api/.*$"
 # Your stuff...
 # ------------------------------------------------------------------------------
 DATA_UPLOAD_MAX_NUMBER_FIELDS=None
+
+CELERY_BROKER_URL="redis://redis:6379/0"
+CELERY_RESULT_BACKEND="redis://redis:6379/0"

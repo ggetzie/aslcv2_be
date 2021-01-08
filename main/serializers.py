@@ -37,8 +37,14 @@ class SpatialAreaNestedSerializer(serializers.ModelSerializer):
                   "area_utm_easting_meters",
                   "area_utm_northing_meters"]
 
+class ContextPhotoField(serializers.RelatedField):
+    def to_representation(self, value):
+        return {"thumbnail_url": value.thumbnail.url,
+                "photo_url": value.photo.url}
+
         
 class SpatialContextSerializer(serializers.ModelSerializer):
+    contextphoto_set = ContextPhotoField(many=True, read_only=True)
     
     class Meta:
         model=SpatialContext
@@ -52,7 +58,8 @@ class SpatialContextSerializer(serializers.ModelSerializer):
                   "opening_date",
                   "closing_date",
                   "description",
-                  "director_notes"]
+                  "director_notes",
+                  "contextphoto_set"]
 
         
 class SpatialContextEditSerializer(serializers.ModelSerializer):

@@ -1,6 +1,12 @@
 version: '3'
 
 services:
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    network_mode: "bridge"
+
   web:
     container_name: aslcv2_be
     image: ggetzie/aslcv2_be_web:latest
@@ -16,8 +22,29 @@ services:
       - aslcv2_be.env
     volumes:
       - /C/aslcv2_be/staticfiles:/usr/local/src/aslcv2_be/staticfiles
-      - /C/aslcv2_be/media:/usr/local/src/aslcv2_be/media
+      - /C/Users/ggetz/Documents/GitHub/aslcv2_be/media:/usr/local/src/aslcv2_be/media
+      # - /D/ararat/data/files:/usr/local/src/aslcv2_be/media
       - /C/aslcv2_be/logs:/usr/local/src/aslcv2_be/logs
+    depends_on:
+      - redis
+    links:
+      - redis:redis
+
+  celery:
+    build: .
+    command: celery --app=config.celery_app worker --loglevel=INFO -n worker.%%h
+    env_file:
+      - aslcv2_be.env
+    network_mode: "bridge"
+    depends_on:
+      - web
+      - redis
+    volumes:
+      - /C/Users/ggetz/Documents/GitHub/aslcv2_be/media:/usr/local/src/aslcv2_be/media
+      # - /D/ararat/data/files:/usr/local/src/aslcv2_be/media
+      - /C/aslcv2_be/logs:/usr/local/src/aslcv2_be/logs
+    links:
+      - redis:redis
 
 # volumes:
 #      staticfiles:

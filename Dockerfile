@@ -30,6 +30,7 @@ RUN touch $APP_HOME/logs/debug.log
 RUN touch $APP_HOME/logs/gunicorn_supervisor.log
 
 RUN chown -R aslcv2_be_user:webapps $APP_HOME
+RUN chmod -R 777 $APP_HOME/media
 USER aslcv2_be_user:webapps
 
 ENTRYPOINT ["sh", "/usr/local/src/aslcv2_be/entrypoint.sh"]

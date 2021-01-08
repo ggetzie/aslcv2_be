@@ -154,7 +154,8 @@ class SpatialContext(models.Model):
                 .filter(utm_hemisphere=self.utm_hemisphere,
                         utm_zone=self.utm_zone,
                         area_utm_easting_meters=self.area_utm_easting_meters,
-                        area_utm_northing_meters=self.area_utm_northing_meters))
+                        area_utm_northing_meters=self.area_utm_northing_meters,
+                        context_number=self.context_number))
 
 
 class ContextType(models.Model):
@@ -214,9 +215,9 @@ class ObjectFind(models.Model):
 
     def save(self, *args, **kwargs):
         # increment to next find number in same context on creation
-        if not self.find_number and self.spatial_context:
+        if not self.find_number and self.context_number:
             nf = (self.__class__
-                  .filter(spatial_context=self.spatial_context)
+                  .filter(context_number=self.context_number)
                   .aggregate(models.Max("find_number"))["find_number__max"])
             self.find_number = nf +1 if nf else 1
         super().save(*args, **kwargs)
@@ -274,8 +275,11 @@ class ContextPhoto(models.Model):
     area_utm_easting_meters = models.IntegerField("Easting (meters)")
     area_utm_northing_meters = models.IntegerField("Northing (meters)")    
 
-    context_number = models.IntegerField("Context Number", editable=False)    
+    context_number = models.IntegerField("Context Number")
     photo = models.ImageField(upload_to=get_context_folder)
+    thumbnail = models.ImageField(upload_to=get_context_folder,
+                                  null=True,
+                                  blank=True)
     user = models.ForeignKey(User,
                              null=True,
                              on_delete=models.SET_NULL)
@@ -287,4 +291,4 @@ class ContextPhoto(models.Model):
 
     def __str__(self):
         return self.photo.name
-        
+
