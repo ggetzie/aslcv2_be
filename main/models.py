@@ -157,6 +157,16 @@ class SpatialContext(models.Model):
                         area_utm_northing_meters=self.area_utm_northing_meters,
                         context_number=self.context_number))
 
+    @property
+    def bagphoto_set(self):
+        return (BagPhoto
+                .objects
+                .filter(utm_hemisphere=self.utm_hemisphere,
+                        utm_zone=self.utm_zone,
+                        area_utm_easting_meters=self.area_utm_easting_meters,
+                        area_utm_northing_meters=self.area_utm_northing_meters,
+                        context_number=self.context_number))                        
+
 
 class ContextType(models.Model):
     type = models.CharField("Type",
@@ -318,3 +328,43 @@ class ActionLog(models.Model):
     def __str__(self):
         return (f"{self.get_action_display()} on {self.model_name} "
                 f"by {self.user.username} at {self.timestamp}")
+
+def get_bag_folder(instance, filename):
+    res = "{0}/{1}/{2}/{3}/{4}/bagphotos/{5}".format(instance.utm_hemisphere,
+                                                     instance.utm_zone,
+                                                     instance.area_utm_easting_meters,
+                                                     instance.area_utm_northing_meters,
+                                                     instance.context_number,
+                                                     filename)
+    return res                
+
+class BagPhoto(models.Model):
+    id = models.UUIDField(primary_key=True,
+                          default=uuid.uuid4,
+                          editable=False)
+    utm_hemisphere = models.CharField("UTM Hemisphere",
+                                      max_length=1,
+                                      choices = [("N", "North"),
+                                                 ("S", "South")])
+    utm_zone = models.IntegerField("UTM Zone")
+    area_utm_easting_meters = models.IntegerField("Easting (meters)")
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+
+    context_number = models.IntegerField("Context Number")
+    photo = models.ImageField(upload_to=get_bag_folder)
+    thumbnail = models.ImageField(upload_to=get_bag_folder,
+                                  null=True,
+                                  blank=True)
+    user = models.ForeignKey(User,
+                             null=True,
+                             on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created",
+                                   default=utc_now) 
+
+    class Meta:
+        db_table = "bag_photos"
+        verbose_name = "Finds Bag Photo"
+        verbose_name_plural = "Finds Bag Photos"
+
+    def __str__(self):
+        return self.photo.name

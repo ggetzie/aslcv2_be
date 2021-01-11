@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from main.models import (SpatialArea, SpatialContext, ObjectFind,
                          MaterialCategory, ContextPhoto, AreaType, ContextType,
-                         ActionLog)
+                         ActionLog, BagPhoto)
 
 @admin.register(SpatialArea)
 class SpatialAreaAdmin(admin.ModelAdmin):
@@ -79,3 +79,9 @@ class ActionLogAdmin(admin.ModelAdmin):
     list_display = ["timestamp", "model_name", "user"]
     list_display_links = ["timestamp", "model_name", "user"]
     readonly_fields = ["timestamp", "user", "model_name", "action", "object_id"]
+
+@admin.register(BagPhoto)
+class BagPhotoAdmin(admin.ModelAdmin):
+    list_display = ["__str__", "user", "created"]
+    list_display_links = ["__str__"]
+    readonly_fields = ["created"]

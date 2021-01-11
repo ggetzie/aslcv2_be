@@ -20,7 +20,7 @@ import requests
 
 import main.utils as utils
 from main.models import (SpatialArea, AreaType, SpatialContext, ContextType,
-                         ObjectFind, MaterialCategory, ContextPhoto)
+                         ObjectFind, MaterialCategory, ContextPhoto, BagPhoto)
 
 headers = utils.get_test_header()
 base_url = "http://aslcv2"
@@ -215,8 +215,21 @@ def test_photo_upload():
     assert pathlib.Path(p.photo.path).exists()
     print("Context Photo upload OK")
 
+def test_bagphoto_upload():    
+    sc = random.choice(SpatialContext.objects.all())
+    url = base_url + reverse("api:spatialcontext_bagphoto", args=[sc.id])
+    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}*.jpg"))
+
+    r = requests.put(url, headers=headers,
+                     files={"photo": open(photo_path, "rb")})
+    assert r.status_code == 201
+    p = BagPhoto.objects.get(id=r.json()["id"])
+    assert pathlib.Path(p.photo.path).exists()
+    print("Finds Bag Photo upload OK")
+
 def test_all():
     test_area()
     test_context()
     test_types()
     test_photo_upload()
+    test_bagphoto_upload()

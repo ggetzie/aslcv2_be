@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from main.models import (SpatialArea, SpatialContext, ObjectFind,
-                         AreaType, ContextType, ContextPhoto)
+                         AreaType, ContextType, ContextPhoto, BagPhoto)
 
 
 class ContextListingField(serializers.RelatedField):
@@ -42,9 +42,11 @@ class ContextPhotoField(serializers.RelatedField):
         return {"thumbnail_url": value.thumbnail.url,
                 "photo_url": value.photo.url}
 
+
         
 class SpatialContextSerializer(serializers.ModelSerializer):
     contextphoto_set = ContextPhotoField(many=True, read_only=True)
+    bagphoto_set = ContextPhotoField(many=True, read_only=True)
     
     class Meta:
         model=SpatialContext
@@ -59,7 +61,8 @@ class SpatialContextSerializer(serializers.ModelSerializer):
                   "closing_date",
                   "description",
                   "director_notes",
-                  "contextphoto_set"]
+                  "contextphoto_set",
+                  "bagphoto_set"]
 
         
 class SpatialContextEditSerializer(serializers.ModelSerializer):
@@ -114,6 +117,16 @@ class ContextTypeSerializer(serializers.ModelSerializer):
 class ContextPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContextPhoto
+        fields = ["id",
+                  "utm_hemisphere",
+                  "utm_zone",
+                  "area_utm_easting_meters",
+                  "area_utm_northing_meters",
+                  "context_number"]
+
+class BagPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BagPhoto
         fields = ["id",
                   "utm_hemisphere",
                   "utm_zone",

@@ -10,7 +10,6 @@ def get_token(username, password, url="http://aslcv2/auth-token/"):
         headers = {"Authorization": f"Token {r.json()['token']}"}
         return headers
     else:
-        print(r.status_code, r.content)
         return r.status_code, r.content
 
 

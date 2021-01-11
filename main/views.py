@@ -11,10 +11,12 @@ from rest_framework.views import APIView
 
 
 from main.models import (SpatialArea, SpatialContext, ObjectFind, ContextPhoto,
-                         AreaType, ContextType, ActionLog)
+                         AreaType, ContextType, ActionLog, BagPhoto)
+
 from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
                               SpatialContextEditSerializer, AreaTypeSerializer,
-                              ContextTypeSerializer, ContextPhotoSerializer)
+                              ContextTypeSerializer, ContextPhotoSerializer,
+                              BagPhotoSerializer)
 
 FILTER_VARS = ["utm_hemisphere",
                "utm_zone",
@@ -138,7 +140,26 @@ class ContextPhotoUpload(APIView):
                                      object_id=op.id)
         ser = ContextPhotoSerializer(op)
         return Response(ser.data, status=status.HTTP_201_CREATED)
-    
+
+
+class BagPhotoUpload(APIView):
+
+    def put(self, request, context_id, format=None):
+        sc = SpatialContext.objects.get(id=context_id)
+        bp = BagPhoto(user=request.user,
+                      utm_hemisphere=sc.utm_hemisphere,
+                      utm_zone=sc.utm_zone,
+                      area_utm_easting_meters=sc.area_utm_easting_meters,
+                      area_utm_northing_meters=sc.area_utm_northing_meters,
+                      context_number=sc.context_number,
+                      photo=request.FILES["photo"])
+        bp.save()
+        _ = ActionLog.objects.create(user=self.request.user,
+                                     model_name=BagPhoto._meta.verbose_name,
+                                     action="C",
+                                     object_id=bp.id)
+        ser = BagPhotoSerializer(bp)
+        return Response(ser.data, status=status.HTTP_201_CREATED)                                     
 
 class AreaTypeList(ListAPIView):
     model = AreaType

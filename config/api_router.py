@@ -72,7 +72,10 @@ context_urls = [
          name="spatialcontext_photo"),
     path("types/",
          views.ContextTypeList.as_view(),
-         name="spatialcontext_types")
+         name="spatialcontext_types"),
+     path("<uuid:context_id>/bagphoto/",
+          views.BagPhotoUpload.as_view(),
+          name="spatialcontext_bagphoto")
     ]
 
 
