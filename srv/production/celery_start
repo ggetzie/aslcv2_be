@@ -1,0 +1,15 @@
+#!/bin/bash
+
+NAME="aslcv2_be_celery"
+DJANGODIR="/usr/local/src/aslcv2_be"
+USER=aslcv2_be_user
+GROUP=webapps
+CELERY_APP=config.celery_app
+
+echo "Starting $NAME as `whoami`"
+
+cd $DJANGODIR
+source /usr/local/src/env/aslcv2_be/bin/activate
+
+echo "Starting Celery"
+exec /usr/local/src/env/aslcv2_be/bin/celery --app=$CELERY_APP worker --loglevel=INFO -n worker.%%h

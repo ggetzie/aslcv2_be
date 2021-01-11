@@ -188,9 +188,6 @@ class ObjectFind(models.Model):
 
     context_number = models.IntegerField("Context Number", editable=False)    
     find_number = models.IntegerField("Find Number")
-    user = models.ForeignKey(User,
-                             null=True,
-                             on_delete=models.SET_NULL)
     material = models.CharField("Material",
                                 max_length=255,
                                 default="")
