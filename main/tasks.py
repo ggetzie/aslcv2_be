@@ -12,6 +12,7 @@ from main.models import ContextPhoto
 
 @shared_task
 def create_thumbnail(photo_id):
+    print(f"Received id {photo_id}")
     cp = ContextPhoto.objects.get(id=photo_id)
     photo_path = pathlib.Path(cp.photo.file.name)
     basewidth = 50
