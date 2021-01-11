@@ -280,6 +280,8 @@ class ContextPhoto(models.Model):
     user = models.ForeignKey(User,
                              null=True,
                              on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created",
+                                   default=utc_now) 
 
     class Meta:
         db_table = "context_photos"
@@ -289,3 +291,30 @@ class ContextPhoto(models.Model):
     def __str__(self):
         return self.photo.name
 
+class ActionLog(models.Model):
+    id = models.UUIDField(primary_key=True,
+                          default=uuid.uuid4,
+                          editable=False)
+    user = models.ForeignKey(User,
+                             null=True,
+                             on_delete=models.SET_NULL)
+    model_name = models.CharField("Model Name", 
+                                  max_length=100)
+    timestamp = models.DateTimeField("timestamp",
+                                     default=utc_now)
+    action = models.CharField("Action Type", 
+                              max_length=2,
+                              choices=(("C", "CREATE"),
+                                       ("R", "READ"),
+                                       ("U", "UPDATE"),
+                                       ("D", "DELETE")))
+    object_id = models.UUIDField("Object ID")
+
+    class Meta:
+        db_table = "action_log"
+        verbose_name = "Action Log"
+        verbose_name_plural = "Action Logs"
+
+    def __str__(self):
+        return (f"{self.get_action_display()} on {self.model_name} "
+                f"by {self.user.username} at {self.timestamp}")

@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 
 from main.models import (SpatialArea, SpatialContext, ObjectFind, ContextPhoto,
-                         AreaType, ContextType)
+                         AreaType, ContextType, ActionLog)
 from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
                               SpatialContextEditSerializer, AreaTypeSerializer,
                               ContextTypeSerializer, ContextPhotoSerializer)
@@ -42,13 +42,18 @@ class SpatialAreaDetail(APIView):
 
     def get_object(self, area_id):
         try:
-            return SpatialArea.objects.get(id=area_id)
+            res = SpatialArea.objects.get(id=area_id)
+            return res
         except SpatialArea.DoesNotExist:
             raise Http404
 
     def get(self, request, area_id, format=None):
         sa = self.get_object(area_id)
         serializer = SpatialAreaSerializer(sa)
+        _ = ActionLog.objects.create(user=self.request.user,
+                                         model_name=SpatialArea._meta.verbose_name,
+                                         action="R",
+                                         object_id=area_id)
         return Response(serializer.data)
 
 
@@ -70,6 +75,10 @@ class SpatialContextList(ListCreateAPIView):
         serializer = SpatialContextEditSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            _ = ActionLog.objects.create(user=self.request.user,
+                                         model_name=SpatialContext._meta.verbose_name,
+                                         action="C",
+                                         object_id=serializer.data["id"])
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,11 +92,19 @@ class SpatialContextDetail(APIView):
 
     def get(self, request, context_id, format=None):
         sc = self.get_object(context_id)
+        _ = ActionLog.objects.create(user=self.request.user,
+                                     model_name=SpatialContext._meta.verbose_name,
+                                     action="R",
+                                     object_id=context_id)
         serializer = SpatialContextSerializer(sc)
         return Response(serializer.data)
 
     def put(self, request, context_id, format=None):
         sc = self.get_object(context_id)
+        _ = ActionLog.objects.create(user=self.request.user,
+                                     model_name=SpatialContext._meta.verbose_name,
+                                     action="U",
+                                     object_id=context_id)
         serializer = SpatialContextEditSerializer(sc,
                                                   data=request.data,
                                                   partial=True)
@@ -113,7 +130,12 @@ class ContextPhotoUpload(APIView):
                           area_utm_northing_meters=sc.area_utm_northing_meters,
                           context_number=sc.context_number,
                           photo=request.FILES["photo"])
+
         op.save()
+        _ = ActionLog.objects.create(user=self.request.user,
+                                     model_name=ContextPhoto._meta.verbose_name,
+                                     action="C",
+                                     object_id=op.id)
         ser = ContextPhotoSerializer(op)
         return Response(ser.data, status=status.HTTP_201_CREATED)
     

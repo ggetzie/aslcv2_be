@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from main.models import (SpatialArea, SpatialContext, ObjectFind,
-                         MaterialCategory, ContextPhoto, AreaType, ContextType)
+                         MaterialCategory, ContextPhoto, AreaType, ContextType,
+                         ActionLog)
 
 @admin.register(SpatialArea)
 class SpatialAreaAdmin(admin.ModelAdmin):
@@ -61,8 +62,9 @@ class MaterialCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(ContextPhoto)
 class ContextPhotoAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "user"]
+    list_display = ["__str__", "user", "created"]
     list_display_links = ["__str__"]
+    readonly_fields = ["created"]
 
 @admin.register(AreaType)
 class AreaTypeAdmin(admin.ModelAdmin):
@@ -71,3 +73,9 @@ class AreaTypeAdmin(admin.ModelAdmin):
 @admin.register(ContextType)
 class ContextTypeAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(ActionLog)
+class ActionLogAdmin(admin.ModelAdmin):
+    list_display = ["timestamp", "model_name", "user"]
+    list_display_links = ["timestamp", "model_name", "user"]
+    readonly_fields = ["timestamp", "user", "model_name", "action", "object_id"]

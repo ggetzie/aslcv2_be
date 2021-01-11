@@ -23,7 +23,8 @@ from main.models import (SpatialArea, AreaType, SpatialContext, ContextType,
                          ObjectFind, MaterialCategory, ContextPhoto)
 
 headers = utils.get_test_header()
-base_url = "http://localhost:3000"
+base_url = "http://aslcv2"
+PHOTO_DIR = "/mnt/c/Users/ggetz/Pictures/"
 
 # SpatialArea: N-38-478130-4419430
 test_utm_hemisphere = "N"
@@ -205,7 +206,7 @@ def test_types():
 def test_photo_upload():
     sc = random.choice(SpatialContext.objects.all())
     url = base_url + reverse("api:spatialcontext_photo", args=[sc.id])
-    photo_path = random.choice(glob.glob("/media/gabe/data/pictures/*.jpg"))
+    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}*.jpg"))
 
     r = requests.put(url, headers=headers,
                      files={"photo": open(photo_path, "rb")})
