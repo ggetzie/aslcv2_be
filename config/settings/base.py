@@ -47,7 +47,7 @@ DATABASES = {
         "OPTIONS": {
             "options": "-c search_path=django,public"
         },
-	"NAME": "aslcv2_be",
+	"NAME": env("DJANGO_DB"),
 	"USER": env("ARCHAEOLOGY_DB_USER"),
 	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
 	"HOST": env("DB_HOST", default="localhost"),
