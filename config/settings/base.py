@@ -51,7 +51,7 @@ DATABASES = {
 	"USER": env("ARCHAEOLOGY_DB_USER"),
 	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
 	"HOST": env("DB_HOST", default="localhost"),
-	"PORT": "",                      # Set to empty string for default.
+	"PORT": env("DB_PORT", default="5432"),                      # Set to empty string for default.
         "TEST": {
             "NAME": "archaeology_test",
             "MIGRATE": False
@@ -66,7 +66,7 @@ DATABASES = {
 	"USER": env("ARCHAEOLOGY_DB_USER"),
 	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
 	"HOST": env("DB_HOST", default="localhost"),
-	"PORT": "",                      # Set to empty string for default.
+	"PORT": env("DB_PORT", default="5432"),                      # Set to empty string for default.
         "TEST": {
             "NAME": "archaeology_test",
             "MIGRATE": False
