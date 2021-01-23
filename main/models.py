@@ -282,6 +282,8 @@ def get_context_folder_tn(instance, filename):
 
     return f"{subfolder}/tn_{photo_path.name}"
 
+def get_bag_folder(instance, filename):
+    pass
 
 class ContextPhoto(models.Model):
     id = models.UUIDField(primary_key=True,
