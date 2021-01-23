@@ -171,5 +171,4 @@ class AreaTypeList(ListAPIView):
 class ContextTypeList(ListAPIView):
     model = ContextType
     serializer_class = ContextTypeSerializer
-    queryset = ContextType.objects.all()
-                         
+    queryset = ContextType.objects.all()                         
