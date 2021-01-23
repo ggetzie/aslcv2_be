@@ -132,5 +132,6 @@ class BagPhotoSerializer(serializers.ModelSerializer):
                   "utm_zone",
                   "area_utm_easting_meters",
                   "area_utm_northing_meters",
-                  "context_number"]
+                  "context_number",
+                  "source"]
         

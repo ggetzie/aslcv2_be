@@ -87,3 +87,4 @@ class BagPhotoAdmin(admin.ModelAdmin):
     list_display_links = ["__str__"]
     readonly_fields = ["created"]
     exclude = ["thumbnail"]
+    list_filter = ["source"]

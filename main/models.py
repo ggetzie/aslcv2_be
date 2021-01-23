@@ -1,6 +1,8 @@
 import datetime
+import pathlib
 import uuid
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -258,16 +260,27 @@ class MaterialCategory(models.Model):
     def __str__(self):
         return f"{self.material} - {self.category}"
 
-
+def get_photo_filename(subfolder):
+    full_path = pathlib.Path(settings.MEDIA_ROOT) / subfolder
+    photos = full_path.glob("*.jpg")
+    existing = [int(p.stem) for p in photos if p.stem.isnumeric()]
+    if existing:
+        return f"{max(existing) + 1}.jpg"
+    else:
+        return "1.jpg"
+    
 
 def get_context_folder(instance, filename):
-    res = "{0}/{1}/{2}/{3}/{4}/{5}".format(instance.utm_hemisphere,
-                                           instance.utm_zone,
-                                           instance.area_utm_easting_meters,
-                                           instance.area_utm_northing_meters,
-                                           instance.context_number,
-                                           filename)
-    return res
+    subfolder = instance.subfolder
+    new_filename = get_photo_filename(subfolder)
+
+    return f"{subfolder}/{new_filename}"
+
+def get_context_folder_tn(instance, filename):
+    subfolder = instance.subfolder
+    photo_path = pathlib.Path(instance.photo.file.name)
+
+    return f"{subfolder}/tn_{photo_path.name}"
 
 
 class ContextPhoto(models.Model):
@@ -284,7 +297,7 @@ class ContextPhoto(models.Model):
 
     context_number = models.IntegerField("Context Number")
     photo = models.ImageField(upload_to=get_context_folder)
-    thumbnail = models.ImageField(upload_to=get_context_folder,
+    thumbnail = models.ImageField(upload_to=get_context_folder_tn,
                                   null=True,
                                   blank=True)
     user = models.ForeignKey(User,
@@ -292,6 +305,15 @@ class ContextPhoto(models.Model):
                              on_delete=models.SET_NULL)
     created = models.DateTimeField("Created",
                                    default=utc_now) 
+    
+    @property
+    def subfolder(self):
+        sub_root = (f"{self.utm_hemisphere}/"
+                    f"{self.utm_zone}/"
+                    f"{self.area_utm_easting_meters}/"
+                    f"{self.area_utm_northing_meters}/"
+                    f"{self.context_number}")
+        return f"{sub_root}/documentation"
 
     class Meta:
         db_table = "context_photos"
@@ -300,6 +322,59 @@ class ContextPhoto(models.Model):
 
     def __str__(self):
         return self.photo.name
+
+
+class BagPhoto(models.Model):
+    id = models.UUIDField(primary_key=True,
+                          default=uuid.uuid4,
+                          editable=False)
+    utm_hemisphere = models.CharField("UTM Hemisphere",
+                                      max_length=1,
+                                      choices = [("N", "North"),
+                                                 ("S", "South")])
+    utm_zone = models.IntegerField("UTM Zone")
+    area_utm_easting_meters = models.IntegerField("Easting (meters)")
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+
+    context_number = models.IntegerField("Context Number")
+    photo = models.ImageField(upload_to=get_context_folder)
+    thumbnail = models.ImageField(upload_to=get_context_folder_tn,
+                                  null=True,
+                                  blank=True)
+    user = models.ForeignKey(User,
+                             null=True,
+                             on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created",
+                                   default=utc_now) 
+    source = models.CharField("Location where taken",
+                              max_length=1,
+                              choices=(("F", "In Field"),
+                                       ("D", "Drying")),
+                              default="F")
+    @property
+    def subfolder(self):
+        sub_root = (f"{self.utm_hemisphere}/"
+                    f"{self.utm_zone}/"
+                    f"{self.area_utm_easting_meters}/"
+                    f"{self.area_utm_northing_meters}/"
+                    f"{self.context_number}")
+        if self.source == "F":
+            return f"{sub_root}/documentation/bag_field"
+        else:
+            return f"{sub_root}/documentation/bag_dry"
+    
+    @property
+    def folder_path(self):
+        pass
+
+    class Meta:
+        db_table = "bag_photos"
+        verbose_name = "Finds Bag Photo"
+        verbose_name_plural = "Finds Bag Photos"
+
+    def __str__(self):
+        return self.photo.name        
+
 
 class ActionLog(models.Model):
     id = models.UUIDField(primary_key=True,
@@ -329,42 +404,3 @@ class ActionLog(models.Model):
         return (f"{self.get_action_display()} on {self.model_name} "
                 f"by {self.user.username} at {self.timestamp}")
 
-def get_bag_folder(instance, filename):
-    res = "{0}/{1}/{2}/{3}/{4}/bagphotos/{5}".format(instance.utm_hemisphere,
-                                                     instance.utm_zone,
-                                                     instance.area_utm_easting_meters,
-                                                     instance.area_utm_northing_meters,
-                                                     instance.context_number,
-                                                     filename)
-    return res                
-
-class BagPhoto(models.Model):
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4,
-                          editable=False)
-    utm_hemisphere = models.CharField("UTM Hemisphere",
-                                      max_length=1,
-                                      choices = [("N", "North"),
-                                                 ("S", "South")])
-    utm_zone = models.IntegerField("UTM Zone")
-    area_utm_easting_meters = models.IntegerField("Easting (meters)")
-    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
-
-    context_number = models.IntegerField("Context Number")
-    photo = models.ImageField(upload_to=get_bag_folder)
-    thumbnail = models.ImageField(upload_to=get_bag_folder,
-                                  null=True,
-                                  blank=True)
-    user = models.ForeignKey(User,
-                             null=True,
-                             on_delete=models.SET_NULL)
-    created = models.DateTimeField("Created",
-                                   default=utc_now) 
-
-    class Meta:
-        db_table = "bag_photos"
-        verbose_name = "Finds Bag Photo"
-        verbose_name_plural = "Finds Bag Photos"
-
-    def __str__(self):
-        return self.photo.name

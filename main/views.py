@@ -152,6 +152,7 @@ class BagPhotoUpload(APIView):
                       area_utm_easting_meters=sc.area_utm_easting_meters,
                       area_utm_northing_meters=sc.area_utm_northing_meters,
                       context_number=sc.context_number,
+                      source=request.data["source"],
                       photo=request.FILES["photo"])
         bp.save()
         _ = ActionLog.objects.create(user=self.request.user,

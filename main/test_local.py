@@ -219,8 +219,9 @@ def test_bagphoto_upload():
     sc = random.choice(SpatialContext.objects.all())
     url = base_url + reverse("api:spatialcontext_bagphoto", args=[sc.id])
     photo_path = random.choice(glob.glob(f"{PHOTO_DIR}*.jpg"))
-
-    r = requests.put(url, headers=headers,
+    r = requests.put(url, 
+                     data={"source": "F"},
+                     headers=headers,
                      files={"photo": open(photo_path, "rb")})
     assert r.status_code == 201
     p = BagPhoto.objects.get(id=r.json()["id"])
