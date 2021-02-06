@@ -24,7 +24,7 @@ def create_thumbnail(photo_id):
     height = int(img.size[1] * basewidth / img.size[0])
     resized = img.resize((basewidth, height), PIL.Image.ANTIALIAS)
     buffer = BytesIO()
-    resized.save(fp=buffer, format="JPEG")
+    resized.save(fp=buffer, format="JPEG", quality=95)
     cf = ContentFile(buffer.getvalue())
     cp.thumbnail.save(tn_name,
                       InMemoryUploadedFile(cf,
@@ -49,7 +49,7 @@ def create_bp_thumbnail(photo_id):
     height = int(img.size[1] * basewidth / img.size[0])
     resized = img.resize((basewidth, height), PIL.Image.ANTIALIAS)
     buffer = BytesIO()
-    resized.save(fp=buffer, format="JPEG")
+    resized.save(fp=buffer, format="JPEG", quality=95)
     cf = ContentFile(buffer.getvalue())
     cp.thumbnail.save(tn_name,
                       InMemoryUploadedFile(cf,

@@ -13,7 +13,7 @@ def tn_is_same(cp):
     """
     photo_stem = Path(cp.photo.file.name).stem
     tn_stem = Path(cp.thumbnail.file.name).stem
-    return tn_stem == f"tn_{photo_stem}"
+    return tn_stem.startswith(f"tn_{photo_stem}")
 
 @receiver(post_save, sender=ContextPhoto)
 def start_thumbnail(sender, **kwargs):
