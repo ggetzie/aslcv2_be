@@ -1,5 +1,6 @@
 import PIL
 import pathlib
+import time
 
 from io import BytesIO
 
@@ -10,21 +11,21 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from main.models import ContextPhoto, BagPhoto
 
+THUMBNAIL_DIM = 100
+
 @shared_task
 def create_thumbnail(photo_id):
     print(f"Received id {photo_id}")
+    time.sleep(1)
     cp = ContextPhoto.objects.get(id=photo_id)
     photo_path = pathlib.Path(cp.photo.file.name)
-    basewidth = 50
     tn_name = f"tn_{photo_path.name}"
     img = PIL.Image.open(photo_path)
-    if img.size[0] <= 50:
-        return
-    # scale image to 50px width
-    height = int(img.size[1] * basewidth / img.size[0])
-    resized = img.resize((basewidth, height), PIL.Image.ANTIALIAS)
     buffer = BytesIO()
-    resized.save(fp=buffer, format="JPEG", quality=95)
+    img.thumbnail((THUMBNAIL_DIM,THUMBNAIL_DIM), 
+                  resample=PIL.Image.LANCZOS, 
+                  reducing_gap=3.0)
+    img.save(fp=buffer, format="JPEG", quality=95)
     cf = ContentFile(buffer.getvalue())
     cp.thumbnail.save(tn_name,
                       InMemoryUploadedFile(cf,
@@ -38,18 +39,16 @@ def create_thumbnail(photo_id):
 @shared_task
 def create_bp_thumbnail(photo_id):
     print(f"Received id {photo_id}")
+    time.sleep(1)
     cp = BagPhoto.objects.get(id=photo_id)
     photo_path = pathlib.Path(cp.photo.file.name)
-    basewidth = 50
     tn_name = f"tn_{photo_path.name}"
     img = PIL.Image.open(photo_path)
-    if img.size[0] <= 50:
-        return
-    # scale image to 50px width
-    height = int(img.size[1] * basewidth / img.size[0])
-    resized = img.resize((basewidth, height), PIL.Image.ANTIALIAS)
     buffer = BytesIO()
-    resized.save(fp=buffer, format="JPEG", quality=95)
+    img.thumbnail((THUMBNAIL_DIM,THUMBNAIL_DIM), 
+                  resample=PIL.Image.LANCZOS, 
+                  reducing_gap=3.0)
+    img.save(fp=buffer, format="JPEG", quality=95)
     cf = ContentFile(buffer.getvalue())
     cp.thumbnail.save(tn_name,
                       InMemoryUploadedFile(cf,
