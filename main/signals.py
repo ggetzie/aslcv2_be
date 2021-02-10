@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from main.models import ContextPhoto, BagPhoto
-from main.tasks import create_thumbnail, create_bp_thumbnail
+from main.tasks import cp_thumbnail, bp_thumbnail
 
 def tn_is_same(cp):
     """
@@ -16,14 +16,14 @@ def tn_is_same(cp):
     return tn_stem.startswith(f"tn_{photo_stem}")
 
 @receiver(post_save, sender=ContextPhoto)
-def start_thumbnail(sender, **kwargs):
+def start_cp_thumbnail(sender, **kwargs):
     cp = kwargs["instance"]
     if not cp.thumbnail or (not tn_is_same(cp)):
-        create_thumbnail.delay(cp.id)
+        cp_thumbnail.delay(cp.id)
         
 
 @receiver(post_save, sender=BagPhoto)
 def start_bp_thumbnail(sender, **kwargs):
     bp = kwargs["instance"]
     if not bp.thumbnail or (not tn_is_same(bp)):
-        create_bp_thumbnail.delay(bp.id)        
+        bp_thumbnail.delay(bp.id)        
