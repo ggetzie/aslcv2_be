@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from main.models import (SpatialArea, SpatialContext, ObjectFind,
                          MaterialCategory, ContextPhoto, AreaType, ContextType,
-                         ActionLog, BagPhoto)
+                         ActionLog, BagPhoto, FindPhoto)
 
 @admin.register(SpatialArea)
 class SpatialAreaAdmin(admin.ModelAdmin):
@@ -64,8 +64,30 @@ class MaterialCategoryAdmin(admin.ModelAdmin):
 class ContextPhotoAdmin(admin.ModelAdmin):
     list_display = ["__str__", "user", "created"]
     list_display_links = ["__str__"]
+    readonly_fields = ["created", "thumbnail"]
+    ordering = ["utm_hemisphere", "utm_zone", "area_utm_easting_meters",
+                "area_utm_northing_meters", "context_number", "created"]
+
+
+@admin.register(BagPhoto)
+class BagPhotoAdmin(admin.ModelAdmin):
+    list_display = ["__str__", "source", "user", "created"]
+    list_display_links = ["__str__"]
+    readonly_fields = ["created", "thumbnail"]
+    list_filter = ["source"]
+    ordering = ["utm_hemisphere", "utm_zone", "area_utm_easting_meters",
+                "area_utm_northing_meters", "context_number", "source", 
+                "created"]
+
+@admin.register(FindPhoto)
+class FindPhotoAdmin(admin.ModelAdmin):
+    list_display = ["__str__", "user", "created"]
+    list_display_links = ["__str__"]
     readonly_fields = ["created"]
-    exclude = ["thumbnail"]
+    ordering = ["utm_hemisphere", "utm_zone", "area_utm_easting_meters",
+                "area_utm_northing_meters", "context_number", "find_number", 
+                "created"]
+    
 
 @admin.register(AreaType)
 class AreaTypeAdmin(admin.ModelAdmin):
@@ -80,11 +102,3 @@ class ActionLogAdmin(admin.ModelAdmin):
     list_display = ["timestamp", "model_name", "user"]
     list_display_links = ["timestamp", "model_name", "user"]
     readonly_fields = ["timestamp", "user", "model_name", "action", "object_id"]
-
-@admin.register(BagPhoto)
-class BagPhotoAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "source", "user", "created"]
-    list_display_links = ["__str__"]
-    readonly_fields = ["created"]
-    exclude = ["thumbnail"]
-    list_filter = ["source"]

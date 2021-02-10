@@ -160,7 +160,8 @@ class BagPhotoUpload(APIView):
                                      action="C",
                                      object_id=bp.id)
         ser = BagPhotoSerializer(bp)
-        return Response(ser.data, status=status.HTTP_201_CREATED)                                     
+        return Response(ser.data, status=status.HTTP_201_CREATED)
+
 
 class AreaTypeList(ListAPIView):
     model = AreaType
@@ -171,4 +172,4 @@ class AreaTypeList(ListAPIView):
 class ContextTypeList(ListAPIView):
     model = ContextType
     serializer_class = ContextTypeSerializer
-    queryset = ContextType.objects.all()                         
+    queryset = ContextType.objects.all()

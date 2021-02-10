@@ -260,19 +260,27 @@ class MaterialCategory(models.Model):
     def __str__(self):
         return f"{self.material} - {self.category}"
 
-def get_photo_filename(subfolder):
+
+def get_photo_filename(subfolder, extension):
+    """
+    Name photos by sequential numbers in the context folder
+    e.g. 1.jpg, 2.jpg, 3.jpg, etc.
+    """
     full_path = pathlib.Path(settings.MEDIA_ROOT) / subfolder
-    photos = full_path.glob("*.jpg")
+    photos = full_path.glob(f"*.{extension}")
     existing = [int(p.stem) for p in photos if p.stem.isnumeric()]
     if existing:
-        return f"{max(existing) + 1}.jpg"
+        return f"{max(existing) + 1}.{extension}"
     else:
-        return "1.jpg"
-    
+        return f"1.{extension}"
 
 def get_context_folder(instance, filename):
+    """
+    Find the folder to store photos. Will be determined mostly by the photo
+    object's "subfolder" property
+    """
     subfolder = instance.subfolder
-    new_filename = get_photo_filename(subfolder)
+    new_filename = get_photo_filename(subfolder, instance.extension)
 
     return f"{subfolder}/{new_filename}"
 
@@ -283,9 +291,13 @@ def get_context_folder_tn(instance, filename):
     return f"{subfolder}/tn_{photo_path.name}"
 
 def get_bag_folder(instance, filename):
+    """
+    Not used. Kept for compatibility with migrations
+    """
     pass
 
 class ContextPhoto(models.Model):
+    extension = "jpg"
     id = models.UUIDField(primary_key=True,
                           default=uuid.uuid4,
                           editable=False)
@@ -327,6 +339,7 @@ class ContextPhoto(models.Model):
 
 
 class BagPhoto(models.Model):
+    extension = "jpg"
     id = models.UUIDField(primary_key=True,
                           default=uuid.uuid4,
                           editable=False)
@@ -365,10 +378,6 @@ class BagPhoto(models.Model):
         else:
             return f"{sub_root}/documentation/bag_dry"
     
-    @property
-    def folder_path(self):
-        pass
-
     class Meta:
         db_table = "bag_photos"
         verbose_name = "Finds Bag Photo"
@@ -376,6 +385,49 @@ class BagPhoto(models.Model):
 
     def __str__(self):
         return self.photo.name        
+
+
+class FindPhoto(models.Model):
+    extension = "cr3"
+    id = models.UUIDField(primary_key=True,
+                          default=uuid.uuid4,
+                          editable=False)
+    utm_hemisphere = models.CharField("UTM Hemisphere",
+                                      max_length=1,
+                                      choices = [("N", "North"),
+                                                 ("S", "South")])
+    utm_zone = models.IntegerField("UTM Zone")
+    area_utm_easting_meters = models.IntegerField("Easting (meters)")
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+
+    context_number = models.IntegerField("Context Number")
+    find_number = models.IntegerField("Find Number")
+    photo = models.FileField(upload_to=get_context_folder)
+    user = models.ForeignKey(User,
+                             null=True,
+                             on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created",
+                                   default=utc_now) 
+
+    @property
+    def subfolder(self):
+        """
+        Build the path to the folder where photos will be stored
+        """
+        sub_root = (f"{self.utm_hemisphere}/"
+                    f"{self.utm_zone}/"
+                    f"{self.area_utm_easting_meters}/"
+                    f"{self.area_utm_northing_meters}/"
+                    f"{self.context_number}")
+        return f"{sub_root}/finds/individual/{self.find_number}/photo"
+    
+    class Meta:
+        db_table = "find_photos"
+        verbose_name = "Find Photo"
+        verbose_name_plural = "Find Photos"
+
+    def __str__(self):
+        return self.photo.name                
 
 
 class ActionLog(models.Model):
