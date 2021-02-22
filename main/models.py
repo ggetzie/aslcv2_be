@@ -242,10 +242,21 @@ class ObjectFind(models.Model):
         return MaterialCategory.objects.get(material=self.material,
                                             category=self.category)
 
+    def findphoto_set(self):
+        return FindPhoto.objects.filter(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+            context_number=self.context_number,
+            find_number=self.find_number
+        ) 
+
     
 class MaterialCategory(models.Model):
     id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4)
+                          default=uuid.uuid4,
+                          editable=False)
     material = models.CharField("Material",
                                 max_length=255)
     category = models.CharField("Category",

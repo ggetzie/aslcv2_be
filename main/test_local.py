@@ -32,6 +32,9 @@ test_utm_zone = 38
 test_area_utm_easting_meters = 478130
 test_area_utm_northing_meters = 4419430
 
+# SpatialContext: N-38-478130-4419430-1
+test_context_number = 1
+
 all_sa = SpatialArea.objects.all()
 sa_h = SpatialArea.objects.filter(utm_hemisphere=test_utm_hemisphere)
 sa_hz = SpatialArea.objects.filter(utm_hemisphere=test_utm_hemisphere,
@@ -57,6 +60,16 @@ sc_hzen = (SpatialContext
                    utm_zone=test_utm_zone,
                    area_utm_easting_meters=test_area_utm_easting_meters,
                    area_utm_northing_meters=test_area_utm_northing_meters))
+
+all_obj = ObjectFind.objects.all()
+
+obj_hzen = (ObjectFind
+            .objects
+            .filter(utm_hemisphere=test_utm_hemisphere,
+                    utm_zone=test_utm_zone,
+                    area_utm_easting_meters=test_area_utm_easting_meters,
+                    area_utm_northing_meters=test_area_utm_northing_meters,
+                    context_number=test_context_number))
 
 
 def test_area():
@@ -227,6 +240,9 @@ def test_bagphoto_upload():
     p = BagPhoto.objects.get(id=r.json()["id"])
     assert pathlib.Path(p.photo.path).exists()
     print("Finds Bag Photo upload OK")
+
+def test_objectfind_list():
+    pass    
 
 def test_all():
     test_area()
