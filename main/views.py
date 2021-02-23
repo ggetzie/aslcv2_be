@@ -18,6 +18,10 @@ from main.serializers import (FindPhotoSerializer, SpatialAreaSerializer, Spatia
                               ContextTypeSerializer, ContextPhotoSerializer,
                               BagPhotoSerializer, ObjectFindSerializer, MCSerializer)
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 FILTER_VARS = ["utm_hemisphere",
                "utm_zone",
                "area_utm_easting_meters",
@@ -27,7 +31,8 @@ FILTER_VARS = ["utm_hemisphere",
 class SpatialAreaList(ListAPIView):
     serializer_class = SpatialAreaSerializer
     model = SpatialArea
-    paginate_by = 100
+    # paginate_by = 100
+    pagination_class = None
 
     def get_queryset(self):
         qs = SpatialArea.objects.all()
@@ -61,6 +66,7 @@ class SpatialAreaDetail(APIView):
 
 class SpatialContextList(ListCreateAPIView):
     serializer_class = SpatialContextSerializer
+    pagination_class = None
 
     def get_queryset(self):
         qs = SpatialContext.objects.all()
@@ -123,8 +129,12 @@ class ImageUploadParser(FileUploadParser):
 class ContextPhotoUpload(APIView):
 
     def put(self, request, context_id, format=None):
-        
+        logger.info("In context photo put upload")
+        # return Response(f"ok", status=status.HTTP_201_CREATED)
         sc = SpatialContext.objects.get(id=context_id)
+        
+        logger.info(f"sc = {sc}")
+        logger.info(request.FILES["photo"])
         op = ContextPhoto(user=request.user,
                           utm_hemisphere=sc.utm_hemisphere,
                           utm_zone=sc.utm_zone,
@@ -134,14 +144,16 @@ class ContextPhotoUpload(APIView):
                           photo=request.FILES["photo"])
 
         op.save()
+        logger.info(op)
         _ = ActionLog.objects.create(user=self.request.user,
                                      model_name=ContextPhoto._meta.verbose_name,
                                      action="C",
                                      object_id=op.id)
         ser = ContextPhotoSerializer(op)
+        logger.info(ser)
         return Response(ser.data, status=status.HTTP_201_CREATED)
 
-
+    
 class BagPhotoUpload(APIView):
 
     def put(self, request, context_id, format=None):
@@ -243,15 +255,18 @@ class AreaTypeList(ListAPIView):
     model = AreaType
     serializer_class = AreaTypeSerializer
     queryset = AreaType.objects.all()
+    pagination_class = None
 
 
 class ContextTypeList(ListAPIView):
     model = ContextType
     serializer_class = ContextTypeSerializer
     queryset = ContextType.objects.all()
+    pagination_class = None
     
 
 class MCList(ListAPIView):
     model = MaterialCategory
     serializer_class = MCSerializer
     queryset = MaterialCategory.objects.all()
+    pagination_class = None

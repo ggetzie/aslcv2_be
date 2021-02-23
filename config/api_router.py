@@ -86,10 +86,10 @@ find_urls = [
           views.MCList.as_view(),
           name="materialcategory_list"),
      path(("<hem:utm_hemisphere>/"
-               "<int:utm_zone>/"
-               "<int:area_utm_easting_meters>/"
-               "<int:area_utm_northing_meters>/"
-               "<int:context_number/"),
+           "<int:utm_zone>/"
+           "<int:area_utm_easting_meters>/"
+           "<int:area_utm_northing_meters>/"
+           "<int:context_number>/"),
           views.ObjectFindList.as_view(),
           name="objectfind_list_hzenc"),
     path("<uuid:find_id>/",

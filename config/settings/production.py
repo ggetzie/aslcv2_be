@@ -159,9 +159,10 @@ LOGGING = {
     },
     "handlers": {
         "file": {
-            "level": "ERROR",
+            "level": "INFO",
             "filters": ["require_debug_false"],
             "class": "logging.FileHandler",
+            "formatter": "verbose",
             "filename": "/usr/local/src/aslcv2_be/logs/debug.log"
         },
         "console": {
@@ -170,7 +171,7 @@ LOGGING = {
             "formatter": "verbose",
         },
     },
-    "root": {"level": "INFO", "handlers": ["console"]},
+    "root": {"level": "INFO", "handlers": ["console", "file"]},
     "loggers": {
         "django.request": {
             "handlers": ["file"],
