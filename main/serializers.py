@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from main.models import (SpatialArea, SpatialContext, ObjectFind,
-                         AreaType, ContextType, ContextPhoto)
+from main.models import (FindPhoto, SpatialArea, SpatialContext, ObjectFind,
+                         AreaType, ContextType, ContextPhoto, BagPhoto, MaterialCategory)
 
 
 class ContextListingField(serializers.RelatedField):
@@ -46,6 +46,7 @@ class ContextPhotoField(serializers.RelatedField):
         
 class SpatialContextSerializer(serializers.ModelSerializer):
     contextphoto_set = ContextPhotoField(many=True, read_only=True)
+    bagphoto_set = ContextPhotoField(many=True, read_only=True)
     
     class Meta:
         model=SpatialContext
@@ -60,17 +61,18 @@ class SpatialContextSerializer(serializers.ModelSerializer):
                   "closing_date",
                   "description",
                   "director_notes",
-                  "contextphoto_set"]
+                  "contextphoto_set",
+                  "bagphoto_set"]
 
         
 class SpatialContextEditSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
-        # sa, _ = SpatialArea.objects.get_or_create(
-        #     utm_hemisphere=validated_data["utm_hemisphere"],
-        #     utm_zone=validated_data["utm_zone"],
-        #     area_utm_easting_meters=validated_data["area_utm_easting_meters"],
-        #     area_utm_northing_meters=validated_data["area_utm_northing_meters"])
+        _ = SpatialArea.objects.get_or_create(
+            utm_hemisphere=validated_data["utm_hemisphere"],
+            utm_zone=validated_data["utm_zone"],
+            area_utm_easting_meters=validated_data["area_utm_easting_meters"],
+            area_utm_northing_meters=validated_data["area_utm_northing_meters"])
         return SpatialContext.objects.create(**validated_data)
 
     class Meta:
@@ -121,4 +123,65 @@ class ContextPhotoSerializer(serializers.ModelSerializer):
                   "area_utm_easting_meters",
                   "area_utm_northing_meters",
                   "context_number"]
+
+class BagPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BagPhoto
+        fields = [
+            "id",
+            "utm_hemisphere",
+            "utm_zone",
+            "area_utm_easting_meters",
+            "area_utm_northing_meters",
+            "context_number",
+            "source"
+        ]
+
+
+class FindPhotoField(serializers.RelatedField):
+    def to_representation(self, value):
+        return {"photo_name": value.photo.name,
+                "photo_url": value.photo.url}        
+
+
+class ObjectFindSerializer(serializers.ModelSerializer):
+    findphoto_set = FindPhotoField(many=True, read_only=True)
+
+    class Meta:
+        model = ObjectFind
+        fields = [
+            "id",
+            "utm_hemisphere",
+            "utm_zone",
+            "area_utm_easting_meters",
+            "area_utm_northing_meters",
+            "context_number",
+            "find_number",
+            "material",
+            "category",
+            "director_notes",
+            "findphoto_set"
+        ]
+
         
+class FindPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FindPhoto
+        fields = [
+            "id",
+            "utm_hemisphere",
+            "utm_zone",
+            "area_utm_easting_meters",
+            "area_utm_northing_meters",
+            "context_number",
+            "find_number",
+        ]
+
+class MCSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaterialCategory
+        fields = [
+            "id",
+            "material", 
+            "category"
+        ]

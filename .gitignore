@@ -281,7 +281,7 @@ pip-selfcheck.json
 aslcv2_be/media/
 .pytest_cache/
 logs/
-media/
+media
 
 .vscode
 scratch/

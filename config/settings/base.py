@@ -47,11 +47,11 @@ DATABASES = {
         "OPTIONS": {
             "options": "-c search_path=django,public"
         },
-	"NAME": env("ARCHAEOLOGY_DB"),
+	"NAME": env("DJANGO_DB"),
 	"USER": env("ARCHAEOLOGY_DB_USER"),
 	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
 	"HOST": env("DB_HOST", default="localhost"),
-	"PORT": "",                      # Set to empty string for default.
+	"PORT": env("DB_PORT", default="5432"),                      # Set to empty string for default.
         "TEST": {
             "NAME": "archaeology_test",
             "MIGRATE": False
@@ -66,7 +66,7 @@ DATABASES = {
 	"USER": env("ARCHAEOLOGY_DB_USER"),
 	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
 	"HOST": env("DB_HOST", default="localhost"),
-	"PORT": "",                      # Set to empty string for default.
+	"PORT": env("DB_PORT", default="5432"),                      # Set to empty string for default.
         "TEST": {
             "NAME": "archaeology_test",
             "MIGRATE": False
@@ -316,6 +316,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PAGINATION_CLASS": 'rest_framework.pagination.LimitOffsetPagination', 
+    "PAGE_SIZE": 100
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
@@ -324,5 +326,6 @@ CORS_URLS_REGEX = r"^/api/.*$"
 # ------------------------------------------------------------------------------
 DATA_UPLOAD_MAX_NUMBER_FIELDS=None
 
-CELERY_BROKER_URL="redis://redis:6379/0"
-CELERY_RESULT_BACKEND="redis://redis:6379/0"
+CELERY_BROKER_URL = env("aslcv2_be_CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+FILE_UPLOAD_PERMISSIONS = None

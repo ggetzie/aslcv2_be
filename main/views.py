@@ -10,11 +10,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-from main.models import (SpatialArea, SpatialContext, ObjectFind, ContextPhoto,
-                         AreaType, ContextType)
-from main.serializers import (SpatialAreaSerializer, SpatialContextSerializer,
+from main.models import (FindPhoto, SpatialArea, SpatialContext, ObjectFind, ContextPhoto,
+                         AreaType, ContextType, ActionLog, BagPhoto, MaterialCategory)
+
+from main.serializers import (FindPhotoSerializer, SpatialAreaSerializer, SpatialContextSerializer,
                               SpatialContextEditSerializer, AreaTypeSerializer,
-                              ContextTypeSerializer, ContextPhotoSerializer)
+                              ContextTypeSerializer, ContextPhotoSerializer,
+                              BagPhotoSerializer, ObjectFindSerializer, MCSerializer)
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 FILTER_VARS = ["utm_hemisphere",
                "utm_zone",
@@ -25,7 +31,8 @@ FILTER_VARS = ["utm_hemisphere",
 class SpatialAreaList(ListAPIView):
     serializer_class = SpatialAreaSerializer
     model = SpatialArea
-    paginate_by = 100
+    # paginate_by = 100
+    pagination_class = None
 
     def get_queryset(self):
         qs = SpatialArea.objects.all()
@@ -42,18 +49,24 @@ class SpatialAreaDetail(APIView):
 
     def get_object(self, area_id):
         try:
-            return SpatialArea.objects.get(id=area_id)
+            res = SpatialArea.objects.get(id=area_id)
+            return res
         except SpatialArea.DoesNotExist:
             raise Http404
 
     def get(self, request, area_id, format=None):
         sa = self.get_object(area_id)
         serializer = SpatialAreaSerializer(sa)
+        _ = ActionLog.objects.create(user=self.request.user,
+                                         model_name=SpatialArea._meta.verbose_name,
+                                         action="R",
+                                         object_id=area_id)
         return Response(serializer.data)
 
 
 class SpatialContextList(ListCreateAPIView):
     serializer_class = SpatialContextSerializer
+    pagination_class = None
 
     def get_queryset(self):
         qs = SpatialContext.objects.all()
@@ -70,6 +83,10 @@ class SpatialContextList(ListCreateAPIView):
         serializer = SpatialContextEditSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            _ = ActionLog.objects.create(user=request.user,
+                                         model_name=SpatialContext._meta.verbose_name,
+                                         action="C",
+                                         object_id=serializer.data["id"])
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,11 +100,19 @@ class SpatialContextDetail(APIView):
 
     def get(self, request, context_id, format=None):
         sc = self.get_object(context_id)
+        _ = ActionLog.objects.create(user=request.user,
+                                     model_name=SpatialContext._meta.verbose_name,
+                                     action="R",
+                                     object_id=context_id)
         serializer = SpatialContextSerializer(sc)
         return Response(serializer.data)
 
     def put(self, request, context_id, format=None):
         sc = self.get_object(context_id)
+        _ = ActionLog.objects.create(user=request.user,
+                                     model_name=SpatialContext._meta.verbose_name,
+                                     action="U",
+                                     object_id=context_id)
         serializer = SpatialContextEditSerializer(sc,
                                                   data=request.data,
                                                   partial=True)
@@ -104,8 +129,12 @@ class ImageUploadParser(FileUploadParser):
 class ContextPhotoUpload(APIView):
 
     def put(self, request, context_id, format=None):
-        
+        logger.info("In context photo put upload")
+        # return Response(f"ok", status=status.HTTP_201_CREATED)
         sc = SpatialContext.objects.get(id=context_id)
+        
+        logger.info(f"sc = {sc}")
+        logger.info(request.FILES["photo"])
         op = ContextPhoto(user=request.user,
                           utm_hemisphere=sc.utm_hemisphere,
                           utm_zone=sc.utm_zone,
@@ -113,19 +142,131 @@ class ContextPhotoUpload(APIView):
                           area_utm_northing_meters=sc.area_utm_northing_meters,
                           context_number=sc.context_number,
                           photo=request.FILES["photo"])
+
         op.save()
+        logger.info(op)
+        _ = ActionLog.objects.create(user=self.request.user,
+                                     model_name=ContextPhoto._meta.verbose_name,
+                                     action="C",
+                                     object_id=op.id)
         ser = ContextPhotoSerializer(op)
+        logger.info(ser)
         return Response(ser.data, status=status.HTTP_201_CREATED)
+
     
+class BagPhotoUpload(APIView):
+
+    def put(self, request, context_id, format=None):
+        sc = SpatialContext.objects.get(id=context_id)
+        bp = BagPhoto(user=request.user,
+                      utm_hemisphere=sc.utm_hemisphere,
+                      utm_zone=sc.utm_zone,
+                      area_utm_easting_meters=sc.area_utm_easting_meters,
+                      area_utm_northing_meters=sc.area_utm_northing_meters,
+                      context_number=sc.context_number,
+                      source=request.data["source"],
+                      photo=request.FILES["photo"])
+        bp.save()
+        _ = ActionLog.objects.create(user=request.user,
+                                     model_name=BagPhoto._meta.verbose_name,
+                                     action="C",
+                                     object_id=bp.id)
+        ser = BagPhotoSerializer(bp)
+        return Response(ser.data, status=status.HTTP_201_CREATED)
+
+
+class ObjectFindList(ListCreateAPIView):
+    serializer_class = ObjectFindSerializer
+
+    def get_queryset(self):
+        qs = ObjectFind.objects.all()
+        fv = FILTER_VARS + ["context_number"]
+        fd = {v: self.kwargs[v] for v in fv if v in self.kwargs}
+        if fd:
+            qs = qs.filter(**fd)
+        return qs
+
+    def post(self, request, format=None):
+        serializer = ObjectFindSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            _ = ActionLog.objects.create(user=request.user,
+                                         model_name=ObjectFind._meta.verbose_name,
+                                         action="C",
+                                         object_id=serializer.data["id"])
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ObjectFindDetail(APIView):
+
+    def get_object(self, find_id):
+        try:
+            return ObjectFind.objects.get(id=find_id)
+        except ObjectFind.DoesNotExist:
+            raise Http404
+
+    def get(self, request, find_id, format=None):
+        obj = self.get_object(find_id)
+        _ = ActionLog.objects.create(user=request.user,
+                                     model_name=ObjectFind._meta.verbose_name,
+                                     action="R",
+                                     object_id=find_id)
+        serializer=ObjectFindSerializer(obj)
+        return Response(serializer.data)
+
+    def put(self, request, find_id, format=None):
+        obj = self.get_object(find_id)
+        _ = ActionLog.objects.create(user=request.user,
+                                     model_name=ObjectFind._meta.verbose_name,
+                                     action="U",
+                                     object_id=find_id)
+        serializer = ObjectFindSerializer(obj,
+                                          data=request.data,
+                                          partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FindPhotoUpload(APIView):
+
+    def put(self, request, find_id, format=None):
+        obj = ObjectFind.objects.get(id=find_id)
+        fp = FindPhoto(user=request.user,
+                       utm_hemisphere=obj.utm_hemisphere,
+                       utm_zone=obj.utm_zone,
+                       area_utm_easting_meters=obj.area_utm_easting_meters,
+                       area_utm_northing_meters=obj.area_utm_northing_mmeters,
+                       context_number=obj.context_number,
+                       find_number=obj.find_number,
+                       photo=request.FILES["photo"])
+        fp.save()
+        _ = ActionLog.objects.create(user=request.user,
+                                     model_name=FindPhoto._meta.verbose_name,
+                                     action="C",
+                                     object_id=fp.id)
+        ser = FindPhotoSerializer(fp)
+        return Response(ser.data, status=status.HTTP_201_CREATED)
+
 
 class AreaTypeList(ListAPIView):
     model = AreaType
     serializer_class = AreaTypeSerializer
     queryset = AreaType.objects.all()
+    pagination_class = None
 
 
 class ContextTypeList(ListAPIView):
     model = ContextType
     serializer_class = ContextTypeSerializer
     queryset = ContextType.objects.all()
-                         
+    pagination_class = None
+    
+
+class MCList(ListAPIView):
+    model = MaterialCategory
+    serializer_class = MCSerializer
+    queryset = MaterialCategory.objects.all()
+    pagination_class = None

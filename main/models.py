@@ -1,6 +1,8 @@
 import datetime
+import pathlib
 import uuid
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -157,6 +159,16 @@ class SpatialContext(models.Model):
                         area_utm_northing_meters=self.area_utm_northing_meters,
                         context_number=self.context_number))
 
+    @property
+    def bagphoto_set(self):
+        return (BagPhoto
+                .objects
+                .filter(utm_hemisphere=self.utm_hemisphere,
+                        utm_zone=self.utm_zone,
+                        area_utm_easting_meters=self.area_utm_easting_meters,
+                        area_utm_northing_meters=self.area_utm_northing_meters,
+                        context_number=self.context_number))                        
+
 
 class ContextType(models.Model):
     type = models.CharField("Type",
@@ -188,9 +200,6 @@ class ObjectFind(models.Model):
 
     context_number = models.IntegerField("Context Number", editable=False)    
     find_number = models.IntegerField("Find Number")
-    user = models.ForeignKey(User,
-                             null=True,
-                             on_delete=models.SET_NULL)
     material = models.CharField("Material",
                                 max_length=255,
                                 default="")
@@ -215,9 +224,18 @@ class ObjectFind(models.Model):
 
     def save(self, *args, **kwargs):
         # increment to next find number in same context on creation
-        if not self.find_number and self.context_number:
+        if not self.find_number and all([
+            self.utm_hemisphere,
+            self.utm_zone,
+            self.area_utm_easting_meters,
+            self.area_utm_northing_meters,
+            self.context_number]):
             nf = (self.__class__
-                  .filter(context_number=self.context_number)
+                  .filter(utm_hemisphere=self.utm_hemisphere,
+                          utm_zone=self.utm_zone,
+                          area_utm_easting_meters=self.area_utm_easting_meters,
+                          area_utm_northing_meters=self.area_utm_northing_meters,
+                          context_number=self.context_number)
                   .aggregate(models.Max("find_number"))["find_number__max"])
             self.find_number = nf +1 if nf else 1
         super().save(*args, **kwargs)
@@ -233,10 +251,21 @@ class ObjectFind(models.Model):
         return MaterialCategory.objects.get(material=self.material,
                                             category=self.category)
 
+    def findphoto_set(self):
+        return FindPhoto.objects.filter(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+            context_number=self.context_number,
+            find_number=self.find_number
+        ) 
+
     
 class MaterialCategory(models.Model):
     id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4)
+                          default=uuid.uuid4,
+                          editable=False)
     material = models.CharField("Material",
                                 max_length=255)
     category = models.CharField("Category",
@@ -252,18 +281,43 @@ class MaterialCategory(models.Model):
         return f"{self.material} - {self.category}"
 
 
+def get_photo_filename(subfolder, extension):
+    """
+    Name photos by sequential numbers in the context folder
+    e.g. 1.jpg, 2.jpg, 3.jpg, etc.
+    """
+    full_path = pathlib.Path(settings.MEDIA_ROOT) / subfolder
+    photos = full_path.glob(f"*.{extension}")
+    existing = [int(p.stem) for p in photos if p.stem.isnumeric()]
+    if existing:
+        return f"{max(existing) + 1}.{extension}"
+    else:
+        return f"1.{extension}"
 
 def get_context_folder(instance, filename):
-    res = "{0}/{1}/{2}/{3}/{4}/{5}".format(instance.utm_hemisphere,
-                                           instance.utm_zone,
-                                           instance.area_utm_easting_meters,
-                                           instance.area_utm_northing_meters,
-                                           instance.context_number,
-                                           filename)
-    return res
+    """
+    Find the folder to store photos. Will be determined mostly by the photo
+    object's "subfolder" property
+    """
+    subfolder = instance.subfolder
+    new_filename = get_photo_filename(subfolder, instance.extension)
 
+    return f"{subfolder}/{new_filename}"
+
+def get_context_folder_tn(instance, filename):
+    subfolder = instance.subfolder
+    photo_path = pathlib.Path(instance.photo.file.name)
+
+    return f"{subfolder}/tn_{photo_path.name}"
+
+def get_bag_folder(instance, filename):
+    """
+    Not used. Kept for compatibility with migrations
+    """
+    pass
 
 class ContextPhoto(models.Model):
+    extension = "jpg"
     id = models.UUIDField(primary_key=True,
                           default=uuid.uuid4,
                           editable=False)
@@ -277,12 +331,23 @@ class ContextPhoto(models.Model):
 
     context_number = models.IntegerField("Context Number")
     photo = models.ImageField(upload_to=get_context_folder)
-    thumbnail = models.ImageField(upload_to=get_context_folder,
+    thumbnail = models.ImageField(upload_to=get_context_folder_tn,
                                   null=True,
                                   blank=True)
     user = models.ForeignKey(User,
                              null=True,
                              on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created",
+                                   default=utc_now) 
+    
+    @property
+    def subfolder(self):
+        sub_root = (f"{self.utm_hemisphere}/"
+                    f"{self.utm_zone}/"
+                    f"{self.area_utm_easting_meters}/"
+                    f"{self.area_utm_northing_meters}/"
+                    f"{self.context_number}")
+        return f"{sub_root}/documentation"
 
     class Meta:
         db_table = "context_photos"
@@ -291,4 +356,125 @@ class ContextPhoto(models.Model):
 
     def __str__(self):
         return self.photo.name
+
+
+class BagPhoto(models.Model):
+    extension = "jpg"
+    id = models.UUIDField(primary_key=True,
+                          default=uuid.uuid4,
+                          editable=False)
+    utm_hemisphere = models.CharField("UTM Hemisphere",
+                                      max_length=1,
+                                      choices = [("N", "North"),
+                                                 ("S", "South")])
+    utm_zone = models.IntegerField("UTM Zone")
+    area_utm_easting_meters = models.IntegerField("Easting (meters)")
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+
+    context_number = models.IntegerField("Context Number")
+    photo = models.ImageField(upload_to=get_context_folder)
+    thumbnail = models.ImageField(upload_to=get_context_folder_tn,
+                                  null=True,
+                                  blank=True)
+    user = models.ForeignKey(User,
+                             null=True,
+                             on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created",
+                                   default=utc_now) 
+    source = models.CharField("Location where taken",
+                              max_length=1,
+                              choices=(("F", "In Field"),
+                                       ("D", "Drying")),
+                              default="F")
+    @property
+    def subfolder(self):
+        sub_root = (f"{self.utm_hemisphere}/"
+                    f"{self.utm_zone}/"
+                    f"{self.area_utm_easting_meters}/"
+                    f"{self.area_utm_northing_meters}/"
+                    f"{self.context_number}")
+        if self.source == "F":
+            return f"{sub_root}/documentation/bag_field"
+        else:
+            return f"{sub_root}/documentation/bag_dry"
+    
+    class Meta:
+        db_table = "bag_photos"
+        verbose_name = "Finds Bag Photo"
+        verbose_name_plural = "Finds Bag Photos"
+
+    def __str__(self):
+        return self.photo.name        
+
+
+class FindPhoto(models.Model):
+    extension = "cr3"
+    id = models.UUIDField(primary_key=True,
+                          default=uuid.uuid4,
+                          editable=False)
+    utm_hemisphere = models.CharField("UTM Hemisphere",
+                                      max_length=1,
+                                      choices = [("N", "North"),
+                                                 ("S", "South")])
+    utm_zone = models.IntegerField("UTM Zone")
+    area_utm_easting_meters = models.IntegerField("Easting (meters)")
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+
+    context_number = models.IntegerField("Context Number")
+    find_number = models.IntegerField("Find Number")
+    photo = models.FileField(upload_to=get_context_folder)
+    user = models.ForeignKey(User,
+                             null=True,
+                             on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created",
+                                   default=utc_now) 
+
+    @property
+    def subfolder(self):
+        """
+        Build the path to the folder where photos will be stored
+        """
+        sub_root = (f"{self.utm_hemisphere}/"
+                    f"{self.utm_zone}/"
+                    f"{self.area_utm_easting_meters}/"
+                    f"{self.area_utm_northing_meters}/"
+                    f"{self.context_number}")
+        return f"{sub_root}/finds/individual/{self.find_number}/photo"
+    
+    class Meta:
+        db_table = "find_photos"
+        verbose_name = "Find Photo"
+        verbose_name_plural = "Find Photos"
+
+    def __str__(self):
+        return self.photo.name                
+
+
+class ActionLog(models.Model):
+    id = models.UUIDField(primary_key=True,
+                          default=uuid.uuid4,
+                          editable=False)
+    user = models.ForeignKey(User,
+                             null=True,
+                             on_delete=models.SET_NULL)
+    model_name = models.CharField("Model Name", 
+                                  max_length=100)
+    timestamp = models.DateTimeField("timestamp",
+                                     default=utc_now)
+    action = models.CharField("Action Type", 
+                              max_length=2,
+                              choices=(("C", "CREATE"),
+                                       ("R", "READ"),
+                                       ("U", "UPDATE"),
+                                       ("D", "DELETE")))
+    object_id = models.UUIDField("Object ID")
+
+    class Meta:
+        db_table = "action_log"
+        verbose_name = "Action Log"
+        verbose_name_plural = "Action Logs"
+
+    def __str__(self):
+        return (f"{self.get_action_display()} on {self.model_name} "
+                f"by {self.user.username} at {self.timestamp}")
 

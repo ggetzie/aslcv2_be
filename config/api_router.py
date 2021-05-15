@@ -72,13 +72,38 @@ context_urls = [
          name="spatialcontext_photo"),
     path("types/",
          views.ContextTypeList.as_view(),
-         name="spatialcontext_types")
+         name="spatialcontext_types"),
+     path("<uuid:context_id>/bagphoto/",
+          views.BagPhotoUpload.as_view(),
+          name="spatialcontext_bagphoto")
     ]
 
+find_urls = [
+     path("",
+         views.ObjectFindList.as_view(),
+         name="objectfind_list"),
+     path("mc/",
+          views.MCList.as_view(),
+          name="materialcategory_list"),
+     path(("<hem:utm_hemisphere>/"
+           "<int:utm_zone>/"
+           "<int:area_utm_easting_meters>/"
+           "<int:area_utm_northing_meters>/"
+           "<int:context_number>/"),
+          views.ObjectFindList.as_view(),
+          name="objectfind_list_hzenc"),
+    path("<uuid:find_id>/",
+         views.ObjectFindDetail.as_view(),
+         name="objectfind_detail"),
+    path("<uuid:find_id>/photo/",
+         views.FindPhotoUpload.as_view(),
+         name="objecctfind_photo"),
+]    
 
 urlpatterns = [
     path("area/", include(area_urls)),
     path("context/", include(context_urls)),
+    path("find/", include(find_urls))
 ] + router.urls
 
 

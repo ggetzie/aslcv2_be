@@ -2,7 +2,7 @@ from django.conf import settings
 
 import requests
 
-def get_token(username, password, url="http://localhost:3000/auth-token/"):
+def get_token(username, password, url="http://aslcv2/auth-token/"):
     r = requests.post(url,
                       data={"username":username,
                             "password": password})

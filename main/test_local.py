@@ -20,16 +20,27 @@ import requests
 
 import main.utils as utils
 from main.models import (SpatialArea, AreaType, SpatialContext, ContextType,
-                         ObjectFind, MaterialCategory, ContextPhoto)
+                         ObjectFind, MaterialCategory, ContextPhoto, BagPhoto)
 
 headers = utils.get_test_header()
-base_url = "http://localhost:3000"
+base_url = "http://aslcv2"
+PHOTO_DIR = "/mnt/c/Users/ggetz/Pictures/"
 
 # SpatialArea: N-38-478130-4419430
 test_utm_hemisphere = "N"
 test_utm_zone = 38
 test_area_utm_easting_meters = 478130
 test_area_utm_northing_meters = 4419430
+hzen = [
+    test_utm_hemisphere,
+    test_utm_zone,
+    test_area_utm_easting_meters,
+    test_area_utm_northing_meters
+]
+
+# SpatialContext: N-38-478130-4419430-1
+test_context_number = 1
+hzenc = hzen + [test_context_number]
 
 all_sa = SpatialArea.objects.all()
 sa_h = SpatialArea.objects.filter(utm_hemisphere=test_utm_hemisphere)
@@ -56,6 +67,16 @@ sc_hzen = (SpatialContext
                    utm_zone=test_utm_zone,
                    area_utm_easting_meters=test_area_utm_easting_meters,
                    area_utm_northing_meters=test_area_utm_northing_meters))
+
+all_obj = ObjectFind.objects.all()
+
+obj_hzenc = (ObjectFind
+             .objects
+             .filter(utm_hemisphere=test_utm_hemisphere,
+                     utm_zone=test_utm_zone,
+                     area_utm_easting_meters=test_area_utm_easting_meters,
+                     area_utm_northing_meters=test_area_utm_northing_meters,
+                     context_number=test_context_number))
 
 
 def test_area():
@@ -166,6 +187,7 @@ def test_context():
                      headers=headers)
     assert r.status_code == 200
     assert r.json()["id"] == str(sc.id)
+    print(f"SpatialContext Detail OK")
 
     # test edit spatial context
     sc = random.choice(SpatialContext.objects.filter(opening_date__isnull=True))
@@ -205,17 +227,81 @@ def test_types():
 def test_photo_upload():
     sc = random.choice(SpatialContext.objects.all())
     url = base_url + reverse("api:spatialcontext_photo", args=[sc.id])
-    photo_path = random.choice(glob.glob("/media/gabe/data/pictures/*.jpg"))
+    print(url)
+    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}*.jpg"))
+    print(photo_path)
 
-    r = requests.put(url, headers=headers,
+    r = requests.post(url, headers=headers,
                      files={"photo": open(photo_path, "rb")})
     assert r.status_code == 201
     p = ContextPhoto.objects.get(id=r.json()["id"])
     assert pathlib.Path(p.photo.path).exists()
     print("Context Photo upload OK")
 
+def test_bagphoto_upload():    
+    sc = random.choice(SpatialContext.objects.all())
+    url = base_url + reverse("api:spatialcontext_bagphoto", args=[sc.id])
+    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}*.jpg"))
+    r = requests.put(url, 
+                     data={"source": "F"},
+                     headers=headers,
+                     files={"photo": open(photo_path, "rb")})
+    assert r.status_code == 201
+    p = BagPhoto.objects.get(id=r.json()["id"])
+    assert pathlib.Path(p.photo.path).exists()
+    print("Finds Bag Photo upload OK")
+
+def test_objectfind():
+    # test get all object finds
+    url = base_url + reverse("api:objectfind_list")
+    r = requests.get(url, headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert all_obj.count() == data["count"]
+    print("List all ObjectFinds OK")
+
+    # test filter object finds by hzenc
+    url = base_url + reverse("api:objectfind_list_hzenc", 
+                             args=[test_utm_hemisphere,
+                                   test_utm_zone,
+                                   test_area_utm_easting_meters,
+                                   test_area_utm_northing_meters,
+                                   test_context_number])
+    r = requests.get(url, headers=headers)
+    data = r.json()
+    assert r.status_code == 200
+    assert obj_hzenc.count() == data["count"]
+    print("Filter ObjectFinds list OK")
+
+def test_objectfind_detail():    
+    obj = random.choice(all_obj)
+    url = base_url + reverse("api:objectfind_detail", args=[obj.id])
+    r = requests.get(url, headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert str(obj.id) == data["id"] 
+    print("Get object find detail OK")
+    
+    new_note = obj.director_notes + " edited" if obj.director_notes else "edited"
+    data = {
+        "director_notes": new_note
+    }
+    r = requests.put(url, data=data, headers=headers)
+    assert r.status_code == 200
+    assert r.json()["director_notes"] == new_note
+    print("Edit object find detail OK")
+
+def test_mc_list():
+    mcs = MaterialCategory.objects.all()
+    url = base_url + reverse("api:materialcategory_list")
+    r = requests.get(url, headers=headers)
+    assert r.status_code == 200
+    assert mcs.count() == len(r.json())
+    print("Material Category list OK")
+
 def test_all():
     test_area()
     test_context()
     test_types()
     test_photo_upload()
+    test_bagphoto_upload()
