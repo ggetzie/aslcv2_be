@@ -115,6 +115,11 @@ class SpatialContextDetail(APIView):
                                      action="U",
                                      object_id=context_id)
         data = request.data.copy()
+        if data.get("director_notes", "") is None:
+            data["director_notes"] = ""
+        if data.get("description", "") is None:
+            data["description"] = ""
+            
         serializer = SpatialContextEditSerializer(sc,
                                                   data=data,
                                                   partial=True)
