@@ -39,8 +39,9 @@ class SpatialAreaNestedSerializer(serializers.ModelSerializer):
 
 class ContextPhotoField(serializers.RelatedField):
     def to_representation(self, value):
-        return {"thumbnail_url": value.thumbnail.url,
-                "photo_url": value.photo.url}
+
+        return {"thumbnail_url": value.thumbnail.url if value.thumbnail else "",
+                "photo_url": value.photo.url if value.photo else ""}
 
         
 class SpatialContextSerializer(serializers.ModelSerializer):
@@ -67,11 +68,13 @@ class SpatialContextSerializer(serializers.ModelSerializer):
 class SpatialContextEditSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
+
         _ = SpatialArea.objects.get_or_create(
             utm_hemisphere=validated_data["utm_hemisphere"],
             utm_zone=validated_data["utm_zone"],
             area_utm_easting_meters=validated_data["area_utm_easting_meters"],
             area_utm_northing_meters=validated_data["area_utm_northing_meters"])
+
         return SpatialContext.objects.create(**validated_data)
 
     class Meta:
