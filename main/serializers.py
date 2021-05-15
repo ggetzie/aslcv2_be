@@ -65,11 +65,11 @@ class SpatialContextSerializer(serializers.ModelSerializer):
 class SpatialContextEditSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
-        sa, _ = SpatialArea.objects.get_or_create(
-            utm_hemisphere=validated_data["utm_hemisphere"],
-            utm_zone=validated_data["utm_zone"],
-            area_utm_easting_meters=validated_data["area_utm_easting_meters"],
-            area_utm_northing_meters=validated_data["area_utm_northing_meters"])
+        # sa, _ = SpatialArea.objects.get_or_create(
+        #     utm_hemisphere=validated_data["utm_hemisphere"],
+        #     utm_zone=validated_data["utm_zone"],
+        #     area_utm_easting_meters=validated_data["area_utm_easting_meters"],
+        #     area_utm_northing_meters=validated_data["area_utm_northing_meters"])
         return SpatialContext.objects.create(**validated_data)
 
     class Meta:

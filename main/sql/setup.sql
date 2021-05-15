@@ -1,4 +1,4 @@
--- Script to set up from a blank database
+	-- Script to set up from a blank database
 -- Create users with passwords first
 CREATE DATABASE archaeology;
 CREATE SCHEMA postgis;
