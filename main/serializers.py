@@ -101,6 +101,12 @@ class SpatialContextEditSerializer(serializers.ModelSerializer):
                   "description",
                   "director_notes"]
 
+    def validate_description(self, value):
+        if value.strip().lower() == "test error":
+            raise serializers.ValidationError("Testing Error handling")
+        else:
+            return value
+
 
 class SpatialContextNestedSerializer(serializers.ModelSerializer):
 
