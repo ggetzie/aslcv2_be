@@ -63,6 +63,11 @@ class SpatialContextSerializer(serializers.ModelSerializer):
                   "director_notes",
                   "contextphoto_set",
                   "bagphoto_set"]
+    def validate_director_notes(self, value):
+        return value or ""
+
+    def validate_description(self, value):
+        return value or ""
 
         
 class SpatialContextEditSerializer(serializers.ModelSerializer):

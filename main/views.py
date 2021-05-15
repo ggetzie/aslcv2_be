@@ -114,8 +114,9 @@ class SpatialContextDetail(APIView):
                                      model_name=SpatialContext._meta.verbose_name,
                                      action="U",
                                      object_id=context_id)
+        data = request.data.copy()
         serializer = SpatialContextEditSerializer(sc,
-                                                  data=request.data,
+                                                  data=data,
                                                   partial=True)
         if serializer.is_valid():
             serializer.save()
