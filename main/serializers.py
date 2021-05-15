@@ -68,7 +68,10 @@ class SpatialContextSerializer(serializers.ModelSerializer):
         return value or ""
 
     def validate_description(self, value):
-        return value or ""
+        if value.strip().lower() == "test error":
+            raise serializers.ValidationError("Testing Error handling")
+        else:
+            return value
 
         
 class SpatialContextEditSerializer(serializers.ModelSerializer):
