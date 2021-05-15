@@ -39,8 +39,9 @@ class SpatialAreaNestedSerializer(serializers.ModelSerializer):
 
 class ContextPhotoField(serializers.RelatedField):
     def to_representation(self, value):
-        return {"thumbnail_url": value.thumbnail.url,
-                "photo_url": value.photo.url}
+
+        return {"thumbnail_url": value.thumbnail.url if value.thumbnail else "",
+                "photo_url": value.photo.url if value.photo else ""}
 
         
 class SpatialContextSerializer(serializers.ModelSerializer):
