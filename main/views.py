@@ -109,6 +109,7 @@ class SpatialContextDetail(APIView):
 
     def put(self, request, context_id, format=None):
         sc = self.get_object(context_id)
+        logger.info(f"Updating context {context_id}")
         _ = ActionLog.objects.create(user=request.user,
                                      model_name=SpatialContext._meta.verbose_name,
                                      action="U",
@@ -118,7 +119,9 @@ class SpatialContextDetail(APIView):
                                                   partial=True)
         if serializer.is_valid():
             serializer.save()
+            logger.info(f"Saved data {serializer.data}")
             return Response(serializer.data)
+        logger.info(f"Update Context errors {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
