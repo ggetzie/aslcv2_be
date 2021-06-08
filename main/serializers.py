@@ -1,4 +1,3 @@
-from typing_extensions import Required
 from rest_framework import serializers
 from main.models import (FindPhoto, SpatialArea, SpatialContext, ObjectFind,
                          AreaType, ContextType, ContextPhoto, BagPhoto, MaterialCategory)
