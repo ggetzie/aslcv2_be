@@ -195,12 +195,6 @@ class FindPhotoSerializer(serializers.ModelSerializer):
             "find_number",
         ]
 
-        extra_kwargs = {
-            "find_number": {
-                "required": False
-            }
-        }
-
 class MCSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaterialCategory
