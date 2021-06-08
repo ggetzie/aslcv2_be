@@ -1,3 +1,4 @@
+from typing_extensions import Required
 from rest_framework import serializers
 from main.models import (FindPhoto, SpatialArea, SpatialContext, ObjectFind,
                          AreaType, ContextType, ContextPhoto, BagPhoto, MaterialCategory)
@@ -182,6 +183,7 @@ class ObjectFindSerializer(serializers.ModelSerializer):
 
         
 class FindPhotoSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = FindPhoto
         fields = [
@@ -193,6 +195,12 @@ class FindPhotoSerializer(serializers.ModelSerializer):
             "context_number",
             "find_number",
         ]
+
+        extra_kwargs = {
+            "find_number": {
+                "required": False
+            }
+        }
 
 class MCSerializer(serializers.ModelSerializer):
     class Meta:
