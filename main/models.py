@@ -230,14 +230,14 @@ class ObjectFind(models.Model):
             self.area_utm_easting_meters,
             self.area_utm_northing_meters,
             self.context_number]):
-            nf = (self.__class__
+            nf = (self.__class__.objects
                   .filter(utm_hemisphere=self.utm_hemisphere,
                           utm_zone=self.utm_zone,
                           area_utm_easting_meters=self.area_utm_easting_meters,
                           area_utm_northing_meters=self.area_utm_northing_meters,
                           context_number=self.context_number)
                   .aggregate(models.Max("find_number"))["find_number__max"])
-            self.find_number = nf +1 if nf else 1
+            self.find_number = nf + 1 if nf else 1
         super().save(*args, **kwargs)
         
     def __str__(self):

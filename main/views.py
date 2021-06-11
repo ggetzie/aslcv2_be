@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.http import Http404
 from django.shortcuts import render
 
@@ -196,16 +197,27 @@ class ObjectFindList(ListCreateAPIView):
         return qs
 
     def post(self, request, format=None):
-        serializer = ObjectFindSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            _ = ActionLog.objects.create(user=request.user,
-                                         model_name=ObjectFind._meta.verbose_name,
-                                         action="C",
-                                         object_id=serializer.data["id"])
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        required_fields = [
+            "utm_hemisphere",
+            "utm_zone",
+            "area_utm_easting_meters",
+            "area_utm_northing_meters",
+            "context_number"
+        ]
+        errmsg = ""
+        if all([f in request.data for f in required_fields]):
+            new_find = ObjectFind(**request.data)
+            try:
+                new_find.save()
+                serializer = ObjectFindSerializer(new_find)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError as e:
+                print(e)
+                errmsg = "Invalid Data"
+                return Response({"error": errmsg}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            errmsg = "Missing required fields"
+            return Response({"error", errmsg}, status=status.HTTP_400_BAD_REQUEST)
 
 class ObjectFindDetail(APIView):
 
