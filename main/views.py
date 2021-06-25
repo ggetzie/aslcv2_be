@@ -271,6 +271,24 @@ class FindPhotoUpload(APIView):
         ser = FindPhotoSerializer(fp)
         return Response(ser.data, status=status.HTTP_201_CREATED)
 
+    def post(self, request, find_id, format=None):
+        obj = ObjectFind.objects.get(id=find_id)
+        fp = FindPhoto(user=request.user,
+                       utm_hemisphere=obj.utm_hemisphere,
+                       utm_zone=obj.utm_zone,
+                       area_utm_easting_meters=obj.area_utm_easting_meters,
+                       area_utm_northing_meters=obj.area_utm_northing_mmeters,
+                       context_number=obj.context_number,
+                       find_number=obj.find_number,
+                       photo=request.FILES["photo"])
+        fp.save()
+        _ = ActionLog.objects.create(user=request.user,
+                                     model_name=FindPhoto._meta.verbose_name,
+                                     action="C",
+                                     object_id=fp.id)
+        ser = FindPhotoSerializer(fp)
+        return Response(ser.data, status=status.HTTP_201_CREATED)
+
 
 class AreaTypeList(ListAPIView):
     model = AreaType
