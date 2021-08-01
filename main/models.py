@@ -394,9 +394,9 @@ class BagPhoto(models.Model):
                     f"{self.area_utm_northing_meters}/"
                     f"{self.context_number}")
         if self.source == "F":
-            return f"{sub_root}/documentation/bag_field"
+            return f"{sub_root}/finds/bags/field"
         else:
-            return f"{sub_root}/documentation/bag_dry"
+            return f"{sub_root}/finds/bags/drying"
     
     class Meta:
         db_table = "bag_photos"
