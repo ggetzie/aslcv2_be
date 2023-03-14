@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+
+  <div class="row">
+    {% include "main/fragments/hemisphere_col.html" %}
+    {% include "main/fragments/zone_col.html" %}
+    <div class="col-2">
+      <label for="utm_easting_select">Easting</label>
+      <select class="form-control" id="utm_easting_select" onchange="document.location = `${document.location}/${this.value}`;">
+        <option></option>
+        {% for easting in eastings %}
+          <option value="{{ easting }}">{{ easting }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+{% endblock content %}

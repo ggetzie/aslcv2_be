@@ -1,0 +1,23 @@
+{% extends "base.html" %} 
+
+{% block content %}
+<div class="form-row">
+  {% include "main/fragments/hemisphere_col.html" %}
+  {% include "main/fragments/zone_col.html" %}
+  {% include "main/fragments/easting_col.html" %}
+  {% include "main/fragments/northing_col.html" %}
+  
+  <div class="col-2">
+    <label for="spatialcontext_select">Context</label>
+    <select class="form-control" id="spatialcontext_select" onchange="document.location = `${document.location}/${this.value}`;">
+      <option></option>
+      {% for sc in spatial_contexts %}
+        <option value="{{ sc.context_number }}">
+            {{ sc.context_number }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+{% endblock content %}

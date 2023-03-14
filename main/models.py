@@ -8,61 +8,62 @@ from django.db import models
 
 User = get_user_model()
 
+
 def utc_now():
     return datetime.datetime.now(tz=datetime.timezone.utc)
 
+
 class SpatialArea(models.Model):
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4,
-                          editable=False)
-    utm_hemisphere = models.CharField("UTM Hemisphere",
-                                      max_length=1,
-                                      choices = [("N", "North"),
-                                                 ("S", "South")])
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    utm_hemisphere = models.CharField(
+        "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
+    )
     utm_zone = models.IntegerField("UTM Zone")
     area_utm_easting_meters = models.IntegerField("Easting (meters)")
     area_utm_northing_meters = models.IntegerField("Northing (meters)")
-    type = models.ForeignKey("AreaType",
-                             on_delete=models.SET_NULL,
-                             blank=True, null=True,
-                             to_field="type",
-                             db_column="type")
-    longitude_decimal_degrees = models.FloatField("Longitude",
-                                                  null=True,
-                                                  blank=True)
-    latitude_decimal_degrees = models.FloatField("Latitude",
-                                                 null=True,
-                                                 blank=True)
+    type = models.ForeignKey(
+        "AreaType",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        to_field="type",
+        db_column="type",
+    )
+    longitude_decimal_degrees = models.FloatField("Longitude", null=True, blank=True)
+    latitude_decimal_degrees = models.FloatField("Latitude", null=True, blank=True)
 
     class Meta:
         db_table = "areas"
         managed = False
-        ordering = ["utm_hemisphere",
-                    "utm_zone",
-                    "area_utm_easting_meters",
-                    "area_utm_northing_meters"]
+        ordering = [
+            "utm_hemisphere",
+            "utm_zone",
+            "area_utm_easting_meters",
+            "area_utm_northing_meters",
+        ]
         verbose_name = "Spatial Area"
         verbose_name_plural = "Spatial Areas"
 
     def __str__(self):
-        return (f"{self.utm_hemisphere}-"
-                f"{self.utm_zone}-"
-                f"{self.area_utm_easting_meters}-"
-                f"{self.area_utm_northing_meters}")
+        return (
+            f"{self.utm_hemisphere}-"
+            f"{self.utm_zone}-"
+            f"{self.area_utm_easting_meters}-"
+            f"{self.area_utm_northing_meters}"
+        )
 
     @property
     def spatialcontext_set(self):
-        return (SpatialContext
-                .objects
-                .filter(utm_hemisphere=self.utm_hemisphere,
-                        utm_zone=self.utm_zone,
-                        area_utm_easting_meters=self.area_utm_easting_meters,
-                        area_utm_northing_meters=self.area_utm_northing_meters))
-    
+        return SpatialContext.objects.filter(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+        )
+
 
 class AreaType(models.Model):
-    type = models.CharField("Type", max_length=255,
-                            primary_key=True)
+    type = models.CharField("Type", max_length=255, primary_key=True)
 
     class Meta:
         db_table = "area_types"
@@ -76,108 +77,101 @@ class AreaType(models.Model):
 
 
 class SpatialContext(models.Model):
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4,
-                          editable=False)
-    utm_hemisphere = models.CharField("UTM Hemisphere",
-                                      max_length=1,
-                                      choices = [("N", "North"),
-                                                 ("S", "South")])
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    utm_hemisphere = models.CharField(
+        "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
+    )
     utm_zone = models.IntegerField("UTM Zone")
     area_utm_easting_meters = models.IntegerField("Easting (meters)")
-    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")
 
-    context_number = models.IntegerField("Context Number",
-                                         editable=False)
-    type = models.ForeignKey("ContextType",
-                             null=True, blank=True,
-                             to_field="type",
-                             on_delete=models.SET_NULL,
-                             db_column="type")
-                             
-    opening_date = models.DateField("Opening Date",
-                                    null=True,
-                                    blank=True)
+    context_number = models.IntegerField("Context Number", editable=False)
+    type = models.ForeignKey(
+        "ContextType",
+        null=True,
+        blank=True,
+        to_field="type",
+        on_delete=models.SET_NULL,
+        db_column="type",
+    )
 
-    closing_date = models.DateField("Closing Date",
-                                    null=True,
-                                    blank=True)
-    description = models.CharField("Description",
-                                   max_length=255,
-                                   default="",
-                                   blank=True)
-    director_notes = models.TextField("Director Notes",
-                                      default="",
-                                      blank=True)
-                                   
+    opening_date = models.DateField("Opening Date", null=True, blank=True)
+
+    closing_date = models.DateField("Closing Date", null=True, blank=True)
+    description = models.CharField(
+        "Description", max_length=255, default="", blank=True
+    )
+    director_notes = models.TextField("Director Notes", default="", blank=True)
+
     class Meta:
         db_table = "contexts"
         managed = False
         verbose_name = "Spatial Context"
         verbose_name_plural = "Spatial Contexts"
-        
-        ordering = ["utm_hemisphere",
-                    "utm_zone",
-                    "area_utm_easting_meters",
-                    "area_utm_northing_meters",
-                    "context_number"]
+
+        ordering = [
+            "utm_hemisphere",
+            "utm_zone",
+            "area_utm_easting_meters",
+            "area_utm_northing_meters",
+            "context_number",
+        ]
 
     def __str__(self):
-        return (f"{self.utm_hemisphere}-{self.utm_zone}-"
-                f"{self.area_utm_easting_meters}-"
-                f"{self.area_utm_northing_meters}-{self.context_number}")
+        return (
+            f"{self.utm_hemisphere}-{self.utm_zone}-"
+            f"{self.area_utm_easting_meters}-"
+            f"{self.area_utm_northing_meters}-{self.context_number}"
+        )
 
     def save(self, *args, **kwargs):
         # increment to next context_number
         if not self.context_number:
-            nc = (self.__class__
-                  .objects
-                  .filter(utm_hemisphere=self.utm_hemisphere,
-                          utm_zone=self.utm_zone,
-                          area_utm_easting_meters=self.area_utm_easting_meters,
-                          area_utm_northing_meters=self.area_utm_northing_meters)
-                  .aggregate(models
-                             .Max("context_number"))["context_number__max"])
+            nc = self.__class__.objects.filter(
+                utm_hemisphere=self.utm_hemisphere,
+                utm_zone=self.utm_zone,
+                area_utm_easting_meters=self.area_utm_easting_meters,
+                area_utm_northing_meters=self.area_utm_northing_meters,
+            ).aggregate(models.Max("context_number"))["context_number__max"]
             self.context_number = nc + 1 if nc else 1
         super().save(*args, **kwargs)
 
     @property
     def area(self):
-        return (SpatialArea
-                .objects
-                .get(utm_hemisphere=self.utm_hemisphere,
-                     utm_zone=self.utm_zone,
-                     area_utm_easting_meters=self.area_utm_easting_meters,
-                     area_utm_northing_meters=self.area_utm_northing_meters))
+        return SpatialArea.objects.get(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+        )
+
     @property
     def contextphoto_set(self):
-        return (ContextPhoto
-                .objects
-                .filter(utm_hemisphere=self.utm_hemisphere,
-                        utm_zone=self.utm_zone,
-                        area_utm_easting_meters=self.area_utm_easting_meters,
-                        area_utm_northing_meters=self.area_utm_northing_meters,
-                        context_number=self.context_number))
+        return ContextPhoto.objects.filter(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+            context_number=self.context_number,
+        )
 
     @property
     def bagphoto_set(self):
-        return (BagPhoto
-                .objects
-                .filter(utm_hemisphere=self.utm_hemisphere,
-                        utm_zone=self.utm_zone,
-                        area_utm_easting_meters=self.area_utm_easting_meters,
-                        area_utm_northing_meters=self.area_utm_northing_meters,
-                        context_number=self.context_number))                        
+        return BagPhoto.objects.filter(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+            context_number=self.context_number,
+        )
 
 
 class ContextType(models.Model):
-    type = models.CharField("Type",
-                            primary_key=True,
-                            max_length=255)
+    type = models.CharField("Type", primary_key=True, max_length=255)
 
     class Meta:
         db_table = "context_types"
-        managed=False
+        managed = False
         verbose_name = "Context Type"
         verbose_name_plural = "Context Types"
         ordering = ["type"]
@@ -185,71 +179,80 @@ class ContextType(models.Model):
     def __str__(self):
         return self.type
 
-    
+
 class ObjectFind(models.Model):
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4,
-                          editable=False)
-    utm_hemisphere = models.CharField("UTM Hemisphere",
-                                      max_length=1,
-                                      choices = [("N", "North"),
-                                                 ("S", "South")])
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    utm_hemisphere = models.CharField(
+        "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
+    )
     utm_zone = models.IntegerField("UTM Zone")
     area_utm_easting_meters = models.IntegerField("Easting (meters)")
-    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")
 
-    context_number = models.IntegerField("Context Number", editable=False)    
+    context_number = models.IntegerField("Context Number", editable=False)
     find_number = models.IntegerField("Find Number", blank=True)
-    material = models.CharField("Material",
-                                max_length=255,
-                                default="")
-    category = models.CharField("Category",
-                                max_length=255,
-                                default="")
-    director_notes = models.TextField("Director Notes",
-                                      default="",
-                                      blank=True)
+    material = models.CharField("Material", max_length=255, default="")
+    category = models.CharField("Category", max_length=255, default="")
+    director_notes = models.TextField("Director Notes", default="", blank=True)
 
     class Meta:
         db_table = "finds"
         managed = False
         verbose_name = "Object Find"
         verbose_name_plural = "Object Finds"
-        ordering = ["utm_hemisphere",
-                    "utm_zone",
-                    "area_utm_easting_meters",
-                    "area_utm_northing_meters",
-                    "context_number",
-                    "find_number"]
+        ordering = [
+            "utm_hemisphere",
+            "utm_zone",
+            "area_utm_easting_meters",
+            "area_utm_northing_meters",
+            "context_number",
+            "find_number",
+        ]
 
     def save(self, *args, **kwargs):
         # increment to next find number in same context on creation
-        if not self.find_number and all([
-            self.utm_hemisphere,
-            self.utm_zone,
-            self.area_utm_easting_meters,
-            self.area_utm_northing_meters,
-            self.context_number]):
-            nf = (self.__class__.objects
-                  .filter(utm_hemisphere=self.utm_hemisphere,
-                          utm_zone=self.utm_zone,
-                          area_utm_easting_meters=self.area_utm_easting_meters,
-                          area_utm_northing_meters=self.area_utm_northing_meters,
-                          context_number=self.context_number)
-                  .aggregate(models.Max("find_number"))["find_number__max"])
+        if not self.find_number and all(
+            [
+                self.utm_hemisphere,
+                self.utm_zone,
+                self.area_utm_easting_meters,
+                self.area_utm_northing_meters,
+                self.context_number,
+            ]
+        ):
+            nf = self.__class__.objects.filter(
+                utm_hemisphere=self.utm_hemisphere,
+                utm_zone=self.utm_zone,
+                area_utm_easting_meters=self.area_utm_easting_meters,
+                area_utm_northing_meters=self.area_utm_northing_meters,
+                context_number=self.context_number,
+            ).aggregate(models.Max("find_number"))["find_number__max"]
             self.find_number = nf + 1 if nf else 1
         super().save(*args, **kwargs)
-        
+
     def __str__(self):
-        return (f"{self.utm_hemisphere}-{self.utm_zone}-"
-                f"{self.area_utm_easting_meters}-"
-                f"{self.area_utm_northing_meters}-{self.context_number}-"
-                f"{self.find_number}")
+        return (
+            f"{self.utm_hemisphere}-{self.utm_zone}-"
+            f"{self.area_utm_easting_meters}-"
+            f"{self.area_utm_northing_meters}-{self.context_number}-"
+            f"{self.find_number}"
+        )
 
     @property
     def material_category(self):
-        return MaterialCategory.objects.get(material=self.material,
-                                            category=self.category)
+        return MaterialCategory.objects.get(
+            material=self.material, category=self.category
+        )
+
+    @property
+    def spatial_context(self):
+        return SpatialContext.objects.get(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+            context_number=self.context_number,
+        )
 
     def findphoto_set(self):
         return FindPhoto.objects.filter(
@@ -258,18 +261,14 @@ class ObjectFind(models.Model):
             area_utm_easting_meters=self.area_utm_easting_meters,
             area_utm_northing_meters=self.area_utm_northing_meters,
             context_number=self.context_number,
-            find_number=self.find_number
-        ) 
+            find_number=self.find_number,
+        )
 
-    
+
 class MaterialCategory(models.Model):
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4,
-                          editable=False)
-    material = models.CharField("Material",
-                                max_length=255)
-    category = models.CharField("Category",
-                                max_length=255)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    material = models.CharField("Material", max_length=255)
+    category = models.CharField("Category", max_length=255)
 
     class Meta:
         db_table = "material_category"
@@ -294,6 +293,7 @@ def get_photo_filename(subfolder, extension):
     else:
         return f"1.{extension}"
 
+
 def get_context_folder(instance, filename):
     """
     Find the folder to store photos. Will be determined mostly by the photo
@@ -304,11 +304,13 @@ def get_context_folder(instance, filename):
 
     return f"{subfolder}/{new_filename}"
 
+
 def get_context_folder_tn(instance, filename):
     subfolder = instance.subfolder
     photo_path = pathlib.Path(instance.photo.file.name)
 
     return f"{subfolder}/tn_{photo_path.name}"
+
 
 def get_bag_folder(instance, filename):
     """
@@ -316,37 +318,34 @@ def get_bag_folder(instance, filename):
     """
     pass
 
+
 class ContextPhoto(models.Model):
     extension = "jpg"
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4,
-                          editable=False)
-    utm_hemisphere = models.CharField("UTM Hemisphere",
-                                      max_length=1,
-                                      choices = [("N", "North"),
-                                                 ("S", "South")])
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    utm_hemisphere = models.CharField(
+        "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
+    )
     utm_zone = models.IntegerField("UTM Zone")
     area_utm_easting_meters = models.IntegerField("Easting (meters)")
-    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")
 
     context_number = models.IntegerField("Context Number")
     photo = models.ImageField(upload_to=get_context_folder)
-    thumbnail = models.ImageField(upload_to=get_context_folder_tn,
-                                  null=True,
-                                  blank=True)
-    user = models.ForeignKey(User,
-                             null=True,
-                             on_delete=models.SET_NULL)
-    created = models.DateTimeField("Created",
-                                   default=utc_now) 
-    
+    thumbnail = models.ImageField(
+        upload_to=get_context_folder_tn, null=True, blank=True
+    )
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created", default=utc_now)
+
     @property
     def subfolder(self):
-        sub_root = (f"{self.utm_hemisphere}/"
-                    f"{self.utm_zone}/"
-                    f"{self.area_utm_easting_meters}/"
-                    f"{self.area_utm_northing_meters}/"
-                    f"{self.context_number}")
+        sub_root = (
+            f"{self.utm_hemisphere}/"
+            f"{self.utm_zone}/"
+            f"{self.area_utm_easting_meters}/"
+            f"{self.area_utm_northing_meters}/"
+            f"{self.context_number}"
+        )
         return f"{sub_root}/documentation"
 
     class Meta:
@@ -360,113 +359,100 @@ class ContextPhoto(models.Model):
 
 class BagPhoto(models.Model):
     extension = "jpg"
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4,
-                          editable=False)
-    utm_hemisphere = models.CharField("UTM Hemisphere",
-                                      max_length=1,
-                                      choices = [("N", "North"),
-                                                 ("S", "South")])
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    utm_hemisphere = models.CharField(
+        "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
+    )
     utm_zone = models.IntegerField("UTM Zone")
     area_utm_easting_meters = models.IntegerField("Easting (meters)")
-    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")
 
     context_number = models.IntegerField("Context Number")
     photo = models.ImageField(upload_to=get_context_folder)
-    thumbnail = models.ImageField(upload_to=get_context_folder_tn,
-                                  null=True,
-                                  blank=True)
-    user = models.ForeignKey(User,
-                             null=True,
-                             on_delete=models.SET_NULL)
-    created = models.DateTimeField("Created",
-                                   default=utc_now) 
-    source = models.CharField("Location where taken",
-                              max_length=1,
-                              choices=(("F", "In Field"),
-                                       ("D", "Drying")),
-                              default="F")
+    thumbnail = models.ImageField(
+        upload_to=get_context_folder_tn, null=True, blank=True
+    )
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created", default=utc_now)
+    source = models.CharField(
+        "Location where taken",
+        max_length=1,
+        choices=(("F", "In Field"), ("D", "Drying")),
+        default="F",
+    )
+
     @property
     def subfolder(self):
-        sub_root = (f"{self.utm_hemisphere}/"
-                    f"{self.utm_zone}/"
-                    f"{self.area_utm_easting_meters}/"
-                    f"{self.area_utm_northing_meters}/"
-                    f"{self.context_number}")
+        sub_root = (
+            f"{self.utm_hemisphere}/"
+            f"{self.utm_zone}/"
+            f"{self.area_utm_easting_meters}/"
+            f"{self.area_utm_northing_meters}/"
+            f"{self.context_number}"
+        )
         if self.source == "F":
             return f"{sub_root}/finds/bags/field"
         else:
             return f"{sub_root}/finds/bags/drying"
-    
+
     class Meta:
         db_table = "bag_photos"
         verbose_name = "Finds Bag Photo"
         verbose_name_plural = "Finds Bag Photos"
 
     def __str__(self):
-        return self.photo.name        
+        return self.photo.name
 
 
 class FindPhoto(models.Model):
     extension = "cr3"
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4,
-                          editable=False)
-    utm_hemisphere = models.CharField("UTM Hemisphere",
-                                      max_length=1,
-                                      choices = [("N", "North"),
-                                                 ("S", "South")])
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    utm_hemisphere = models.CharField(
+        "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
+    )
     utm_zone = models.IntegerField("UTM Zone")
     area_utm_easting_meters = models.IntegerField("Easting (meters)")
-    area_utm_northing_meters = models.IntegerField("Northing (meters)")    
+    area_utm_northing_meters = models.IntegerField("Northing (meters)")
 
     context_number = models.IntegerField("Context Number")
     find_number = models.IntegerField("Find Number")
     photo = models.FileField(upload_to=get_context_folder)
-    user = models.ForeignKey(User,
-                             null=True,
-                             on_delete=models.SET_NULL)
-    created = models.DateTimeField("Created",
-                                   default=utc_now) 
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    created = models.DateTimeField("Created", default=utc_now)
 
     @property
     def subfolder(self):
         """
         Build the path to the folder where photos will be stored
         """
-        sub_root = (f"{self.utm_hemisphere}/"
-                    f"{self.utm_zone}/"
-                    f"{self.area_utm_easting_meters}/"
-                    f"{self.area_utm_northing_meters}/"
-                    f"{self.context_number}")
+        sub_root = (
+            f"{self.utm_hemisphere}/"
+            f"{self.utm_zone}/"
+            f"{self.area_utm_easting_meters}/"
+            f"{self.area_utm_northing_meters}/"
+            f"{self.context_number}"
+        )
         return f"{sub_root}/finds/individual/{self.find_number}/photo"
-    
+
     class Meta:
         db_table = "find_photos"
         verbose_name = "Find Photo"
         verbose_name_plural = "Find Photos"
 
     def __str__(self):
-        return self.photo.name                
+        return self.photo.name
 
 
 class ActionLog(models.Model):
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4,
-                          editable=False)
-    user = models.ForeignKey(User,
-                             null=True,
-                             on_delete=models.SET_NULL)
-    model_name = models.CharField("Model Name", 
-                                  max_length=100)
-    timestamp = models.DateTimeField("timestamp",
-                                     default=utc_now)
-    action = models.CharField("Action Type", 
-                              max_length=2,
-                              choices=(("C", "CREATE"),
-                                       ("R", "READ"),
-                                       ("U", "UPDATE"),
-                                       ("D", "DELETE")))
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    model_name = models.CharField("Model Name", max_length=100)
+    timestamp = models.DateTimeField("timestamp", default=utc_now)
+    action = models.CharField(
+        "Action Type",
+        max_length=2,
+        choices=(("C", "CREATE"), ("R", "READ"), ("U", "UPDATE"), ("D", "DELETE")),
+    )
     object_id = models.UUIDField("Object ID")
 
     class Meta:
@@ -475,6 +461,7 @@ class ActionLog(models.Model):
         verbose_name_plural = "Action Logs"
 
     def __str__(self):
-        return (f"{self.get_action_display()} on {self.model_name} "
-                f"by {self.user.username} at {self.timestamp}")
-
+        return (
+            f"{self.get_action_display()} on {self.model_name} "
+            f"by {self.user.username} at {self.timestamp}"
+        )

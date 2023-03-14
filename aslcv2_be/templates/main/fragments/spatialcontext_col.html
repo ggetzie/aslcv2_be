@@ -1,0 +1,9 @@
+<div class="col-1">
+  <p>Context</p>
+  <p>
+    <a href="{% url 'main:spatialcontext_select' hemisphere zone easting northing %}" 
+       title="Click to change context">
+      {{ spatial_context.context_number }}
+    </a>
+  </p>
+</div>

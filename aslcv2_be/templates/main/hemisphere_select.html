@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+  <p>Select Hemisphere</p>
+  <div class="row">
+    {% for hemisphere in hemispheres %}
+    <div class="col-1">
+      <a href="{% url 'main:zone_select' hemisphere %}">{{ hemisphere }}</a>
+    </div>
+    {% empty %}
+    <div class="col-1 bg-danger">
+      No Hemispheres Found
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}

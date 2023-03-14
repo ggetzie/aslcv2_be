@@ -1,0 +1,35 @@
+{% extends "base.html" %} 
+
+{% block content %}
+<h1>Spatial Context {{ spatial_context.context_number }}</h1>
+<div class="form-row">
+  {% include "main/fragments/hemisphere_col.html" %}
+  {% include "main/fragments/zone_col.html" %}
+  {% include "main/fragments/easting_col.html" %}
+  {% include "main/fragments/northing_col.html" %}
+  {% include "main/fragments/spatialcontext_col.html" %}
+  {% include "main/fragments/findnumber_col.html" %}
+</div>
+
+<div class="find_info mt-5">
+  <h2 class="mb-3">Info</h2>
+  <dl class="row">
+    <dt class="col-sm-2">
+      Material:
+    </dt>
+    <dd class="col-sm-10">
+      {{ find.material }}
+    </dd>
+    <dt class="col-sm-2">
+      Category:
+    </dt>
+    <dd class="col-sm-10">
+      {{ find.category }}
+    </dd>
+  </dl>
+    
+  <h3>Director Notes</h3>
+  <p>{{ find.director_notes}}</p>
+</div>
+
+{% endblock content %}

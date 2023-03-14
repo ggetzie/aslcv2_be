@@ -1,0 +1,65 @@
+{% extends "base.html" %} 
+
+{% block content %}
+<h1>Spatial Context {{ spatial_context.context_number }}</h1>
+<div class="form-row">
+  {% include "main/fragments/hemisphere_col.html" %}
+  {% include "main/fragments/zone_col.html" %}
+  {% include "main/fragments/easting_col.html" %}
+  {% include "main/fragments/northing_col.html" %}
+  {% include "main/fragments/spatialcontext_col.html" %}
+
+  <div class="col-2">
+    <label for="find_select">Find Number</label>
+    <select class="form-control" id="find_select" 
+            onchange="document.location = `${document.location}/${this.value}`;">
+      <option></option>
+      {% for find in finds %}
+        <option value="{{ find.find_number }}">
+            {{ find.find_number }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+{% if not finds %}
+<div>
+  <p class="mt-3">
+    No finds in this context. 
+    <a href="{% url 'main:spatialcontext_select' hemisphere zone easting northing %}">
+      Try a different context.
+    </a>
+  </p>
+</div>  
+{% endif %}
+
+<div class="spatialcontext_info mt-5">
+  <h2 class="mb-3">Info</h2>
+  <dl class="row">
+    <dt class="col-sm-2">
+      Type:
+    </dt>
+    <dd class="col-sm-10">
+      {{ spatial_context.type }}
+    </dd>
+    <dt class="col-sm-2">
+      Opening Date:
+    </dt>
+    <dd class="col-sm-10">
+      {{ spatial_context.opening_date }}
+    </dd>
+    <dt class="col-sm-2">
+      Closing Date:
+    </dt>
+    <dd class="col-sm-10">
+      {{ spatial_context.closing_date }}
+    </dd>
+  </dl>
+    <h3>Description</h3>
+    <p>{{ spatial_context.description }}</p>
+    <h3>Director Notes</h3>
+    <p>{{ spatial_context.director_notes}}</p>
+</div>
+
+{% endblock content %}
