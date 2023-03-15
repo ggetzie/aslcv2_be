@@ -76,6 +76,27 @@ class AreaType(models.Model):
         return self.type
 
 
+class SpatialContextManager(models.Manager):
+    def get_from_str(self, sc_str):
+        """Look up a Spatial context from a string in the format
+        "N-38-478130-4419430-32"
+
+        Args:
+            sc_str (str): A string in the format above
+
+        Returns:
+            SpatialContext: A SpatialContext object
+        """
+        h, z, e, n, c = [int(s) if s.isdigit() else s for s in sc_str.split("-")]
+        return self.get(
+            utm_hemisphere=h,
+            utm_zone=z,
+            area_utm_easting_meters=e,
+            area_utm_northing_meters=n,
+            context_number=c,
+        )
+
+
 class SpatialContext(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     utm_hemisphere = models.CharField(
@@ -102,6 +123,8 @@ class SpatialContext(models.Model):
         "Description", max_length=255, default="", blank=True
     )
     director_notes = models.TextField("Director Notes", default="", blank=True)
+
+    objects = SpatialContextManager()
 
     class Meta:
         db_table = "contexts"

@@ -43,40 +43,29 @@ LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 # "django.contrib.gis.db.backends.postgis",
 DATABASES = {
     "default": {
-	"ENGINE": "django.db.backends.postgresql_psycopg2",
-        "OPTIONS": {
-            "options": "-c search_path=django,public"
-        },
-	"NAME": env("DJANGO_DB"),
-	"USER": env("ARCHAEOLOGY_DB_USER"),
-	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
-	"HOST": env("DB_HOST", default="localhost"),
-	"PORT": env("DB_PORT", default="5432"),                      # Set to empty string for default.
-        "TEST": {
-            "NAME": "archaeology_test",
-            "MIGRATE": False
-        },
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "OPTIONS": {"options": "-c search_path=django,public"},
+        "NAME": env("DJANGO_DB"),
+        "USER": env("ARCHAEOLOGY_DB_USER"),
+        "PASSWORD": env("ARCHAEOLOGY_DB_PW"),  # store in environment variable
+        "HOST": env("DB_HOST", default="localhost"),
+        "PORT": env("DB_PORT", default="5432"),  # Set to empty string for default.
+        "TEST": {"NAME": "archaeology_test", "MIGRATE": False},
     },
     "archaeology": {
-	"ENGINE": "django.db.backends.postgresql_psycopg2",
-        "OPTIONS": {
-            "options": "-c search_path=spatial,options,object"
-        },
-	"NAME": env("ARCHAEOLOGY_DB"),
-	"USER": env("ARCHAEOLOGY_DB_USER"),
-	"PASSWORD": env("ARCHAEOLOGY_DB_PW"), # store in environment variable
-	"HOST": env("DB_HOST", default="localhost"),
-	"PORT": env("DB_PORT", default="5432"),                      # Set to empty string for default.
-        "TEST": {
-            "NAME": "archaeology_test",
-            "MIGRATE": False
-        },
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "OPTIONS": {"options": "-c search_path=spatial,options,object"},
+        "NAME": env("ARCHAEOLOGY_DB"),
+        "USER": env("ARCHAEOLOGY_DB_USER"),
+        "PASSWORD": env("ARCHAEOLOGY_DB_PW"),  # store in environment variable
+        "HOST": env("DB_HOST", default="localhost"),
+        "PORT": env("DB_PORT", default="5432"),  # Set to empty string for default.
+        "TEST": {"NAME": "archaeology_test", "MIGRATE": False},
     },
 }
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
-DATABASE_ROUTERS = ["config.routers.ArchaeologyRouter",
-                    "config.routers.DefaultRouter"]
+DATABASE_ROUTERS = ["config.routers.ArchaeologyRouter", "config.routers.DefaultRouter"]
 
 # URLS
 # ------------------------------------------------------------------------------
@@ -316,17 +305,17 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_PAGINATION_CLASS": 'rest_framework.pagination.LimitOffsetPagination', 
-    "PAGE_SIZE": 100
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 100,
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
 # Your stuff...
 # ------------------------------------------------------------------------------
-DATA_UPLOAD_MAX_NUMBER_FIELDS=None
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
 CELERY_BROKER_URL = env("aslcv2_be_CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 FILE_UPLOAD_PERMISSIONS = None
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

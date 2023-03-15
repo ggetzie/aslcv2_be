@@ -292,7 +292,7 @@ class FindPhotoUpload(APIView):
             utm_hemisphere=obj.utm_hemisphere,
             utm_zone=obj.utm_zone,
             area_utm_easting_meters=obj.area_utm_easting_meters,
-            area_utm_northing_meters=obj.area_utm_northing_mmeters,
+            area_utm_northing_meters=obj.area_utm_northing_meters,
             context_number=obj.context_number,
             find_number=obj.find_number,
             photo=request.FILES["photo"],
