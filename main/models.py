@@ -186,7 +186,7 @@ class SpatialContext(models.Model):
             area_utm_easting_meters=self.area_utm_easting_meters,
             area_utm_northing_meters=self.area_utm_northing_meters,
             context_number=self.context_number,
-        )
+        ).order_by("source")
 
 
 class ContextType(models.Model):
@@ -379,6 +379,17 @@ class ContextPhoto(models.Model):
     def __str__(self):
         return self.photo.name
 
+    @property
+    def spatial_context(self):
+        sc = SpatialContext.objects.get(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+            context_number=self.context_number,
+        )
+        return sc
+
 
 class BagPhoto(models.Model):
     extension = "jpg"
@@ -417,6 +428,17 @@ class BagPhoto(models.Model):
             return f"{sub_root}/finds/bags/field"
         else:
             return f"{sub_root}/finds/bags/drying"
+
+    @property
+    def spatial_context(self):
+        sc = SpatialContext.objects.get(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+            context_number=self.context_number,
+        )
+        return sc
 
     class Meta:
         db_table = "bag_photos"
@@ -464,6 +486,10 @@ class FindPhoto(models.Model):
 
     def __str__(self):
         return self.photo.name
+
+    def get_filename(self):
+        p = pathlib.Path(self.photo.path)
+        return p.name
 
 
 class ActionLog(models.Model):

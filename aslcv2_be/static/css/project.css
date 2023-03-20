@@ -8439,3 +8439,6 @@ a.text-dark:hover, a.text-dark:focus {
   background-color: #f2dede;
   border-color: #eed3d7;
   color: #b94a48; }
+
+details > summary {
+  font-size: 1.75em; }

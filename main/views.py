@@ -475,3 +475,29 @@ def find_detail(
         "spatial_context": object_find.spatial_context,
     }
     return render(request, template_name="main/find_detail.html", context=context)
+
+
+def home_page(request):
+    hzenc = [
+        "utm_hemisphere",
+        "utm_zone",
+        "area_utm_easting_meters",
+        "area_utm_northing_meters",
+        "context_number",
+    ]
+    hzencf = hzenc + ["find_number"]
+    distinct_context_finds = ObjectFind.objects.order_by(*hzenc).distinct(*hzenc)
+    distinct_context_photos = ContextPhoto.objects.order_by(*hzenc).distinct(*hzenc)
+    distinct_bag_photos = BagPhoto.objects.order_by(*hzenc).distinct(*hzenc)
+    distinct_find_photos = FindPhoto.objects.order_by(*hzencf).distinct(*hzencf)
+
+    return render(
+        request,
+        template_name="pages/home.html",
+        context={
+            "distinct_context_finds": distinct_context_finds,
+            "distinct_context_photos": distinct_context_photos,
+            "distinct_bag_photos": distinct_bag_photos,
+            "distinct_find_photos": distinct_find_photos,
+        },
+    )

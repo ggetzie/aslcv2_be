@@ -2,6 +2,70 @@
 
 {% block content %}
 <p>
-  <a href="{% url 'main:hemisphere_select' %}">View Data</a>
+  <a href="{% url 'main:hemisphere_select' %}">Browse All Data</a>
 </p>
+
+<details>
+  <summary>Contexts with Finds</summary>
+  <ul class="list-group">
+    {% for p in distinct_context_finds %}
+    <li class="list-group-item">
+      <a href="{% url 'main:find_select' p.utm_hemisphere p.utm_zone p.area_utm_easting_meters p.area_utm_northing_meters p.context_number %}">
+        {{ p.utm_hemisphere }}-{{ p.utm_zone }}-{{ p.area_utm_easting_meters }}-{{ p.area_utm_northing_meters }}-{{ p.context_number }}
+      </a>
+    </li>
+    {% empty %}
+    <li class="list-group-item">
+      No contexts with finds available.
+    </li>
+    {% endfor %}
+  </ul>
+</details>
+
+<details>
+  <summary>Contexts with Context Photos</summary>
+  <ul class="list-group">
+    {% for p in distinct_context_photos %}
+    <li class="list-group-item">
+      <a href="{% url 'main:find_select' p.utm_hemisphere p.utm_zone p.area_utm_easting_meters p.area_utm_northing_meters p.context_number %}">
+        {{ p.utm_hemisphere }}-{{ p.utm_zone }}-{{ p.area_utm_easting_meters }}-{{ p.area_utm_northing_meters }}-{{ p.context_number }}
+      </a>
+    </li>
+    {% empty %}
+    <li class="list-group-item">
+      No context photos found.
+    </li>
+    {% endfor %}
+  </ul>
+</details>
+
+<details>
+  <summary>Contexts with Bag Photos</summary>
+  {% for p in distinct_bag_photos %}
+  <li class="list-group-item">
+    <a href="{% url 'main:find_select' p.utm_hemisphere p.utm_zone p.area_utm_easting_meters p.area_utm_northing_meters p.context_number %}">
+      {{ p.utm_hemisphere }}-{{ p.utm_zone }}-{{ p.area_utm_easting_meters }}-{{ p.area_utm_northing_meters }}-{{ p.context_number }}
+    </a>
+  </li>
+  {% empty %}
+  <li class="list-group-item">
+    No context photos found.
+  </li>
+  {% endfor %}
+</details>
+
+<details>
+  <summary>Finds with Photos</summary>
+  {% for p in distinct_find_photos %}
+  <li class="list-group-item">
+    <a href="{% url 'main:find_detail' p.utm_hemisphere p.utm_zone p.area_utm_easting_meters p.area_utm_northing_meters p.context_number p.find_number %}">
+      {{ p.utm_hemisphere }}-{{ p.utm_zone }}-{{ p.area_utm_easting_meters }}-{{ p.area_utm_northing_meters }}-{{ p.context_number }}-{{ p.find_number }}
+    </a>
+  </li>
+  {% empty %}
+  <li class="list-group-item">
+    No context photos found.
+  </li>
+  {% endfor %}
+</details>
 {% endblock content %}

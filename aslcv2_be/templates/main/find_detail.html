@@ -1,7 +1,7 @@
 {% extends "base.html" %} 
 
 {% block content %}
-<h1>Spatial Context {{ spatial_context.context_number }}</h1>
+<h1>Spatial Context {{ spatial_context.context_number }} Find {{ find.find_number }}</h1>
 <div class="form-row">
   {% include "main/fragments/hemisphere_col.html" %}
   {% include "main/fragments/zone_col.html" %}
@@ -29,7 +29,19 @@
   </dl>
     
   <h3>Director Notes</h3>
-  <p>{{ find.director_notes}}</p>
+  <p>{{ find.director_notes|default:"No director notes."}}</p>
+</div>
+
+<h2 class="mt-5 mb-3">Find Photos</h2>
+<div class="row">
+    {% for photo in find.findphoto_set.all %}
+    <div class="col-md-3">
+      <a href="{{ photo.photo.url }}">{{ photo.get_filename }}</a>
+    </div>
+    {% if forloop.counter|divisibleby:4 %}</div><div class="row">{% endif %}
+    {% empty %}
+    <div class="col-md-3"><p>No Find Photos</p></div>
+    {% endfor %}
 </div>
 
 {% endblock content %}

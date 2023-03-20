@@ -57,14 +57,14 @@
     </dd>
   </dl>
     <h3>Description</h3>
-    <p>{{ spatial_context.description }}</p>
+    <p>{{ spatial_context.description|default:"No description" }}</p>
     <h3>Director Notes</h3>
-    <p>{{ spatial_context.director_notes}}</p>
+    <p>{{ spatial_context.director_notes|default:"No director notes."}}</p>
 </div>
 
 <div class="spatialcontext_photos mt-5">
-  <h2>Photos</h2>
-  <h3>Context Photos</h3>
+  <h2 class="mb-3">Photos</h2>
+  <h3 class="mb-2">Context Photos</h3>
   <div class="row">
     {% for photo in spatial_context.contextphoto_set %}
     <div class="col-md-3">
@@ -75,6 +75,26 @@
     <div class="col-md-3"><p>No Context Photos</p></div>
     {% endfor %}
   </div>
+  <h3 class="mt-3 mb-2">Bag Photos</h3>
+  {% if spatial_context.bagphoto_set %}
+    {% regroup spatial_context.bagphoto_set by get_source_display as bagphotos %}
+    {% for source in bagphotos %}
+    <h4 class="mt-2">{{ source.grouper }}</h4>
+      <div class="row">
+        {% for photo in source.list %}
+        <div class="col-md-3">
+          <a href="{{ photo.photo.url }}"><img class="img-thumbnail" src="{{ photo.thumbnail.url }}" /></a>
+        </div>
+        {% if forloop.counter|divisibleby:4 %}</div><div class="row">{% endif %}
+        {% empty %}
+        <div class="col-md-3"><p>No {{ source.grouper }} Photos</p></div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% else %}
+  <p>No bag photos found for this context.</p>
+  {% endif %}
+
 </div>
 
 {% endblock content %}
