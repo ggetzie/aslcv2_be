@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView
+from django.contrib.auth.decorators import login_required
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -351,6 +351,7 @@ class MCList(ListAPIView):
     pagination_class = None
 
 
+@login_required
 def hemisphere_select(request):
     hemispheres = (
         SpatialArea.objects.order_by("utm_hemisphere")
@@ -361,6 +362,7 @@ def hemisphere_select(request):
     return render(request, template_name="main/hemisphere_select.html", context=context)
 
 
+@login_required
 def zone_select(request, hemisphere):
     zones = (
         SpatialArea.objects.filter(utm_hemisphere=hemisphere)
@@ -375,6 +377,7 @@ def zone_select(request, hemisphere):
     return render(request, template_name="main/zone_select.html", context=context)
 
 
+@login_required
 def easting_select(request, hemisphere, zone):
     eastings = (
         SpatialArea.objects.filter(utm_hemisphere=hemisphere, utm_zone=zone)
@@ -387,6 +390,7 @@ def easting_select(request, hemisphere, zone):
     return render(request, template_name="main/easting_select.html", context=context)
 
 
+@login_required
 def northing_select(request, hemisphere, zone, easting):
     northings = (
         SpatialArea.objects.filter(
@@ -405,6 +409,7 @@ def northing_select(request, hemisphere, zone, easting):
     return render(request, template_name="main/northing_select.html", context=context)
 
 
+@login_required
 def spatialcontext_select(request, hemisphere, zone, easting, northing):
     area = get_object_or_404(
         SpatialArea,
@@ -426,6 +431,7 @@ def spatialcontext_select(request, hemisphere, zone, easting, northing):
     )
 
 
+@login_required
 def find_select(request, hemisphere, zone, easting, northing, context_number):
     spatial_context = get_object_or_404(
         SpatialContext,
@@ -454,6 +460,7 @@ def find_select(request, hemisphere, zone, easting, northing, context_number):
     return render(request, template_name="main/find_select.html", context=context)
 
 
+@login_required
 def find_detail(
     request, hemisphere, zone, easting, northing, context_number, find_number
 ):
@@ -477,6 +484,7 @@ def find_detail(
     return render(request, template_name="main/find_detail.html", context=context)
 
 
+@login_required
 def home_page(request):
     hzenc = [
         "utm_hemisphere",
