@@ -32,7 +32,7 @@ exec /usr/local/src/env/aslcv2_be/bin/gunicorn ${DJANGO_WSGI_MODULE}:application
     --workers $NUM_WORKERS \
     --timeout $TIMEOUT \
     --user=$USER --group=$GROUP \
-    --bind 127.0.0.1:8009 \
+    --bind 127.0.0.1:8002 \
     --log-level=debug \
     --log-file=-
 
