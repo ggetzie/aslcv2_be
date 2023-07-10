@@ -514,3 +514,8 @@ class ActionLog(models.Model):
             f"{self.get_action_display()} on {self.model_name} "
             f"by {self.user.username} at {self.timestamp}"
         )
+
+
+class Path(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
