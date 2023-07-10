@@ -1,0 +1,22 @@
+{
+  "teamMember": "username",
+  "points": [
+    {
+      "latitude": 98.1,
+      "longitude": 112.3,
+      "altitude": 1001,
+      "timestamp": 7687686,
+      "ARRatio": 0.5,
+      "status": "ok"
+    },
+    {
+      "latitude": 98.1,
+      "longitude": 112.3,
+      "altitude": 1001,
+      "timestamp": 768980,
+      "ARRatio": 0.5,
+      "status": "ok"
+    }
+    
+  ]
+}

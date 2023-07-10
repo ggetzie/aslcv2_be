@@ -1,19 +1,29 @@
 items in angle brackets <> indicate a value should be provided
 
-/api/area/ - GET list all SpatialAreas
-/api/area/<utm_hemisphere> - GET list all SpatialAreas with hemisphere "N or S"
-/api/area/<utm_hemisphere>/<utm_zone> - GET list all SpatialAreas with hemisphere "N or S" and zone
-/api/area/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters - GET list all SpatialAreas with hemisphere "N or S" and Zone and easting
-/api/area/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters>/<area_utm_nothing_meters> - GET list all SpatialAreas with hemisphere "N or S",  Zone,  Easting, Northing - note this will only be one area, but will be in a list
-/api/area/<uuid> - GET detail of Spatial Area with given uuid
-/api/area/types - GET list SpatialArea types
+Spatial Areas
+/asl/api/area/ - GET list all SpatialAreas
+/asl/api/area/<utm_hemisphere> - GET list all SpatialAreas with hemisphere "N or S"
+/asl/api/area/<utm_hemisphere>/<utm_zone> - GET list all SpatialAreas with hemisphere "N or S" and zone
+/asl/api/area/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters - GET list all SpatialAreas with hemisphere "N or S" and Zone and easting
+/asl/api/area/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters>/<area_utm_nothing_meters> - GET list all SpatialAreas with hemisphere "N or S",  Zone,  Easting, Northing - note this will only be one area, but will be in a list
+/asl/api/area/<uuid> - GET detail of Spatial Area with given uuid
+/asl/api/area/types - GET list SpatialArea types
 
-/api/context/ - GET list all SpatialContexts
-	      - POST create new Spatial Context
-/api/context/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters>/<area_utm_nothing_meters>/ - GET list all SpatialContexts for the SpatialArea with the given values
-/api/context/<uuid> - GET detail of Spatial Context with given uuid
-		    - PUT update Spatial Context with given uuid
-/api/context/<uuid>/photo/ - PUT upload photo
-/api/context/types/ - GET list all Spatial Context Types
+Spatial Contexts
+/asl/api/context/ - GET list all SpatialContexts
+	      					- POST create new Spatial Context
+/asl/api/context/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters>/<area_utm_nothing_meters>/ - GET list all SpatialContexts for the SpatialArea with the given values
+/asl/api/context/<uuid> - GET detail of Spatial Context with given uuid
+		    								- PUT update Spatial Context with given uuid
+/asl/api/context/<uuid>/photo/ - PUT upload context photo
+/asl/api/context/types/ - GET list all Spatial Context Types
+
+Object Finds
+/asl/api/find/ - GET list all ObjectFinds
+							 - POST create new Object Find
+/asl/api/find/mc/ - GET list all Material Categories
+/asl/api/find/<utm_hemisphere>/<utm_zone>/<area_utm_easting_meters>/<area_utm_northing_meters>/<context_number>/ - GET list all finds for context
+/asl/api/find/<uuid>/ - GET object find detail
+/asl/api/find/<uuid>/photo/ - PUT upload object find photo
 
 
