@@ -233,6 +233,21 @@ class ObjectFind(models.Model):
         ]
 
     def save(self, *args, **kwargs):
+        # ensure area and context exist
+        _ = SpatialArea.objects.get_or_create(
+            self.utm_hemisphere,
+            self.utm_zone,
+            self.area_utm_easting_meters,
+            self.area_utm_northing_meters,
+        )
+        _ = SpatialContext.objects.get_or_create(
+            self.utm_hemisphere,
+            self.utm_zone,
+            self.area_utm_easting_meters,
+            self.area_utm_northing_meters,
+            self.context_number,
+        )
+
         # increment to next find number in same context on creation
         if not self.find_number and all(
             [
