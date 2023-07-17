@@ -212,7 +212,7 @@ class ObjectFind(models.Model):
     area_utm_easting_meters = models.IntegerField("Easting (meters)")
     area_utm_northing_meters = models.IntegerField("Northing (meters)")
 
-    context_number = models.IntegerField("Context Number", editable=False)
+    context_number = models.IntegerField("Context Number")
     find_number = models.IntegerField("Find Number", blank=True)
     material = models.CharField("Material", max_length=255, default="")
     category = models.CharField("Category", max_length=255, default="")
