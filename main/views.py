@@ -230,7 +230,9 @@ class ObjectFindList(ListCreateAPIView):
 
     def post(self, request, format=None):
         serializer = ObjectFindSerializer(data=request.data)
+        logger.info(f"ObjectFindList post {request.data}")
         if serializer.is_valid():
+            logger.info(f"ObjectFindList post valid {serializer.data}")
             serializer.save()
             _ = ActionLog.objects.create(
                 user=request.user,
