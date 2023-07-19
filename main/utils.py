@@ -2,14 +2,10 @@ from django.conf import settings
 
 import requests
 
-def get_token(username, password, url="http://aslcv2/auth-token/"):
-    r = requests.post(
-        url,  
-        data={
-            "username":username,
-            "password": password
-            })
-            
+
+def get_token(username, password, url="http://127.0.0.1:8000/asl/auth-token/"):
+    r = requests.post(url, data={"username": username, "password": password})
+
     if r.status_code == 200:
         headers = {"Authorization": f"Token {r.json()['token']}"}
         return headers

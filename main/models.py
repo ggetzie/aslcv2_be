@@ -217,6 +217,21 @@ class ObjectFind(models.Model):
     material = models.CharField("Material", max_length=255, default="")
     category = models.CharField("Category", max_length=255, default="")
     director_notes = models.TextField("Director Notes", default="", blank=True)
+    batch_year = models.IntegerField(
+        "3d Batch Year", default=2022, db_column="3d_batch_year"
+    )
+    batch_number = models.IntegerField(
+        "3d Batch Number", null=True, blank=True, db_column="3d_batch_number"
+    )
+    batch_piece = models.IntegerField(
+        "3d Batch Piece", null=True, blank=True, db_column="3d_batch_piece"
+    )
+    weight_grams = models.DecimalField(
+        "Weight in grams", max_digits=6, decimal_places=1
+    )
+    volume_millimeter_cubed = models.DecimalField(
+        "Volume in cubic millimeters", max_digits=10, decimal_places=4
+    )
 
     class Meta:
         db_table = "finds"
@@ -516,6 +531,6 @@ class ActionLog(models.Model):
         )
 
 
-class Path(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+# class Path(models.Model):
+#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)

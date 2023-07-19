@@ -1,0 +1,6 @@
+ALTER TABLE object.finds ADD COLUMN IF NOT EXISTS "3d_batch_year" INTEGER DEFAULT 2022;
+ALTER TABLE object.finds ADD COLUMN IF NOT EXISTS "3d_batch_number" INTEGER;
+ALTER TABLE object.finds ADD COLUMN IF NOT EXISTS "3d_batch_piece" INTEGER;
+ALTER TABLE object.finds ADD COLUMN IF NOT EXISTS "special" BOOLEAN DEFAULT false;
+ALTER TABLE object.finds ADD COLUMN IF NOT EXISTS "weight_grams" NUMERIC(6,1);
+ALTER TABLE object.finds ADD COLUMN IF NOT EXISTS "volume_millimeter_cubed" NUMERIC(10,4);

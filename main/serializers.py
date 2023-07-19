@@ -200,6 +200,11 @@ class ObjectFindSerializer(serializers.ModelSerializer):
             "category",
             "director_notes",
             "findphoto_set",
+            "batch_year",
+            "batch_number",
+            "batch_piece",
+            "weight_grams",
+            "volume_millimeter_cubed",
         ]
 
 
