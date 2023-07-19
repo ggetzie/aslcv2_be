@@ -314,8 +314,8 @@ def test_objectfind():
     data = {
         "utm_hemisphere": "N",
         "utm_zone": 38,
-        "area_utm_easting_meters": 478250,
-        "area_utm_northing_meters": 4419550,
+        "area_utm_easting_meters": 478850,
+        "area_utm_northing_meters": 4419560,
         "context_number": 1,
         "material": "pottery",
         "category": "rim",
@@ -337,10 +337,11 @@ def test_objectfind_detail():
     print("Get object find detail OK")
 
     new_note = obj.director_notes + " edited" if obj.director_notes else "edited"
-    data = {"director_notes": new_note, "weight_grams": decimal.Decimal("99.3")}
+    data = {"director_notes": new_note, "weight_grams": "99.3"}
     r = requests.put(url, data=data, headers=headers)
     assert r.status_code == 200
     assert r.json()["director_notes"] == new_note
+    assert r.json()["weight_grams"] == data["weight_grams"]
     print("Edit object find detail OK")
 
 
