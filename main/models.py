@@ -212,7 +212,7 @@ class ObjectFind(models.Model):
     area_utm_easting_meters = models.IntegerField("Easting (meters)")
     area_utm_northing_meters = models.IntegerField("Northing (meters)")
 
-    context_number = models.IntegerField("Context Number", editable=False)
+    context_number = models.IntegerField("Context Number")
     find_number = models.IntegerField("Find Number", blank=True)
     material = models.CharField("Material", max_length=255, default="")
     category = models.CharField("Category", max_length=255, default="")
@@ -248,6 +248,21 @@ class ObjectFind(models.Model):
         ]
 
     def save(self, *args, **kwargs):
+        # ensure area and context exist
+        _ = SpatialArea.objects.get_or_create(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+        )
+        _ = SpatialContext.objects.get_or_create(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+            context_number=self.context_number,
+        )
+
         # increment to next find number in same context on creation
         if not self.find_number and all(
             [
