@@ -1,0 +1,1 @@
+ALTER TABLE object.finds ALTER COLUMN "weight_grams" TYPE NUMERIC(7,2);

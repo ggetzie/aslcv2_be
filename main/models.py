@@ -227,7 +227,7 @@ class ObjectFind(models.Model):
         "3d Batch Piece", null=True, blank=True, db_column="3d_batch_piece"
     )
     weight_grams = models.DecimalField(
-        "Weight in grams", max_digits=6, decimal_places=1, null=True, blank=True
+        "Weight in grams", max_digits=7, decimal_places=2, null=True, blank=True
     )
     volume_millimeter_cubed = models.DecimalField(
         "Volume in cubic millimeters",

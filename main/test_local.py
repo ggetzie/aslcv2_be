@@ -319,7 +319,7 @@ def test_objectfind():
         "context_number": 1,
         "material": "pottery",
         "category": "rim",
-        "weight_grams": "213.6",
+        "weight_grams": "21332.65",
     }
     r = requests.post(all_obj_url, data, headers=headers)
     print(r.status_code)
@@ -337,7 +337,7 @@ def test_objectfind_detail():
     print("Get object find detail OK")
 
     new_note = obj.director_notes + " edited" if obj.director_notes else "edited"
-    data = {"director_notes": new_note, "weight_grams": "99.3"}
+    data = {"director_notes": new_note, "weight_grams": "99999.69"}
     r = requests.put(url, data=data, headers=headers)
     assert r.status_code == 200
     assert r.json()["director_notes"] == new_note
