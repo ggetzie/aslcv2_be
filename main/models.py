@@ -6,6 +6,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from main.utils import get_next_photo_number
+
 User = get_user_model()
 
 
@@ -357,7 +359,9 @@ def get_context_folder(instance, filename):
     object's "subfolder" property
     """
     subfolder = instance.subfolder
-    new_filename = get_photo_filename(subfolder, instance.extension)
+    extension = filename.rsplit(".", maxsplit=1)[-1]
+    folder_path = pathlib.Path(settings.MEDIA_ROOT) / subfolder
+    new_filename = get_next_photo_number(folder_path)
 
     return f"{subfolder}/{new_filename}"
 
@@ -511,7 +515,7 @@ class FindPhoto(models.Model):
             f"{self.area_utm_northing_meters}/"
             f"{self.context_number}"
         )
-        return f"{sub_root}/finds/individual/{self.find_number}/photo"
+        return f"{sub_root}/finds/individual/{self.find_number}/photos"
 
     class Meta:
         db_table = "find_photos"

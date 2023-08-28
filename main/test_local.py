@@ -284,6 +284,15 @@ def test_bagphoto_upload():
     print("Finds Bag Photo upload OK")
 
 
+def test_findphoto_upload():
+    find = random.choice(all_obj)
+    url = base_url + reverse("api:objectfind_photo", args=[find.id])
+    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}/*.jpg"))
+    r = requests.put(url, headers=headers, files={"photo": open(photo_path, "rb")})
+    print(r.json())
+    assert r.status_code == 201
+
+
 def test_objectfind():
     # test get all object finds
     all_obj_url = base_url + reverse("api:objectfind_list")
