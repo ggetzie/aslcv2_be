@@ -8,7 +8,6 @@ Current test runner doesn't work with multi-schema setup
 TODO: fix that
 """
 import datetime
-import decimal
 import glob
 import pathlib
 import random
@@ -29,6 +28,7 @@ from main.models import (
     MaterialCategory,
     ContextPhoto,
     BagPhoto,
+    FindPhoto,
 )
 
 headers = utils.get_test_header()
@@ -254,14 +254,14 @@ def test_types():
     print("Spatial Context Types List OK")
 
 
-def test_photo_upload():
+def test_contextphoto_upload():
     sc = random.choice(SpatialContext.objects.all())
     url = base_url + reverse("api:spatialcontext_photo", args=[sc.id])
     print(url)
-    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}*.jpg"))
+    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}/*.jpg"))
     print(photo_path)
 
-    r = requests.post(url, headers=headers, files={"photo": open(photo_path, "rb")})
+    r = requests.put(url, headers=headers, files={"photo": open(photo_path, "rb")})
     assert r.status_code == 201
     p = ContextPhoto.objects.get(id=r.json()["id"])
     assert pathlib.Path(p.photo.path).exists()
@@ -271,17 +271,17 @@ def test_photo_upload():
 def test_bagphoto_upload():
     sc = random.choice(SpatialContext.objects.all())
     url = base_url + reverse("api:spatialcontext_bagphoto", args=[sc.id])
-    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}*.jpg"))
+    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}/*.jpg"))
     r = requests.put(
         url,
-        data={"source": "F"},
+        data={"source": random.choice(("F", "D"))},
         headers=headers,
         files={"photo": open(photo_path, "rb")},
     )
     assert r.status_code == 201
     p = BagPhoto.objects.get(id=r.json()["id"])
     assert pathlib.Path(p.photo.path).exists()
-    print("Finds Bag Photo upload OK")
+    print("Bag Photo upload OK")
 
 
 def test_findphoto_upload():
@@ -289,8 +289,10 @@ def test_findphoto_upload():
     url = base_url + reverse("api:objectfind_photo", args=[find.id])
     photo_path = random.choice(glob.glob(f"{PHOTO_DIR}/*.jpg"))
     r = requests.put(url, headers=headers, files={"photo": open(photo_path, "rb")})
-    print(r.json())
     assert r.status_code == 201
+    p = FindPhoto.objects.get(id=r.json()["id"])
+    assert pathlib.Path(p.photo.path).exists()
+    print("Find Photo Upload OK")
 
 
 def test_objectfind():
@@ -367,7 +369,9 @@ def test_all():
     test_area()
     test_context()
     test_types()
-    test_photo_upload()
+    test_contextphoto_upload()
     test_bagphoto_upload()
     test_objectfind()
     test_objectfind_detail()
+    test_mc_list()
+    test_findphoto_upload()

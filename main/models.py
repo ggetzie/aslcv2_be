@@ -361,9 +361,10 @@ def get_context_folder(instance, filename):
     subfolder = instance.subfolder
     extension = filename.rsplit(".", maxsplit=1)[-1]
     folder_path = pathlib.Path(settings.MEDIA_ROOT) / subfolder
+    folder_path.mkdir(parents=True, exist_ok=True)
     new_filename = get_next_photo_number(folder_path)
 
-    return f"{subfolder}/{new_filename}"
+    return f"{subfolder}/{new_filename}.{extension}"
 
 
 def get_context_folder_tn(instance, filename):
@@ -381,7 +382,6 @@ def get_bag_folder(instance, filename):
 
 
 class ContextPhoto(models.Model):
-    extension = "jpg"
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     utm_hemisphere = models.CharField(
         "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
@@ -430,7 +430,6 @@ class ContextPhoto(models.Model):
 
 
 class BagPhoto(models.Model):
-    extension = "jpg"
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     utm_hemisphere = models.CharField(
         "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
