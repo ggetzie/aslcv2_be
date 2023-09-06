@@ -553,6 +553,44 @@ class ActionLog(models.Model):
         )
 
 
-# class Path(models.Model):
-#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-#     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+class SurveyPath(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    notes = models.TextField("Notes", default="", blank=True)
+
+    def started_at(self):
+        return self.surveypoint_set.earliest("timestamp").timestamp
+
+    def ended_at(self):
+        return self.surveypoint_set.latest("timestamp").timestamp
+
+
+class SurveyPoint(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    survey_path = models.ForeignKey(SurveyPath, on_delete=models.CASCADE)
+    utm_hemisphere = models.CharField(
+        "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
+    )
+    utm_zone = models.IntegerField("UTM Zone")
+    utm_easting_meters = models.DecimalField(
+        "Easting (meters)", max_digits=9, decimal_places=3
+    )
+    utm_northing_meters = models.DecimalField(
+        "Northing (meters)", max_digits=10, decimal_places=3
+    )
+    latitude = models.DecimalField(
+        "Latitude (decimal degrees)", max_digits=9, decimal_places=6
+    )
+    longitude = models.DecimalField(
+        "Longitude (decimal degrees)", max_digits=9, decimal_places=6
+    )
+    utm_altitude = models.DecimalField(
+        "Elevation (meters)", max_digits=8, decimal_places=4
+    )
+    source = models.CharField(
+        "Source", max_length=1, choices=[("G", "Phone GPS"), ("R", "Reach")]
+    )
+    timestamp = models.DateTimeField("Timestamp", default=utc_now)
+
+    class Meta:
+        ordering = ["survey_path", "timestamp"]
