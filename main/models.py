@@ -564,6 +564,9 @@ class SurveyPath(models.Model):
     def ended_at(self):
         return self.surveypoint_set.latest("timestamp").timestamp
 
+    def __str__(self):
+        return f"{self.id} {self.user}"
+
 
 class SurveyPoint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -590,7 +593,10 @@ class SurveyPoint(models.Model):
     source = models.CharField(
         "Source", max_length=1, choices=[("G", "Phone GPS"), ("R", "Reach")]
     )
-    timestamp = models.DateTimeField("Timestamp", default=utc_now)
+    timestamp = models.DateTimeField("Timestamp")
+
+    def __str__(self):
+        return f"{self.utm_hemisphere}-{self.utm_zone}-{self.utm_easting_meters}-{self.utm_northing_meters}"
 
     class Meta:
         ordering = ["survey_path", "timestamp"]
