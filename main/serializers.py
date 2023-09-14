@@ -9,6 +9,8 @@ from main.models import (
     ContextPhoto,
     BagPhoto,
     MaterialCategory,
+    SurveyPath,
+    SurveyPoint,
 )
 
 
@@ -226,3 +228,15 @@ class MCSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaterialCategory
         fields = ["id", "material", "category"]
+
+
+class SurveyPointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SurveyPoint
+        fields = "__all__"
+
+
+class SurveyPathSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SurveyPath
+        fields = "__all__"
