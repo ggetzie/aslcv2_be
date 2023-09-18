@@ -62,11 +62,60 @@ PUT upload object find photo
 ## Paths
 ### /asl/api/path/
 GET list all SurveyPaths
+Returns a list of all SurveyPaths. To save data, points will not be included. Request details for the individual path to get the list of all points.
+
+
 POST create new SurveyPath
 
 ### /asl/api/path/{uuid}/ 
 GET retrieve details for path with id {uuid}
-PUT update information for path with id {uuid}
+
+Returns:
+```
+{
+  "id": "03a45bbc-9866-47be-890f-2a1ab3a0cdbc"
+  "notes": "Text field containing notes"
+  "user": "test_user"
+  "points": [
+    {
+    "id": "41bae6e1-a47a-4f45-b90f-5f46df917d97"
+    "utm_hemipshere": "N",
+    "utm_zone": 38,
+    "utm_easting_meters": 478130.123,
+    "utm_northing_meters": 4419430.325,
+    "latitude": 25.123456,
+    "longitude": 110.123456,
+    "utm_altitude": 200.1234,
+    "source": "R",
+    "timestamp": 1695007830469
+    },
+    // ... additional points in a JSON array
+  ]
+}
+```
+
+PUT update information for path with id {uuid}  
+Send the fields to update in the payload
+Points included in the PUT request will be created if they are missing the `id` field. If the `id` is included, the existing point with the matching id will be updated in the database.
+
+```
+{
+  "notes": "updated notes text"
+  "points": [
+    {
+    "utm_hemipshere": "N",
+    "utm_zone": 38,
+    "utm_easting_meters": 478150.987,
+    "utm_northing_meters": 4419480.632,
+    "latitude": 25.123456,
+    "longitude": 110.123456,
+    "utm_altitude": 200.1234,
+    "source": "R",
+    "timestamp": 1695007830469
+  },
+  ]
+}
+```
 
 
 
