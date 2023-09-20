@@ -23,6 +23,8 @@ from main.models import (
     ActionLog,
     BagPhoto,
     MaterialCategory,
+    SurveyPath,
+    SurveyPoint,
 )
 
 from main.serializers import (
@@ -36,6 +38,7 @@ from main.serializers import (
     BagPhotoSerializer,
     ObjectFindSerializer,
     MCSerializer,
+    SurveyPathSerializer,
 )
 
 import logging
@@ -362,6 +365,12 @@ class MCList(ListAPIView):
     serializer_class = MCSerializer
     queryset = MaterialCategory.objects.all()
     pagination_class = None
+
+
+class SurveyPathList(ListCreateAPIView):
+    model = SurveyPath
+    serializer_class = SurveyPathSerializer
+    queryset = SurveyPath.objects.all()
 
 
 @login_required

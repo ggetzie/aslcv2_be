@@ -1,3 +1,5 @@
+import datetime
+from dateutil.tz import gettz
 from rest_framework import serializers
 from main.models import (
     FindPhoto,
@@ -237,6 +239,21 @@ class SurveyPointSerializer(serializers.ModelSerializer):
 
 
 class SurveyPathSerializer(serializers.ModelSerializer):
+    points = SurveyPointSerializer(many=True, read_only=False)
+
     class Meta:
         model = SurveyPath
         fields = "__all__"
+
+    def create(self, validated_data):
+        points_data = validated_data.pop("points")
+        path = SurveyPath.objects.create(**validated_data)
+        for point_data in points_data:
+            timezone_str = point_data.pop("timezone")
+            timezone = gettz(timezone_str)
+            timestamp_int = point_data.pop("timestamp")
+            timestamp_obj = datetime.datetime.fromtimestamp(timestamp_int, tz=timezone)
+            point_data["timestamp"] = timestamp_obj
+
+            SurveyPoint.objects.create(path=path, **point_data)
+        return path
