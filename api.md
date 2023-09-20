@@ -64,8 +64,75 @@ PUT upload object find photo
 GET list all SurveyPaths
 Returns a list of all SurveyPaths. To save data, points will not be included. Request details for the individual path to get the list of all points.
 
+Returns:
+```
+[
+  {
+    "id": "03a45bbc-9866-47be-890f-2a1ab3a0cdbc",
+    "notes": "Text field containing notes",
+    "user": "test_user",
+  },
+  {
+    "id": "03a45bbc-9866-47be-890f-2a1ab3a0cdbc",
+    "notes": "Text field containing notes",
+    "user": "test_user",
+  },
+  {
+    "id": "03a45bbc-9866-47be-890f-2a1ab3a0cdbc",
+    "notes": "Text field containing notes",
+    "user": "test_user",
+  }
+]
+```
 
-POST create new SurveyPath
+POST create new SurveyPath  
+Submit a payload with all the information required for the new path. Include the points in an array.  
+Omit Ids. These will be created by the server.  
+Include the IANA timezone name with the timestamp in the point data.  
+Timestamp should be an integer repesenting a POSIX timestamp in seconds.
+
+```
+{
+  "notes": "Excavation at the ancient temple site",
+  "user": "digmaster45",
+  "points": [
+    {
+      "utm_hemisphere": "N",
+      "utm_zone": 33,
+      "utm_easting_meters": 479120.234,
+      "utm_northing_meters": 4420430.456,
+      "latitude": 28.134567,
+      "longitude": 111.1346789,
+      "source": "R",
+      "timestamp": 1695187223,
+      "timezone": "Asia/Yerevan"
+    },
+    {
+      "utm_hemisphere": "N",
+      "utm_zone": 33,
+      "utm_easting_meters": 479235.567,
+      "utm_northing_meters": 4420501.987,
+      "latitude": 28.135678,
+      "longitude": 111.1354543,
+      "source": "R",
+      "timestamp": 1695187345,
+      "timezone": "Asia/Yerevan"      
+    },
+    {
+      "utm_hemisphere": "N",
+      "utm_zone": 33,
+      "utm_easting_meters": 479341.890,
+      "utm_northing_meters": 4420572.890,
+      "latitude": 28.136789,
+      "longitude": 111.1362297,
+      "source": "R",
+      "timestamp": 1695187468,
+      "timezone": "Asia/Yerevan"      
+    }
+  ]
+}
+```
+
 
 ### /asl/api/path/{uuid}/ 
 GET retrieve details for path with id {uuid}
@@ -115,6 +182,31 @@ Points included in the PUT request will be created if they are missing the `id` 
   },
   ]
 }
+```
+
+## Miscellanneous
+
+### /asl/api/timezones
+GET list all IANA timezones
+
+Returns a JSON array of available timezones on the server:
+
+```
+[
+  ...
+  Asia/Gaza,
+  Asia/Harbin,
+  Asia/Hebron,
+  Asia/Ho_Chi_Minh,
+  Asia/Hong_Kong,
+  Asia/Hovd,
+  Asia/Irkutsk,
+  Asia/Istanbul,
+  Asia/Jakarta,
+  Asia/Jayapura,
+  ...
+]
+
 ```
 
 
