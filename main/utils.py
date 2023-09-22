@@ -1,8 +1,9 @@
-import math
 import pathlib
 import requests
+import numpy as np
 
 from django.conf import settings
+from django.db import connections
 
 
 def get_token(username, password, url="http://127.0.0.1:8000/asl/auth-token/"):
@@ -52,15 +53,69 @@ E0 = 500_000  # meters
 
 
 alpha = [
-    n / 2.0 - 2 / 3.0 * n**2 + 5 / 16.0 * n**3,
-    13 / 48.0 * n**2 - 3 / 5.0 * n**3,
-    61 / 240.0 * n**3,
+    # alpha 1
+    n / 2.0
+    - 2 / 3.0 * n**2
+    + 5 / 16.0 * n**3
+    + 41 / 180.0 * n**4
+    - 127 / 288.0 * n**5
+    + 7891 / 37800.0 * n**6
+    + 72161 / 387072.0 * n**7
+    - 18975107 / 50803200.0 * n**8,
+    # alpha 2
+    13 / 48.0 * n**2
+    - 3 / 5.0 * n**3
+    + 557 / 1440.0 * n**4
+    + 281 / 630.0 * n**5
+    - 1983433 / 1935360.0 * n**6
+    + 13769 / 28800.0 * n**7
+    + 148003883 / 174182400.0 * n**8,
+    # alpha 3
+    61 / 240.0 * n**3
+    - 103 / 140.0 * n**4
+    + 15061 / 26880.0 * n**5
+    + 167603 / 181440.0 * n**6
+    - 67102379 / 29030400.0 * n**7
+    + 79682431 / 79833600.0 * n**8,
+    # alpha 4
+    49561 / 161280.0 * n**4
+    - 179 / 168.0 * n**5
+    + 6601661 / 7257600.0 * n**6
+    + 97445 / 49896.0 * n**7
+    - 40176129013 / 7664025600.0 * n**8,
 ]
 
 beta = [
-    1 / 2.0 * n - 2 / 3.0 * n**2 + 37 / 96.0 * n**3,
-    1 / 48.0 * n**2 + 1 / 15.0 * n**3,
-    17 / 480.0 * n**3,
+    # beta 1
+    1 / 2.0 * n
+    - 2 / 3.0 * n**2
+    + 37 / 96.0 * n**3
+    - 1 / 360.0 * n**4
+    - 81 / 512.0 * n**5
+    + 96199 / 604800.0 * n**6
+    - 5406467 / 38707200.0 * n**7
+    + 7944359 / 67737600.0 * n**8,
+    # beta 2
+    1 / 48.0 * n**2
+    + 1 / 15.0 * n**3
+    - 437 / 1440.0 * n**4
+    + 46 / 105.0 * n**5
+    - 1118711 / 3870720.0 * n**6
+    + 51841 / 1209600.0 * n**7
+    + 24749483 / 348364800.0 * n**8,
+    # beta 3
+    17 / 480.0 * n**3
+    - 37 / 840.0 * n**4
+    - 209 / 4480.0 * n**5
+    + 5569 / 90720.0 * n**6
+    + 9261899 / 58060800.0 * n**7
+    - 6457463 / 17740800.0 * n**8,
+    # beta 4
+    4397 / 161280.0 * n**4
+    - 11 / 504.0 * n**5
+    - 830251 / 7257600.0 * n**6
+    - 466511 / 2494800.0 * n**7
+    + 324154477 / 7664025600.0 * n**8,
 ]
 
 # delta = [
@@ -72,30 +127,27 @@ beta = [
 
 def latlong_to_UTM(latitude: float, longitude: float) -> tuple:
     N0 = 0.0 if latitude >= 0.0 else 10_000_000.0  # meters
-    zone = math.ceil((longitude + 180) / 6)
+    zone = np.ceil((longitude + 180) / 6)
 
     # reference meridian
-    lambda0 = math.radians((zone - 1.0) * 6 - 180 + 3)  # longitude of central meridian
+    lambda0 = np.radians((zone - 1.0) * 6 - 180 + 3)  # longitude of central meridian
 
-    latitude = math.radians(latitude)
-    longitude = math.radians(longitude)
-    print(f"{lambda0=}, {longitude=}, {latitude=}")
+    latitude = np.radians(latitude)
+    longitude = np.radians(longitude)
     # latitude: phi (φ)
     # longitude: lambda (λ)
 
-    x = 2.0 * math.sqrt(n) / (1.0 + n)
-    t = math.sinh(
-        math.atanh(math.sin(latitude)) - x * math.atanh(x * math.sin(latitude))
-    )
-    zeta_p = math.atan(t / math.cos(longitude - lambda0))
-    nu_p = math.atan(math.sin(longitude - lambda0) / math.sqrt(1 + t**2.0))
+    x = 2.0 * np.sqrt(n) / (1.0 + n)
+    t = np.sinh(np.arctanh(np.sin(latitude)) - x * np.arctanh(x * np.sin(latitude)))
+    zeta_p = np.arctan(t / np.cos(longitude - lambda0))
+    nu_p = np.arctan(np.sin(longitude - lambda0) / np.sqrt(1 + t**2.0))
     sigma = 1 + sum(
         [
             2
             * (i + 1)
             * alph
-            * math.cos(2 * (i + 1) * zeta_p)
-            * math.cosh(2 * (i + 1) * nu_p)
+            * np.cos(2 * (i + 1) * zeta_p)
+            * np.cosh(2 * (i + 1) * nu_p)
             for i, alph in enumerate(alpha)
         ]
     )
@@ -105,8 +157,8 @@ def latlong_to_UTM(latitude: float, longitude: float) -> tuple:
             2
             * (i + 1)
             * alph
-            * math.sin(2 * (i + 1) * zeta_p)
-            * math.sinh(2 * (i + 1) * nu_p)
+            * np.sin(2 * (i + 1) * zeta_p)
+            * np.sinh(2 * (i + 1) * nu_p)
             for i, alph in enumerate(alpha)
         ]
     )
@@ -115,7 +167,7 @@ def latlong_to_UTM(latitude: float, longitude: float) -> tuple:
         nu_p
         + sum(
             [
-                alph * math.cos(2 * (i + 1) * zeta_p) * math.sinh(2 * (i + 1) * nu_p)
+                alph * np.cos(2 * (i + 1) * zeta_p) * np.sinh(2 * (i + 1) * nu_p)
                 for i, alph in enumerate(alpha)
             ]
         )
@@ -125,7 +177,7 @@ def latlong_to_UTM(latitude: float, longitude: float) -> tuple:
         zeta_p
         + sum(
             [
-                alph * math.sin(2 * (i + 1) * zeta_p) * math.cosh(2 * (i + 1) * nu_p)
+                alph * np.sin(2 * (i + 1) * zeta_p) * np.cosh(2 * (i + 1) * nu_p)
                 for i, alph in enumerate(alpha)
             ]
         )
@@ -135,18 +187,57 @@ def latlong_to_UTM(latitude: float, longitude: float) -> tuple:
         k0
         * A
         / a
-        * math.sqrt(
-            (1 + ((1 - n) / (1 + n) * math.tan(latitude)) ** 2)
+        * np.sqrt(
+            (1 + ((1 - n) / (1 + n) * np.tan(latitude)) ** 2)
             * (sigma**2 + tau**2)
-            / (t**2 + math.cos(longitude - lambda0) ** 2)
+            / (t**2 + np.cos(longitude - lambda0) ** 2)
         )
     )
 
     # Grid Convergence
-    sqrt1t2 = math.sqrt(1 + t**2)
-    gamma = math.atan(
-        (tau * sqrt1t2 + sigma * t * math.tan(longitude - lambda0))
-        / (sigma * sqrt1t2 - tau * t * math.tan(longitude - lambda0))
+    sqrt1t2 = np.sqrt(1 + t**2)
+    gamma = np.arctan(
+        (tau * sqrt1t2 + sigma * t * np.tan(longitude - lambda0))
+        / (sigma * sqrt1t2 - tau * t * np.tan(longitude - lambda0))
     )
 
     return zone, E, N, k, gamma
+
+
+def test_latlong_toUTM():
+    # get sample data from database
+
+    with connections["archaeology"].cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT 
+            latitude_decimal_degrees, 
+            longitude_decimal_degrees, 
+            utm_zone, 
+            utm_easting_meters, 
+            utm_northing_meters
+            FROM spatial.survey_points;
+            """
+        )
+        samples = cursor.fetchall()
+    easting_errors = np.array([])
+    northing_errors = np.array([])
+    for sample in samples:
+        latitude = float(sample[0])
+        longitude = float(sample[1])
+        zone = sample[2]
+        easting = float(sample[3])
+        northing = float(sample[4])
+        zone_calc, easting_calc, northing_calc, _, _ = latlong_to_UTM(
+            latitude, longitude
+        )
+        easting_errors = np.append(easting_errors, easting - easting_calc)
+        northing_errors = np.append(northing_errors, northing - northing_calc)
+        assert zone == zone_calc
+
+    print(
+        f"easting error:\nmean: {np.mean(easting_errors)} max: {np.max(np.abs(easting_errors))}"
+    )
+    print(
+        f"northing error:\n mean: {np.mean(northing_errors)} max: {np.max(np.abs(northing_errors))}"
+    )
