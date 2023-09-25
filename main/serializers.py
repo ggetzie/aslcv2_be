@@ -257,3 +257,21 @@ class SurveyPathSerializer(serializers.ModelSerializer):
 
             SurveyPoint.objects.create(path=path, **point_data)
         return path
+
+    def update(self, validated_data):
+        points_data = validated_data.pop("points")
+        path = SurveyPath.objects.create(**validated_data)
+        for point_data in points_data:
+            timezone_str = point_data.pop("timezone")
+            timezone = gettz(timezone_str)
+            timestamp_int = point_data.pop("timestamp")
+            timestamp_obj = datetime.datetime.fromtimestamp(timestamp_int, tz=timezone)
+            point_data["timestamp"] = timestamp_obj
+
+            if "id" in point_data:
+                point_id = point_data.pop("id")
+                SurveyPoint.objects.filter(id=point_id).update(**point_data)
+            else:
+                SurveyPoint.objects.create(path=path, **point_data)
+
+        return path
