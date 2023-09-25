@@ -241,3 +241,21 @@ def test_latlong_toUTM():
     print(
         f"northing error:\n mean: {np.mean(northing_errors)} max: {np.max(np.abs(northing_errors))}"
     )
+
+
+def test_latlong_toUTM_single(
+    lat_in=43.642567,
+    long_in=-79.387139,
+    zone_in=17,
+    easting_in=630084.0,
+    northing_in=4833439.0,
+):
+    # default test point is CN Tower
+    # from https://geohack.toolforge.org/geohack.php?pagename=Universal_Transverse_Mercator_coordinate_system&params=43_38_33.24_N_79_23_13.7_W_&title=CN+Tower
+    zone_calc, easting_calc, northing_calc, _, _ = latlong_to_UTM(lat_in, long_in)
+    print(f"zone: {zone_in} zone calculated: {zone_calc}")
+    print(f"easting input \teasting calculated\teasting error")
+    print(f"{easting_in}\t{easting_calc}\t{easting_in - easting_calc}")
+    print()
+    print(f"northing input \tnorthing calculated\tnorthing error")
+    print(f"{northing_in}\t{northing_calc}\t{northing_in - northing_calc}")
