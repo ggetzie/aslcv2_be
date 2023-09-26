@@ -155,8 +155,10 @@ class ActionLogAdmin(admin.ModelAdmin):
 
 class SurveyPointInline(admin.TabularInline):
     model = SurveyPoint
+    extra = 0
 
 
 @admin.register(SurveyPath)
 class SurveyPathAdmin(admin.ModelAdmin):
     list_display = ["id", "user"]
+    inlines = [SurveyPointInline]
