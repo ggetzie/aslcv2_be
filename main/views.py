@@ -39,6 +39,7 @@ from main.serializers import (
     ObjectFindSerializer,
     MCSerializer,
     SurveyPathSerializer,
+    SurveyPathListSerializer,
 )
 
 import logging
@@ -371,6 +372,12 @@ class SurveyPathList(ListCreateAPIView):
     model = SurveyPath
     serializer_class = SurveyPathSerializer
     queryset = SurveyPath.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return SurveyPathListSerializer
+        else:
+            return SurveyPathSerializer
 
 
 @login_required

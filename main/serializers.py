@@ -275,3 +275,9 @@ class SurveyPathSerializer(serializers.ModelSerializer):
                 SurveyPoint.objects.create(path=path, **point_data)
 
         return path
+
+
+class SurveyPathListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SurveyPath
+        fields = ["id", "notes", "user__username"]
