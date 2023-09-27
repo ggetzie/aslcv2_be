@@ -248,14 +248,24 @@ class SurveyPathSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         points_data = validated_data.pop("points")
         path = SurveyPath.objects.create(**validated_data)
-        for point_data in points_data:
-            timezone_str = point_data.pop("timezone")
-            timezone = gettz(timezone_str)
-            timestamp_int = point_data.pop("timestamp")
-            timestamp_obj = datetime.datetime.fromtimestamp(timestamp_int, tz=timezone)
-            point_data["timestamp"] = timestamp_obj
-
-            SurveyPoint.objects.create(path=path, **point_data)
+        points = [
+            SurveyPoint(
+                path=path,
+                latitude=point_data["latitude"],
+                longitude=point_data["longitude"],
+                utm_hemisphere=point_data["utm_hemisphere"],
+                utm_zone=point_data["utm_zone"],
+                utm_easting_meters=point_data["utm_easting_meters"],
+                utm_northing_meters=point_data["utm_northing_meters"],
+                timestamp=datetime.datetime.fromtimestamp(
+                    point_data["timestamp"], tz=gettz(point_data["timezone"])
+                ),
+                utm_altitude=point_data["utm_altitude"],
+                source=point_data["source"],
+            )
+            for point_data in points_data
+        ]
+        SurveyPoint.objects.bulk_create(points)
         return path
 
     def update(self, validated_data):
