@@ -163,7 +163,7 @@ Returns:
 
 PUT update information for path with id {uuid}  
 Send the fields to update in the payload
-Points included in the PUT request will be created if they are missing the `id` field. If the `id` is included, the existing point with the matching id will be updated in the database.
+Points included in the PUT request will be created if they are missing the `id` field. If the `id` is included, the existing point with the matching id will be updated in the database. A PUT request requires all fields to be included, even if they are not being updated.
 
 ```
 {
@@ -183,6 +183,10 @@ Points included in the PUT request will be created if they are missing the `id` 
   ]
 }
 ```
+
+PATCH partial update information for path with id {uuid}
+
+Same as PUT, but only the fields included in the payload will be updated. All other fields will be left unchanged.
 
 ## Miscellanneous
 

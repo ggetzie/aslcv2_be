@@ -111,6 +111,11 @@ find_urls = [
     ),
 ]
 
+path_urls = [
+    path("", views.SurveyPathList.as_view(), name="surveypath_list"),
+    path("<uuid:path_id>/", views.SurveyPathDetail.as_view(), name="surveypath_detail"),
+]
+
 urlpatterns = [
     path("area/", include(area_urls)),
     path("context/", include(context_urls)),

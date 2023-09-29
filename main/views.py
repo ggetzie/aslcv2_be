@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
-from rest_framework.generics import CreateAPIView, ListAPIView, ListCreateAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -378,6 +378,10 @@ class SurveyPathList(ListCreateAPIView):
             return SurveyPathListSerializer
         else:
             return SurveyPathSerializer
+        
+class SurveyPathDetail(RetrieveUpdateAPIView):
+    model = SurveyPath
+    serializer_class = SurveyPathSerializer
 
 
 @login_required
