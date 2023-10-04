@@ -120,4 +120,5 @@ urlpatterns = [
     path("area/", include(area_urls)),
     path("context/", include(context_urls)),
     path("find/", include(find_urls)),
+    path("path/", include(path_urls)),
 ] + router.urls

@@ -1,5 +1,6 @@
 import datetime
 from dateutil.tz import gettz
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from main.models import (
     FindPhoto,
@@ -14,6 +15,8 @@ from main.models import (
     SurveyPath,
     SurveyPoint,
 )
+
+User = get_user_model()
 
 
 class ContextListingField(serializers.RelatedField):
@@ -240,14 +243,18 @@ class SurveyPointSerializer(serializers.ModelSerializer):
 
 class SurveyPathSerializer(serializers.ModelSerializer):
     points = SurveyPointSerializer(many=True, read_only=False)
+    username = serializers.CharField(source="user.username", read_only=True)
 
     class Meta:
         model = SurveyPath
-        fields = "__all__"
+        fields = ["id", "notes", "points", "username"]
 
     def create(self, validated_data):
         points_data = validated_data.pop("points")
-        path = SurveyPath.objects.create(**validated_data)
+        user = User.objects.get(username=validated_data["username"])
+        path = SurveyPath.objects.create(
+            user=user, notes=validated_data.get("notes", "")
+        )
         points = [
             SurveyPoint(
                 path=path,
@@ -270,7 +277,10 @@ class SurveyPathSerializer(serializers.ModelSerializer):
 
     def update(self, validated_data):
         points_data = validated_data.pop("points")
-        path = SurveyPath.objects.create(**validated_data)
+        path = self.instance
+        if "notes" in validated_data:
+            path.notes = validated_data["notes"]
+            path.save()
         for point_data in points_data:
             timezone_str = point_data.pop("timezone")
             timezone = gettz(timezone_str)
@@ -288,6 +298,8 @@ class SurveyPathSerializer(serializers.ModelSerializer):
 
 
 class SurveyPathListSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source="user.username", read_only=True)
+
     class Meta:
         model = SurveyPath
-        fields = ["id", "notes", "user__username"]
+        fields = ["id", "notes", "user"]

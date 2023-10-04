@@ -1,10 +1,14 @@
 import datetime
 import random
+import requests
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 from dateutil.tz import gettz
 from main.models import SurveyPath, SurveyPoint
 from main.utils import utm_to_latlong
+from main.test_local import headers, base_url
+
 
 User = get_user_model()
 H = "N"
@@ -54,3 +58,35 @@ def create_test_path():
     points = [SurveyPoint(path=path, **point) for point in data["points"]]
     SurveyPoint.objects.bulk_create(points)
     return path
+
+
+def test_list_paths():
+    r = requests.get(base_url + reverse("api:surveypath_list"), headers=headers)
+    all_paths = SurveyPath.objects.all()
+    print(r.status_code)
+    print(r.json())
+    assert r.status_code == 200
+    assert len(r.json()) == all_paths.count()
+
+
+def test_create_path():
+    # POST to reverse("path-list")
+    url = base_url + reverse("api:surveypath_list")
+    data = create_test_path_data()
+    r = requests.post(url, json=data, headers=headers)
+    assert r.status_code == 201
+    assert r.json()["user"] == data["user"]
+    assert r.json()["notes"] == data["notes"]
+    assert len(r.json()["points"]) == len(data["points"])
+
+
+def test_get_path():
+    pass
+
+
+def test_full_update_path():
+    pass
+
+
+def test_partial_update_path():
+    pass
