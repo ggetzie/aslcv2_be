@@ -1,4 +1,5 @@
 import datetime
+
 from dateutil.tz import gettz
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
@@ -236,37 +237,56 @@ class MCSerializer(serializers.ModelSerializer):
 
 
 class SurveyPointSerializer(serializers.ModelSerializer):
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+    utm_hemisphere = serializers.CharField(max_length=1)
+    utm_zone = serializers.IntegerField()
+    utm_easting_meters = serializers.FloatField()
+    utm_northing_meters = serializers.FloatField()
+    timestamp = serializers.DateTimeField()
+    utm_altitude = serializers.FloatField()
+    source = serializers.CharField(max_length=1)
+
     class Meta:
         model = SurveyPoint
-        fields = "__all__"
+        fields = [
+            "id",
+            "latitude",
+            "longitude",
+            "utm_hemisphere",
+            "utm_zone",
+            "utm_easting_meters",
+            "utm_northing_meters",
+            "timestamp",
+            "utm_altitude",
+            "source",
+        ]
 
 
 class SurveyPathSerializer(serializers.ModelSerializer):
     points = SurveyPointSerializer(many=True, read_only=False)
-    username = serializers.CharField(source="user.username", read_only=True)
+    user = serializers.CharField(source="user.username", read_only=False)
 
     class Meta:
         model = SurveyPath
-        fields = ["id", "notes", "points", "username"]
+        fields = ["id", "notes", "points", "user"]
 
     def create(self, validated_data):
         points_data = validated_data.pop("points")
-        user = User.objects.get(username=validated_data["username"])
+        user = User.objects.get(username=validated_data["user"]["username"])
         path = SurveyPath.objects.create(
             user=user, notes=validated_data.get("notes", "")
         )
         points = [
             SurveyPoint(
-                path=path,
+                survey_path=path,
                 latitude=point_data["latitude"],
                 longitude=point_data["longitude"],
                 utm_hemisphere=point_data["utm_hemisphere"],
                 utm_zone=point_data["utm_zone"],
                 utm_easting_meters=point_data["utm_easting_meters"],
                 utm_northing_meters=point_data["utm_northing_meters"],
-                timestamp=datetime.datetime.fromtimestamp(
-                    point_data["timestamp"], tz=gettz(point_data["timezone"])
-                ),
+                timestamp=point_data["timestamp"],
                 utm_altitude=point_data["utm_altitude"],
                 source=point_data["source"],
             )

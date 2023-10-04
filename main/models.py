@@ -570,7 +570,9 @@ class SurveyPath(models.Model):
 
 class SurveyPoint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    survey_path = models.ForeignKey(SurveyPath, on_delete=models.CASCADE)
+    survey_path = models.ForeignKey(
+        SurveyPath, on_delete=models.CASCADE, related_name="points"
+    )
     utm_hemisphere = models.CharField(
         "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
     )

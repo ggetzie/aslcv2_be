@@ -66,30 +66,37 @@ Returns a list of all SurveyPaths. To save data, points will not be included. Re
 
 Returns:
 ```
-[
+{
+  count: 3,
+  next: null,
+  previous: null,
+  results: [
   {
     "id": "03a45bbc-9866-47be-890f-2a1ab3a0cdbc",
     "notes": "Text field containing notes",
     "user": "test_user",
   },
   {
-    "id": "03a45bbc-9866-47be-890f-2a1ab3a0cdbc",
-    "notes": "Text field containing notes",
-    "user": "test_user",
+    "id": "f2d74324-d0d2-4c4c-aee7-705323451643",
+    "notes": "a different path",
+    "user": "another_user",
   },
   {
-    "id": "03a45bbc-9866-47be-890f-2a1ab3a0cdbc",
-    "notes": "Text field containing notes",
-    "user": "test_user",
+    "id": "d3a529ce-3bde-4e7f-9d9a-525ad128ef65",
+    "notes": "a third path",
+    "user": "yet_another_user",
   }
 ]
+
+}
+
 ```
 
 POST create new SurveyPath  
 Submit a payload with all the information required for the new path. Include the points in an array.  
 Omit Ids. These will be created by the server.  
 Include the IANA timezone name with the timestamp in the point data.  
-Timestamp should be an integer repesenting a POSIX timestamp in seconds.
+Timestamp should be a string in ISO format with timezone information included. Timestamps without timezones will be assumed to be UTC.
 
 ```
 {
@@ -104,8 +111,7 @@ Timestamp should be an integer repesenting a POSIX timestamp in seconds.
       "latitude": 28.134567,
       "longitude": 111.1346789,
       "source": "R",
-      "timestamp": 1695187223,
-      "timezone": "Asia/Yerevan"
+      "timestamp": "2003-07-23T11:00:39.401458+05:00",
     },
     {
       "utm_hemisphere": "N",
@@ -115,8 +121,7 @@ Timestamp should be an integer repesenting a POSIX timestamp in seconds.
       "latitude": 28.135678,
       "longitude": 111.1354543,
       "source": "R",
-      "timestamp": 1695187345,
-      "timezone": "Asia/Yerevan"      
+      "timestamp": "2003-07-23T11:00:42.358826+05:00",
     },
     {
       "utm_hemisphere": "N",
@@ -126,8 +131,7 @@ Timestamp should be an integer repesenting a POSIX timestamp in seconds.
       "latitude": 28.136789,
       "longitude": 111.1362297,
       "source": "R",
-      "timestamp": 1695187468,
-      "timezone": "Asia/Yerevan"      
+      "timestamp": "2003-07-23T11:00:44.310321+05:00",
     }
   ]
 }

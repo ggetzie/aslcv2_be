@@ -1,6 +1,7 @@
 import datetime
 import random
 import requests
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
@@ -13,19 +14,17 @@ from main.test_local import headers, base_url
 User = get_user_model()
 H = "N"
 Z = 38
-timezone = gettz("Asia/Yerevan")
+yerevan = gettz("Asia/Yerevan")
+hongkong = gettz("Asia/Hong_Kong")
 
 
 def create_test_path_data():
-    username = "test"
-    notes = "Randomly generated data to test uploading new paths"
+    notes = f"Randomly generated data to test uploading new paths at {datetime.datetime.now().astimezone(hongkong):%Y-%m-%d %H:%M:%S %Z}"
 
     easting = random.uniform(478000, 488000)
     northing = random.uniform(4417900, 4420000)
     altitude = random.uniform(900, 1200)
-    timestamp = datetime.datetime.fromtimestamp(
-        random.uniform(0, datetime.datetime.now().timestamp()), tz=timezone
-    )
+    timestamp = random.uniform(0, datetime.datetime.now().timestamp())
     latitude, longitude = utm_to_latlong(Z, easting, northing)
     points = []
     for i in range(random.randint(20, 50)):
@@ -36,7 +35,9 @@ def create_test_path_data():
             "utm_zone": Z,
             "utm_easting_meters": easting,
             "utm_northing_meters": northing,
-            "timestamp": timestamp,
+            "timestamp": datetime.datetime.fromtimestamp(
+                timestamp, tz=yerevan
+            ).isoformat(),
             "utm_altitude": altitude,
             "source": "R",
         }
@@ -44,18 +45,32 @@ def create_test_path_data():
         easting = easting + random.uniform(-1, 1)
         northing = northing + random.uniform(-1, 1)
         altitude = altitude + random.uniform(-1, 1)
-        timestamp = datetime.datetime.fromtimestamp(
-            timestamp.timestamp() + random.uniform(0.5, 3), tz=timezone
-        )
+        timestamp = timestamp + random.uniform(0.5, 3)
         latitude, longitude = utm_to_latlong(Z, easting, northing)
-    return {"user": username, "notes": notes, "points": points}
+    return {"user": settings.TEST_USERNAME, "notes": notes, "points": points}
 
 
 def create_test_path():
     data = create_test_path_data()
     test_user = User.objects.get(username=data["user"])
     path = SurveyPath.objects.create(user=test_user, notes=data["notes"])
-    points = [SurveyPoint(path=path, **point) for point in data["points"]]
+    points = [
+        SurveyPoint(
+            survey_path=path,
+            latitude=point["latitude"],
+            longitude=point["longitude"],
+            utm_hemisphere=point["utm_hemisphere"],
+            utm_zone=point["utm_zone"],
+            utm_easting_meters=point["utm_easting_meters"],
+            utm_northing_meters=point["utm_northing_meters"],
+            timestamp=datetime.datetime.fromtimestamp(
+                point["timestamp"], tz=gettz(point["timezone"])
+            ),
+            utm_altitude=point["utm_altitude"],
+            source=point["source"],
+        )
+        for point in data["points"]
+    ]
     SurveyPoint.objects.bulk_create(points)
     return path
 
@@ -65,19 +80,24 @@ def test_list_paths():
     all_paths = SurveyPath.objects.all()
     print(r.status_code)
     print(r.json())
+    data = r.json()
     assert r.status_code == 200
-    assert len(r.json()) == all_paths.count()
+    assert data["count"] == all_paths.count()
+    assert len(data["results"]) == all_paths.count()
+    print("test_list_paths passed")
 
 
 def test_create_path():
-    # POST to reverse("path-list")
     url = base_url + reverse("api:surveypath_list")
     data = create_test_path_data()
     r = requests.post(url, json=data, headers=headers)
+    returned_data = r.json()
+    print(r.status_code)
     assert r.status_code == 201
-    assert r.json()["user"] == data["user"]
-    assert r.json()["notes"] == data["notes"]
-    assert len(r.json()["points"]) == len(data["points"])
+    assert returned_data["user"] == data["user"]
+    assert returned_data["notes"] == data["notes"]
+    assert len(returned_data["points"]) == len(data["points"])
+    print("test_create_path passed")
 
 
 def test_get_path():
