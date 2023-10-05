@@ -113,7 +113,7 @@ find_urls = [
 
 path_urls = [
     path("", views.SurveyPathList.as_view(), name="surveypath_list"),
-    path("<uuid:path_id>/", views.SurveyPathDetail.as_view(), name="surveypath_detail"),
+    path("<uuid:pk>/", views.SurveyPathDetail.as_view(), name="surveypath_detail"),
 ]
 
 urlpatterns = [

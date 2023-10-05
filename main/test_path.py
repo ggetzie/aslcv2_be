@@ -18,6 +18,10 @@ yerevan = gettz("Asia/Yerevan")
 hongkong = gettz("Asia/Hong_Kong")
 
 
+def increment_point(point: SurveyPoint) -> SurveyPoint:
+    pass
+
+
 def create_test_path_data():
     notes = f"Randomly generated data to test uploading new paths at {datetime.datetime.now().astimezone(hongkong):%Y-%m-%d %H:%M:%S %Z}"
 
@@ -63,9 +67,7 @@ def create_test_path():
             utm_zone=point["utm_zone"],
             utm_easting_meters=point["utm_easting_meters"],
             utm_northing_meters=point["utm_northing_meters"],
-            timestamp=datetime.datetime.fromtimestamp(
-                point["timestamp"], tz=gettz(point["timezone"])
-            ),
+            timestamp=point["timestamp"],
             utm_altitude=point["utm_altitude"],
             source=point["source"],
         )
@@ -73,6 +75,34 @@ def create_test_path():
     ]
     SurveyPoint.objects.bulk_create(points)
     return path
+
+
+def create_new_points(starting_point, num_points):
+    points = []
+
+    utm_easting_meters = starting_point.utm_easting_meters + random.uniform(-1, 1)
+    utm_northing_meters = starting_point.utm_northing_meters + random.uniform(-1, 1)
+    timestamp = starting_point.timestamp + random.uniform(0.5, 3)
+    utm_altitude = starting_point.utm_altitude + random.uniform(-1, 1)
+    latitude, longitude = utm_to_latlong(
+        starting_point.utm_zone, utm_easting_meters, utm_northing_meters
+    )
+    for i in range(num_points):
+        point = SurveyPoint(
+            survey_path=starting_point.survey_path,
+            latitude=latitude,
+            longitude=longitude,
+            utm_hemisphere=starting_point.utm_hemisphere,
+            utm_zone=starting_point.utm_zone,
+            utm_easting_meters=utm_easting_meters,
+            utm_northing_meters=utm_northing_meters,
+            timestamp=datetime.datetime.fromtimestamp(timestamp, tz=yerevan),
+            utm_altitude=utm_altitude,
+            source="R",
+        )
+
+        points.append(point)
+    return points
 
 
 def test_list_paths():
@@ -92,7 +122,6 @@ def test_create_path():
     data = create_test_path_data()
     r = requests.post(url, json=data, headers=headers)
     returned_data = r.json()
-    print(r.status_code)
     assert r.status_code == 201
     assert returned_data["user"] == data["user"]
     assert returned_data["notes"] == data["notes"]
@@ -101,7 +130,16 @@ def test_create_path():
 
 
 def test_get_path():
-    pass
+    random_path = SurveyPath.objects.order_by("?").first()
+    url = base_url + reverse("api:surveypath_detail", args=[random_path.id])
+    r = requests.get(url, headers=headers)
+    returned_data = r.json()
+    assert r.status_code == 200
+    assert returned_data["id"] == str(random_path.id)
+    assert returned_data["user"] == random_path.user.username
+    assert returned_data["notes"] == random_path.notes
+    assert len(returned_data["points"]) == random_path.points.count()
+    print("test_get_path passed")
 
 
 def test_full_update_path():
@@ -110,3 +148,6 @@ def test_full_update_path():
 
 def test_partial_update_path():
     pass
+    # update notes
+
+    # add new points

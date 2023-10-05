@@ -398,6 +398,7 @@ class SurveyPathList(ListCreateAPIView):
 class SurveyPathDetail(RetrieveUpdateAPIView):
     model = SurveyPath
     serializer_class = SurveyPathSerializer
+    queryset = SurveyPath.objects.all()
 
 
 @login_required
