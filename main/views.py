@@ -383,17 +383,6 @@ class SurveyPathList(ListCreateAPIView):
         else:
             return SurveyPathSerializer
 
-    def post(self, *args, **kwargs):
-        ser = SurveyPathSerializer(data=self.request.data)
-        print(self.request.data)
-        print()
-        if ser.is_valid():
-            print(ser.validated_data)
-        else:
-            print(ser.errors)
-
-        return super().post(*args, **kwargs)
-
 
 class SurveyPathDetail(RetrieveUpdateAPIView):
     model = SurveyPath

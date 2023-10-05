@@ -18,10 +18,6 @@ yerevan = gettz("Asia/Yerevan")
 hongkong = gettz("Asia/Hong_Kong")
 
 
-def increment_point(point: SurveyPoint) -> SurveyPoint:
-    pass
-
-
 def create_test_path_data():
     notes = f"Randomly generated data to test uploading new paths at {datetime.datetime.now().astimezone(hongkong):%Y-%m-%d %H:%M:%S %Z}"
 
@@ -77,31 +73,56 @@ def create_test_path():
     return path
 
 
-def create_new_points(starting_point, num_points):
-    points = []
-
-    utm_easting_meters = starting_point.utm_easting_meters + random.uniform(-1, 1)
-    utm_northing_meters = starting_point.utm_northing_meters + random.uniform(-1, 1)
-    timestamp = starting_point.timestamp + random.uniform(0.5, 3)
-    utm_altitude = starting_point.utm_altitude + random.uniform(-1, 1)
+def create_new_points_data(starting_point, num_points):
+    utm_easting_meters = float(starting_point.utm_easting_meters) + random.uniform(
+        -1, 1
+    )
+    utm_northing_meters = float(starting_point.utm_northing_meters) + random.uniform(
+        -1, 1
+    )
+    timestamp = datetime.datetime.fromtimestamp(
+        starting_point.timestamp.timestamp() + random.uniform(0.5, 3),
+        tz=starting_point.timestamp.tzinfo,
+    )
+    utm_altitude = float(starting_point.utm_altitude) + random.uniform(-1, 1)
     latitude, longitude = utm_to_latlong(
         starting_point.utm_zone, utm_easting_meters, utm_northing_meters
     )
+    points = [
+        {
+            "latitude": latitude,
+            "longitude": longitude,
+            "utm_hemisphere": starting_point.utm_hemisphere,
+            "utm_zone": starting_point.utm_zone,
+            "utm_easting_meters": utm_easting_meters,
+            "utm_northing_meters": utm_northing_meters,
+            "timestamp": timestamp,
+            "utm_altitude": utm_altitude,
+            "source": "R",
+        }
+    ]
     for i in range(num_points):
-        point = SurveyPoint(
-            survey_path=starting_point.survey_path,
-            latitude=latitude,
-            longitude=longitude,
-            utm_hemisphere=starting_point.utm_hemisphere,
-            utm_zone=starting_point.utm_zone,
-            utm_easting_meters=utm_easting_meters,
-            utm_northing_meters=utm_northing_meters,
-            timestamp=datetime.datetime.fromtimestamp(timestamp, tz=yerevan),
-            utm_altitude=utm_altitude,
-            source="R",
+        utm_easting_meters = utm_easting_meters + random.uniform(-1, 1)
+        utm_northing_meters = utm_northing_meters + random.uniform(-1, 1)
+        latitude, longitude = utm_to_latlong(
+            starting_point.utm_zone, utm_easting_meters, utm_northing_meters
         )
-
-        points.append(point)
+        points.append(
+            {
+                "utm_hemisphere": starting_point.utm_hemisphere,
+                "utm_zone": starting_point.utm_zone,
+                "utm_easting_meters": utm_easting_meters,
+                "utm_northing_meters": utm_northing_meters,
+                "timestamp": datetime.datetime.fromtimestamp(
+                    points[-1]["timestamp"].timestamp() + random.uniform(0.5, 3),
+                    tz=points[-1]["timestamp"].tzinfo,
+                ),
+                "latitude": latitude,
+                "longitude": longitude,
+                "utm_altitude": points[-1]["utm_altitude"] + random.uniform(-1, 1),
+                "source": "R",
+            }
+        )
     return points
 
 
@@ -147,7 +168,16 @@ def test_full_update_path():
 
 
 def test_partial_update_path():
-    pass
-    # update notes
-
+    random_path = SurveyPath.objects.order_by("?").first()
+    url = base_url + reverse("api:surveypath_detail", args=[random_path.id])
+    new_notes = (
+        random_path.notes
+        + f"\nupdated {datetime.datetime.now(tz=hongkong):%Y-%m-%d %H:%M:%S %Z}"
+    )
+    r = requests.patch(url, json={"notes": new_notes}, headers=headers)
+    returned_data = r.json()
+    print(r.status_code)
+    print(returned_data)
+    assert r.status_code == 200
+    assert returned_data["notes"] == new_notes
     # add new points
