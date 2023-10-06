@@ -184,7 +184,7 @@ def test_context():
     print("List all SpatialContext Filter URL OK")
 
     # test create new spatial context
-    sc_type = random.choice(ContextType.objects.all())
+    sc_type = ContextType.objects.order_by("?").first()
     data = {
         "utm_hemisphere": test_utm_hemisphere,
         "utm_zone": test_utm_zone,
@@ -212,7 +212,7 @@ def test_context():
     sc.delete()
 
     # test get spatial context by uuid
-    sc = random.choice(SpatialContext.objects.all())
+    sc = SpatialContext.objects.order_by("?").first()
     r = requests.get(
         base_url + reverse("api:spatialcontext_detail", args=[sc.id]), headers=headers
     )
@@ -221,7 +221,7 @@ def test_context():
     print(f"SpatialContext Detail OK")
 
     # test edit spatial context
-    sc = random.choice(SpatialContext.objects.filter(opening_date__isnull=True))
+    sc = SpatialContext.objects.filter(opening_date__isnull=True).order_by("?").first()
     data = {"opening_date": datetime.date.today()}
     r = requests.put(
         base_url + reverse("api:spatialcontext_detail", args=[sc.id]),

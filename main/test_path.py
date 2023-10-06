@@ -1,10 +1,10 @@
-import datetime
 import random
 import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
+from datetime import datetime
 from dateutil.tz import gettz
 from main.models import SurveyPath, SurveyPoint
 from main.utils import utm_to_latlong
@@ -18,13 +18,19 @@ yerevan = gettz("Asia/Yerevan")
 hongkong = gettz("Asia/Hong_Kong")
 
 
+def increment_timestamp(isostr: str) -> str:
+    dt = datetime.fromisoformat(isostr)
+    dt = datetime.fromtimestamp(dt.timestamp() + random.uniform(0.5, 3), tz=dt.tzinfo)
+    return dt.isoformat()
+
+
 def create_test_path_data():
-    notes = f"Randomly generated data to test uploading new paths at {datetime.datetime.now().astimezone(hongkong):%Y-%m-%d %H:%M:%S %Z}"
+    notes = f"Randomly generated data to test uploading new paths at {datetime.now().astimezone(hongkong):%Y-%m-%d %H:%M:%S %Z}"
 
     easting = random.uniform(478000, 488000)
     northing = random.uniform(4417900, 4420000)
     altitude = random.uniform(900, 1200)
-    timestamp = random.uniform(0, datetime.datetime.now().timestamp())
+    timestamp = random.uniform(0, datetime.now().timestamp())
     latitude, longitude = utm_to_latlong(Z, easting, northing)
     points = []
     for i in range(random.randint(20, 50)):
@@ -35,9 +41,7 @@ def create_test_path_data():
             "utm_zone": Z,
             "utm_easting_meters": easting,
             "utm_northing_meters": northing,
-            "timestamp": datetime.datetime.fromtimestamp(
-                timestamp, tz=yerevan
-            ).isoformat(),
+            "timestamp": datetime.fromtimestamp(timestamp, tz=yerevan).isoformat(),
             "utm_altitude": altitude,
             "source": "R",
         }
@@ -73,17 +77,14 @@ def create_test_path():
     return path
 
 
-def create_new_points_data(starting_point, num_points):
+def create_new_points_data(starting_point: SurveyPoint, num_points: int):
     utm_easting_meters = float(starting_point.utm_easting_meters) + random.uniform(
         -1, 1
     )
     utm_northing_meters = float(starting_point.utm_northing_meters) + random.uniform(
         -1, 1
     )
-    timestamp = datetime.datetime.fromtimestamp(
-        starting_point.timestamp.timestamp() + random.uniform(0.5, 3),
-        tz=starting_point.timestamp.tzinfo,
-    )
+    timestamp = increment_timestamp(starting_point.timestamp.isoformat())
     utm_altitude = float(starting_point.utm_altitude) + random.uniform(-1, 1)
     latitude, longitude = utm_to_latlong(
         starting_point.utm_zone, utm_easting_meters, utm_northing_meters
@@ -113,10 +114,7 @@ def create_new_points_data(starting_point, num_points):
                 "utm_zone": starting_point.utm_zone,
                 "utm_easting_meters": utm_easting_meters,
                 "utm_northing_meters": utm_northing_meters,
-                "timestamp": datetime.datetime.fromtimestamp(
-                    points[-1]["timestamp"].timestamp() + random.uniform(0.5, 3),
-                    tz=points[-1]["timestamp"].tzinfo,
-                ),
+                "timestamp": increment_timestamp(points[-1]["timestamp"]),
                 "latitude": latitude,
                 "longitude": longitude,
                 "utm_altitude": points[-1]["utm_altitude"] + random.uniform(-1, 1),
@@ -151,7 +149,11 @@ def test_create_path():
 
 
 def test_get_path():
-    random_path = SurveyPath.objects.order_by("?").first()
+    random_path = (
+        SurveyPath.objects.order_by("?")
+        .filter(user__username=settings.TEST_USERNAME)
+        .first()
+    )
     url = base_url + reverse("api:surveypath_detail", args=[random_path.id])
     r = requests.get(url, headers=headers)
     returned_data = r.json()
@@ -168,16 +170,29 @@ def test_full_update_path():
 
 
 def test_partial_update_path():
-    random_path = SurveyPath.objects.order_by("?").first()
+    random_path = (
+        SurveyPath.objects.filter(user__username=settings.TEST_USERNAME)
+        .order_by("?")
+        .first()
+    )
     url = base_url + reverse("api:surveypath_detail", args=[random_path.id])
     new_notes = (
         random_path.notes
-        + f"\nupdated {datetime.datetime.now(tz=hongkong):%Y-%m-%d %H:%M:%S %Z}"
+        + f"\nupdated {datetime.now(tz=hongkong):%Y-%m-%d %H:%M:%S %Z}"
     )
     r = requests.patch(url, json={"notes": new_notes}, headers=headers)
     returned_data = r.json()
     print(r.status_code)
-    print(returned_data)
     assert r.status_code == 200
     assert returned_data["notes"] == new_notes
+
     # add new points
+    new_points = create_new_points_data(
+        random_path.points.order_by("timestamp").last(), 10
+    )
+    old_len = random_path.points.count()
+    r = requests.patch(url, json={"points": new_points}, headers=headers)
+    returned_data = r.json()
+    print(r.status_code)
+    assert r.status_code == 200
+    assert len(returned_data["points"]) == old_len + len(new_points)

@@ -303,7 +303,7 @@ class SurveyPathSerializer(serializers.ModelSerializer):
                 point_id = point_data.pop("id")
                 SurveyPoint.objects.filter(id=point_id).update(**point_data)
             else:
-                SurveyPoint.objects.create(path=instance, **point_data)
+                SurveyPoint.objects.create(survey_path=instance, **point_data)
 
         return instance
 
