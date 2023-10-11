@@ -167,7 +167,7 @@ Returns:
 
 PUT update information for path with id {uuid}  
 Send the fields to update in the payload
-Points included in the PUT request will be created if they are missing the `id` field. If the `id` is included, the existing point with the matching id will be updated in the database. A PUT request requires all fields to be included, even if they are not being updated.
+Points included in the PUT request will be created if they are missing the `id` field. If the `id` is included, the existing point with the matching id will be updated in the database. A PUT request requires all fields to be included, even if they are not being updated. `username`, `points`, and `notes` must be in the payload or an error will be returned indicating a missing required field. An empty list of points is allowed. This will result in no change to the points for the path. Points will not be deleted.
 
 ```
 {
@@ -184,6 +184,7 @@ Points included in the PUT request will be created if they are missing the `id` 
     "source": "R",
     "timestamp": 1695007830469
   },
+  "user", "test"
   ]
 }
 ```
@@ -191,6 +192,10 @@ Points included in the PUT request will be created if they are missing the `id` 
 PATCH partial update information for path with id {uuid}
 
 Same as PUT, but only the fields included in the payload will be updated. All other fields will be left unchanged.
+
+```
+{"notes": "make changes to notes only"}
+```
 
 ## Miscellanneous
 

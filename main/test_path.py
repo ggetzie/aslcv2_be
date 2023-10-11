@@ -166,7 +166,30 @@ def test_get_path():
 
 
 def test_full_update_path():
-    pass
+    random_path = (
+        SurveyPath.objects.filter(user__username=settings.TEST_USERNAME)
+        .order_by("?")
+        .first()
+    )
+    url = base_url + reverse("api:surveypath_detail", args=[random_path.id])
+    new_notes = (
+        random_path.notes
+        + f"\nupdated {datetime.now(tz=hongkong):%Y-%m-%d %H:%M:%S %Z}"
+    ).strip()
+    returned = requests.put(
+        url,
+        json={
+            "notes": new_notes,
+            "points": [],  # empty list won't delete points
+            "user": settings.TEST_USERNAME,
+        },
+        headers=headers,
+    )
+    rj = returned.json()
+    assert returned.status_code == 200
+    assert rj["notes"] == new_notes
+    assert len(rj["points"]) == random_path.points.count()
+    print("test_full_update_path passed")
 
 
 def test_partial_update_path():
