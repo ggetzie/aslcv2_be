@@ -40,3 +40,7 @@ Then you should be able to import the data from the .pgsql file without any erro
 ```
 psql archaeology < /path/to/archaeology.pgsql
 ```
+
+## API
+
+For information on how to use the REST API, see the [API documentation](api.md).
