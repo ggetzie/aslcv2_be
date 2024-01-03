@@ -10,12 +10,12 @@ attrs==20.2.0
 Babel==2.8.0
 backcall==0.2.0
 backports.zoneinfo==0.2.1
-billiard==4.1.0
+billiard==4.2.0
 black==20.8b1
 boto3==1.16.19
 botocore==1.19.19
 cattrs==22.2.0
-celery==5.3.4
+celery==5.3.6
 certifi==2020.6.20
 cffi==1.14.2
 cfgv==3.2.0
@@ -66,7 +66,7 @@ isort==5.5.1
 jedi==0.17.2
 Jinja2==2.11.2
 jmespath==0.10.0
-kombu==5.3.2
+kombu==5.3.4
 lazy-object-proxy==1.4.3
 livereload==2.6.3
 lsprotocol==2023.0.0a1
@@ -133,10 +133,10 @@ tornado==6.0.4
 traitlets==5.0.4
 typed-ast==1.4.1
 typeguard==2.13.3
-typing-extensions==3.7.4.3
+typing_extensions==4.9.0
 tzdata==2023.3
 urllib3==1.25.10
-vine==5.0.0
+vine==5.1.0
 virtualenv==20.0.31
 wcwidth==0.2.5
 Werkzeug==1.0.1
