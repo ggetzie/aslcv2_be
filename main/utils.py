@@ -36,7 +36,7 @@ def get_next_photo_number(folder: pathlib.Path) -> str:
     return f"{largest + 1}"
 
 
-# Convert between UTM (Universal Transverse Mercator) coordinates and Latitute/Longitude
+# Convert between UTM (Universal Transverse Mercator) coordinates and Latitude/Longitude
 # using pyproj see: https://stackoverflow.com/a/18620929
 test_lat = 43.642567
 test_long = -79.387139
@@ -46,14 +46,14 @@ def get_utm_zone(longitude: float) -> int:
     return math.ceil((longitude + 180) / 6)
 
 
-def latlong_to_utm(latitude: float, longitude: float) -> (int, float, float):
+def latlong_to_utm(latitude: float, longitude: float) -> "tuple[int, float, float]":
     zone = get_utm_zone(longitude)
     p = pyproj.Proj(proj="utm", zone=zone, ellps="WGS84")
     easting, northing = p(longitude, latitude)
     return zone, easting, northing
 
 
-def utm_to_latlong(zone: int, easting: float, northing: float) -> (float, float):
+def utm_to_latlong(zone: int, easting: float, northing: float) -> "tuple[float, float]":
     p = pyproj.Proj(proj="utm", zone=zone, ellps="WGS84")
     longitude, latitude = p(easting, northing, inverse=True)
     return latitude, longitude
