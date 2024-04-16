@@ -8,6 +8,7 @@ app_name = "main"
 
 urlpatterns = [
     path("", views.hemisphere_select, name="hemisphere_select"),
+    path("find/<uuid:uuid>", views.find_by_uuid, name="find_by_uuid"),
     path("<hem:hemisphere>", views.zone_select, name="zone_select"),
     path("<hem:hemisphere>/<int:zone>", views.easting_select, name="easting_select"),
     path(

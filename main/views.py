@@ -503,6 +503,20 @@ def find_detail(
 
 
 @login_required
+def find_by_uuid(request, uuid):
+    object_find = get_object_or_404(ObjectFind, id=uuid)
+    context = {
+        "hemisphere": object_find.utm_hemisphere,
+        "zone": object_find.utm_zone,
+        "easting": object_find.area_utm_easting_meters,
+        "northing": object_find.area_utm_northing_meters,
+        "find": object_find,
+        "spatial_context": object_find.spatial_context,
+    }
+    return render(request, template_name="main/find_detail.html", context=context)
+
+
+@login_required
 def home_page(request):
     hzenc = [
         "utm_hemisphere",
