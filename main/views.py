@@ -503,8 +503,8 @@ def find_detail(
 
 
 @login_required
-def find_by_uuid(request, uuid):
-    object_find = get_object_or_404(ObjectFind, id=uuid)
+def find_by_uuid(request, object_id):
+    object_find = get_object_or_404(ObjectFind, id=object_id)
     context = {
         "hemisphere": object_find.utm_hemisphere,
         "zone": object_find.utm_zone,
