@@ -1,5 +1,8 @@
-# ASLCV API Documentation
-items in curly brackets {} indicate a value should be provided
+# ASLCV REST API Documentation
+Items in curly brackets {} indicate a value should be provided.
+
+Look at the tests in [test_local.py](./main/test_local.py) for more examples of how to use the endpoints.
+
 
 ## Spatial Areas
 ### /asl/api/area/ 
@@ -11,7 +14,7 @@ GET list all SpatialAreas with hemisphere "N or S"
 ### /asl/api/area/{utm_hemisphere}/{utm_zone}/ 
 GET list all SpatialAreas with hemisphere "N or S" and zone
 
-### /asl/api/area/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters/
+### /asl/api/area/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/
 GET list all SpatialAreas with hemisphere "N or S" and Zone and easting
 
 ### /asl/api/area/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_nothing_meters}/
@@ -57,7 +60,20 @@ GET list all finds for context
 GET object find detail
 
 ### /asl/api/find/{uuid}/photo/
-PUT upload object find photo
+PUT or POST to upload object find photo
+This endpoint expects the photo to be in the FILES dictionary of the request with the key "photo".
+For example:
+```
+def upload_find_photo(obj_id, photo_path, headers):
+  # obj_id is the uuid of the ObjectFind associated with the photo
+  r = requests.put(f"/asl/api/find/{obj_id}/photo/", 
+                   headers=headers,
+                   files={"photo": open(photo_path, "rb")})
+  return r
+```
+
+GET from this endpoint to retrieve a list of all the photos associated with the ObjectFind with uuid
+
 
 ## Paths
 ### /asl/api/path/

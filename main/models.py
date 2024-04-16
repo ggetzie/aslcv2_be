@@ -15,6 +15,32 @@ def utc_now():
     return datetime.datetime.now(tz=datetime.timezone.utc)
 
 
+def build_findphoto_path(find_obj):
+    """Build the path to the subfolder where photos associated with a find are stored
+
+    Args:
+        find_obj (ObjectFind or FindPhoto): An associated object either the ObjectFind itself or one of its FindPhotos
+        needs to have the following attributes:
+            utm_hemisphere (str): "N" or "S"
+            utm_zone (int): UTM zone number
+            area_utm_easting_meters (int): Easting in meters
+            area_utm_northing_meters (int): Northing in meters
+            context_number (int): Context number
+            find_number (int): Find number
+
+    Returns:
+        str: the subfolder under settings.MEDIA_ROOT
+    """
+    sub_root = (
+        f"{find_obj.utm_hemisphere}/"
+        f"{find_obj.utm_zone}/"
+        f"{find_obj.area_utm_easting_meters}/"
+        f"{find_obj.area_utm_northing_meters}/"
+        f"{find_obj.context_number}"
+    )
+    return f"{sub_root}/finds/individual/{find_obj.find_number}/photos"
+
+
 class SpatialArea(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     utm_hemisphere = models.CharField(
@@ -323,6 +349,10 @@ class ObjectFind(models.Model):
             find_number=self.find_number,
         )
 
+    def findphoto_folder(self):
+        # folder is under MEDIA_ROOT
+        return build_findphoto_path(self)
+
 
 class MaterialCategory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -341,7 +371,7 @@ class MaterialCategory(models.Model):
 
 def get_photo_filename(subfolder, extension):
     """
-    Name photos by sequential numbers in the context folder
+    Name photos by sequential numbers according to extension
     e.g. 1.jpg, 2.jpg, 3.jpg, etc.
     """
     full_path = pathlib.Path(settings.MEDIA_ROOT) / subfolder
@@ -486,8 +516,21 @@ class BagPhoto(models.Model):
         return self.photo.name
 
 
+def get_findphoto_folder(instance: models.Model, filename: str) -> str:
+    subfolder = instance.subfolder
+    extension = filename.rsplit(".", maxsplit=1)[-1]
+    extension = extension.lower()
+    if extension == "jpeg":
+        extension = "jpg"
+    folder_path = pathlib.Path(settings.MEDIA_ROOT) / subfolder
+    folder_path.mkdir(parents=True, exist_ok=True)
+    new_filename = get_photo_filename(subfolder, extension)
+
+    return f"{subfolder}/{new_filename}"
+
+
 class FindPhoto(models.Model):
-    extension = "cr3"
+    # extension = "cr3"
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     utm_hemisphere = models.CharField(
         "UTM Hemisphere", max_length=1, choices=[("N", "North"), ("S", "South")]
@@ -498,23 +541,13 @@ class FindPhoto(models.Model):
 
     context_number = models.IntegerField("Context Number")
     find_number = models.IntegerField("Find Number")
-    photo = models.FileField(upload_to=get_context_folder)
+    photo = models.FileField(upload_to=get_findphoto_folder)
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created = models.DateTimeField("Created", default=utc_now)
 
     @property
     def subfolder(self):
-        """
-        Build the path to the folder where photos will be stored
-        """
-        sub_root = (
-            f"{self.utm_hemisphere}/"
-            f"{self.utm_zone}/"
-            f"{self.area_utm_easting_meters}/"
-            f"{self.area_utm_northing_meters}/"
-            f"{self.context_number}"
-        )
-        return f"{sub_root}/finds/individual/{self.find_number}/photos"
+        return build_findphoto_path(self)
 
     class Meta:
         db_table = "find_photos"

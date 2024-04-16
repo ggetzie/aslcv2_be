@@ -31,10 +31,19 @@ from main.models import (
     BagPhoto,
     FindPhoto,
 )
+import test_helpers as th
+
+
+class RunningTestInProduction(Exception):
+    pass
+
+
+if not settings.DEBUG:
+    raise RunningTestInProduction("Tests must be run in DEBUG mode")
 
 headers = utils.get_test_header()
 base_url = "http://127.0.0.1:8000"
-PHOTO_DIR = "/mnt/c/Users/gabe/OneDrive - The University of Hong Kong/Pictures"
+PHOTO_DIR = settings.TEST_PHOTOS_DIR
 
 # SpatialArea: N-38-478130-4419430
 test_utm_hemisphere = "N"
@@ -287,9 +296,9 @@ def test_bagphoto_upload():
 
 def test_findphoto_upload():
     find = random.choice(all_obj)
+    photo_path = th.get_test_photo()
     url = base_url + reverse("api:objectfind_photo", args=[find.id])
-    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}/*.jpg"))
-    r = requests.put(url, headers=headers, files={"photo": open(photo_path, "rb")})
+    r = th.upload_find_photo(url, headers, photo_path)
     assert r.status_code == 201
     p = FindPhoto.objects.get(id=r.json()["id"])
     assert pathlib.Path(p.photo.path).exists()

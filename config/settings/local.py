@@ -48,3 +48,4 @@ INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
 # ------------------------------------------------------------------------------
 TEST_USER_PW = env("TEST_USER_PW")
 TEST_USERNAME = env("TEST_USERNAME")
+TEST_PHOTOS_DIR = env("TEST_PHOTOS_DIR")
