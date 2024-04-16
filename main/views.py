@@ -249,27 +249,6 @@ class ObjectFindList(ListCreateAPIView):
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # required_fields = [
-        #     "utm_hemisphere",
-        #     "utm_zone",
-        #     "area_utm_easting_meters",
-        #     "area_utm_northing_meters",
-        #     "context_number",
-        # ]
-        # errmsg = ""
-        # if all([f in request.data for f in required_fields]):
-        #     new_find = ObjectFind(**request.data)
-        #     try:
-        #         new_find.save()
-        #         serializer = ObjectFindSerializer(new_find)
-        #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-        #     except IntegrityError as e:
-        #         print(e)
-        #         errmsg = "Invalid Data"
-        #         return Response({"error": errmsg}, status=status.HTTP_400_BAD_REQUEST)
-        # else:
-        #     errmsg = "Missing required fields"
-        #     return Response({"error", errmsg}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ObjectFindDetail(APIView):
