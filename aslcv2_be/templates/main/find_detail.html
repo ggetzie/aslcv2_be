@@ -1,4 +1,5 @@
 {% extends "base.html" %} 
+{% load main_extras %}
 
 {% block content %}
 <h1>Spatial Context {{ spatial_context.context_number }} Find {{ find.find_number }}</h1>
@@ -32,16 +33,14 @@
   <p>{{ find.director_notes|default:"No director notes."}}</p>
 </div>
 
-<h2 class="mt-5 mb-3">Find Photos</h2>
-<div class="row">
-    {% for photo in find.findphoto_set.all %}
-    <div class="col-md-3">
-      <a href="{{ photo.photo.url }}">{{ photo.get_filename }}</a>
-    </div>
-    {% if forloop.counter|divisibleby:4 %}</div><div class="row">{% endif %}
-    {% empty %}
-    <div class="col-md-3"><p>No Find Photos</p></div>
-    {% endfor %}
-</div>
+<h2 class="mt-5 mb-3">Files found in {{ find.findphoto_folder}} </h2>
+<ul>
+  {% for url in find.list_file_urls_from_photo_folder %}
+    <li><a href="{{ url }}">{{ url|stem }}</a></li>
+  {% empty %}
+    <li>No files found in {{ find.findphoto_folder }}</li>
+  {% endfor %}
+</ul>
+
 
 {% endblock content %}

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from main.utils import get_next_photo_number
+from main.utils import PHOTO_EXTENSIONS, get_next_photo_number
 
 User = get_user_model()
 
@@ -38,7 +38,7 @@ def build_findphoto_path(find_obj):
         f"{find_obj.area_utm_northing_meters}/"
         f"{find_obj.context_number}"
     )
-    return f"{sub_root}/finds/individual/{find_obj.find_number}/photos"
+    return f"{sub_root}/finds/individual/{find_obj.find_number}/photo"
 
 
 class SpatialArea(models.Model):
@@ -349,9 +349,31 @@ class ObjectFind(models.Model):
             find_number=self.find_number,
         )
 
+    @property
     def findphoto_folder(self):
         # folder is under MEDIA_ROOT
         return build_findphoto_path(self)
+
+    def list_files_photo_folder(self):
+        """List all photos associated with this find from the filesystem
+
+        Returns:
+            list: A list of pathlib.Path objects
+        """
+        folder = pathlib.Path(settings.MEDIA_ROOT) / self.findphoto_folder
+        if not folder.exists():
+            return []
+        files = sorted(
+            list([f for f in folder.iterdir() if not f.is_dir()]),
+            key=lambda f: (f.suffix, f.stem),
+        )
+        return files
+
+    def list_file_urls_from_photo_folder(self):
+        files = self.list_files_photo_folder()
+        folder = self.findphoto_folder
+        urls = [f"{settings.MEDIA_URL}{folder}/{f.name}" for f in files]
+        return urls
 
 
 class MaterialCategory(models.Model):
@@ -545,10 +567,6 @@ class FindPhoto(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created = models.DateTimeField("Created", default=utc_now)
 
-    @property
-    def subfolder(self):
-        return build_findphoto_path(self)
-
     class Meta:
         db_table = "find_photos"
         verbose_name = "Find Photo"
@@ -560,6 +578,21 @@ class FindPhoto(models.Model):
     def get_filename(self):
         p = pathlib.Path(self.photo.path)
         return p.name
+
+    @property
+    def subfolder(self):
+        return build_findphoto_path(self)
+
+    @property
+    def object_find(self):
+        return ObjectFind.objects.get(
+            utm_hemisphere=self.utm_hemisphere,
+            utm_zone=self.utm_zone,
+            area_utm_easting_meters=self.area_utm_easting_meters,
+            area_utm_northing_meters=self.area_utm_northing_meters,
+            context_number=self.context_number,
+            find_number=self.find_number,
+        )
 
 
 class ActionLog(models.Model):
