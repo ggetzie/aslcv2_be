@@ -1,4 +1,4 @@
-from django.db import IntegrityError
+import json
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -329,6 +329,11 @@ class FindPhotoUpload(APIView):
         ser = FindPhotoSerializer(fp)
         return Response(ser.data, status=status.HTTP_201_CREATED)
 
+    def get(self, request, find_id, format=None):
+        obj = ObjectFind.objects.get(id=find_id)
+        photo_urls = obj.list_file_urls_from_photo_folder()
+        return Response(photo_urls, status=status.HTTP_200_OK)
+
 
 class AreaTypeList(ListAPIView):
     model = AreaType
@@ -529,7 +534,10 @@ def home_page(request):
     distinct_context_finds = ObjectFind.objects.order_by(*hzenc).distinct(*hzenc)
     distinct_context_photos = ContextPhoto.objects.order_by(*hzenc).distinct(*hzenc)
     distinct_bag_photos = BagPhoto.objects.order_by(*hzenc).distinct(*hzenc)
-    distinct_find_photos = FindPhoto.objects.order_by(*hzencf).distinct(*hzencf)
+    # distinct_find_photos = FindPhoto.objects.order_by(*hzencf).distinct(*hzencf)
+    distinct_find_photos = [
+        of for of in ObjectFind.objects.all() if of.list_files_photo_folder()
+    ]
 
     return render(
         request,

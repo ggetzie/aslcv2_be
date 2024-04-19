@@ -42,3 +42,21 @@ $red: #b94a48;
 details > summary {
   font-size: 1.75em;
 }
+
+footer {
+  border-top: 1px solid #e7e7e7;
+  padding: 10px 0;
+  text-align: center;
+  height: 40px;
+}
+
+footer a {
+  color: #333;
+  font-size: 0.7em;
+
+}
+
+main {
+  min-height: calc(100vh - 100px);
+  padding-bottom: 10px;
+}

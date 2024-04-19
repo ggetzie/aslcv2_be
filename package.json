@@ -1,7 +1,6 @@
 {
   "name": "aslcv2_be",
   "version": "0.1.0",
-  "dependencies": {},
   "devDependencies": {
     "autoprefixer": "^9.4.7",
     "bootstrap": "4.3.1",
@@ -13,11 +12,12 @@
     "gulp-plumber": "^1.2.1",
     "gulp-postcss": "^8.0.0",
     "gulp-rename": "^1.2.2",
-    "gulp-sass": "^4.0.2",
+    "gulp-sass": "^5.1.0",
     "gulp-uglify-es": "^1.0.4",
     "jquery": "^3.5.1",
     "pixrem": "^5.0.0",
-    "popper.js": "1.14.3"
+    "popper.js": "1.14.3",
+    "sass": "^1.75.0"
   },
   "engines": {
     "node": ">=8"

@@ -385,13 +385,3 @@ def test_all():
     test_objectfind_detail()
     test_mc_list()
     test_findphoto_upload()
-
-
-def get_all_finds(url, headers):
-    all_finds = []
-    r = requests.get(url, headers=headers)
-    all_finds.extend(r.json()["results"])
-    while r.json()["next"]:
-        r = requests.get(r.json()["next"], headers=headers)
-        all_finds.extend(r.json()["results"])
-    return all_finds
