@@ -31,7 +31,7 @@ from main.models import (
     BagPhoto,
     FindPhoto,
 )
-import test_helpers as th
+import main.test_helpers as th
 
 
 class RunningTestInProduction(Exception):
@@ -44,6 +44,7 @@ if not settings.DEBUG:
 headers = utils.get_test_header()
 base_url = "http://127.0.0.1:8000"
 PHOTO_DIR = settings.TEST_PHOTOS_DIR
+client = th.TestClient()
 
 # SpatialArea: N-38-478130-4419430
 test_utm_hemisphere = "N"
@@ -279,7 +280,7 @@ def test_contextphoto_upload():
 
 
 def test_bagphoto_upload():
-    sc = random.choice(SpatialContext.objects.all())
+    sc = SpatialContext.objects.order_by("?").first()
     url = base_url + reverse("api:spatialcontext_bagphoto", args=[sc.id])
     photo_path = random.choice(glob.glob(f"{PHOTO_DIR}/*.jpg"))
     r = requests.put(
@@ -295,14 +296,26 @@ def test_bagphoto_upload():
 
 
 def test_findphoto_upload():
-    find = random.choice(all_obj)
+    objFind = ObjectFind.objects.order_by("?").first()
     photo_path = th.get_test_photo()
-    url = base_url + reverse("api:objectfind_photo", args=[find.id])
-    r = th.upload_find_photo(url, headers, photo_path)
+    url = reverse("api:objectfind_photo", args=[objFind.id])
+    r = client.put(url, data=None, files={"photo": open(photo_path, "rb")})
+    # r = th.upload_find_photo(url, headers, photo_path)
     assert r.status_code == 201
     p = FindPhoto.objects.get(id=r.json()["id"])
     assert pathlib.Path(p.photo.path).exists()
     print("Find Photo Upload OK")
+
+
+def test_findphoto_list():
+    objFind = th.get_random_find_with_photos()
+    url = reverse("api:objectfind_photo", args=[objFind.id])
+    r = client.get(url)
+    assert r.status_code == 200
+    for p in r.json():
+        fp = pathlib.Path(settings.MEDIA_ROOT) / p.replace(settings.MEDIA_URL, "")
+        assert fp.exists()
+    print("Find Photo List OK")
 
 
 def test_objectfind():
