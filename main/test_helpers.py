@@ -41,8 +41,8 @@ def upload_find_photo(url, headers, photo_path):
     return r
 
 
-def get_test_photo(photo_dir=settings.TEST_PHOTOS_DIR):
-    return random.choice(glob.glob(f"{photo_dir}/*.jpg"))
+def get_test_photo(photo_dir=settings.TEST_PHOTOS_DIR, extension=".jpg"):
+    return random.choice(glob.glob(f"{photo_dir}/*{extension}"))
 
 
 class TestClient:

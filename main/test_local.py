@@ -30,6 +30,7 @@ from main.models import (
     ContextPhoto,
     BagPhoto,
     FindPhoto,
+    get_next_photo_number,
 )
 import main.test_helpers as th
 
@@ -41,9 +42,6 @@ class RunningTestInProduction(Exception):
 if not settings.DEBUG:
     raise RunningTestInProduction("Tests must be run in DEBUG mode")
 
-headers = utils.get_test_header()
-base_url = "http://127.0.0.1:8000"
-PHOTO_DIR = settings.TEST_PHOTOS_DIR
 client = th.TestClient()
 
 # SpatialArea: N-38-478130-4419430
@@ -62,89 +60,58 @@ hzen = [
 test_context_number = 1
 hzenc = hzen + [test_context_number]
 
-all_sa = SpatialArea.objects.all()
-sa_h = SpatialArea.objects.filter(utm_hemisphere=test_utm_hemisphere)
-sa_hz = SpatialArea.objects.filter(
-    utm_hemisphere=test_utm_hemisphere, utm_zone=test_utm_zone
-)
-sa_hze = SpatialArea.objects.filter(
-    utm_hemisphere=test_utm_hemisphere,
-    utm_zone=test_utm_zone,
-    area_utm_easting_meters=test_area_utm_easting_meters,
-)
-
-sa_hzen = SpatialArea.objects.filter(
-    utm_hemisphere=test_utm_hemisphere,
-    utm_zone=test_utm_zone,
-    area_utm_easting_meters=test_area_utm_easting_meters,
-    area_utm_northing_meters=test_area_utm_northing_meters,
-)
-
-all_sc = SpatialContext.objects.all()
-
-sc_hzen = SpatialContext.objects.filter(
-    utm_hemisphere=test_utm_hemisphere,
-    utm_zone=test_utm_zone,
-    area_utm_easting_meters=test_area_utm_easting_meters,
-    area_utm_northing_meters=test_area_utm_northing_meters,
-)
-
-all_obj = ObjectFind.objects.all()
-
-obj_hzenc = ObjectFind.objects.filter(
-    utm_hemisphere=test_utm_hemisphere,
-    utm_zone=test_utm_zone,
-    area_utm_easting_meters=test_area_utm_easting_meters,
-    area_utm_northing_meters=test_area_utm_northing_meters,
-    context_number=test_context_number,
-)
-
 
 def test_area():
-    r = requests.get(base_url + reverse("api:spatialarea_list"), headers=headers)
+    r = client.get(reverse("api:spatialarea_list"))
     assert r.status_code == 200
-    assert all_sa.count() == len(r.json())
+    assert SpatialArea.objects.count() == len(r.json())
     print("SpatialArea List OK")
 
-    r = requests.get(
-        base_url + reverse("api:spatialarea_list_h", args=[test_utm_hemisphere]),
-        headers=headers,
-    )
+    r = client.get(reverse("api:spatialarea_list_h", args=[test_utm_hemisphere]))
     assert r.status_code == 200
-    assert sa_h.count() == len(r.json())
+    assert SpatialArea.objects.filter(
+        utm_hemisphere=test_utm_hemisphere
+    ).count() == len(r.json())
     print("SpatialArea List Hemisphere OK")
 
-    url404 = (
-        base_url + reverse("api:spatialarea_list_h", args=[test_utm_hemisphere])
-    ).replace("/N/", "/Q/")
-    r = requests.get(url404, headers=headers)
+    url404 = reverse("api:spatialarea_list_h", args=[test_utm_hemisphere]).replace(
+        "/N/", "/Q/"
+    )
+    r = client.get(url404)
     assert r.status_code == 404
     print("SpatialArea List Hemisphere 404 OK")
 
-    r = requests.get(
-        base_url
-        + reverse("api:spatialarea_list_hz", args=[test_utm_hemisphere, test_utm_zone]),
-        headers=headers,
+    r = client.get(
+        reverse("api:spatialarea_list_hz", args=[test_utm_hemisphere, test_utm_zone])
     )
     assert r.status_code == 200
-    assert sa_hz.count() == len(r.json())
+    assert (
+        len(r.json())
+        == SpatialArea.objects.filter(
+            utm_hemisphere=test_utm_hemisphere, utm_zone=test_utm_zone
+        ).count()
+    )
     print("SpatialArea List Hemisphere Zone OK")
 
-    r = requests.get(
-        base_url
-        + reverse(
+    r = client.get(
+        reverse(
             "api:spatialarea_list_hze",
             args=[test_utm_hemisphere, test_utm_zone, test_area_utm_easting_meters],
-        ),
-        headers=headers,
+        )
     )
     assert r.status_code == 200
-    assert sa_hze.count() == len(r.json())
+    assert (
+        len(r.json())
+        == SpatialArea.objects.filter(
+            utm_hemisphere=test_utm_hemisphere,
+            utm_zone=test_utm_zone,
+            area_utm_easting_meters=test_area_utm_easting_meters,
+        ).count()
+    )
     print("SpatialArea List Hemisphere Zone Easting OK")
 
-    r = requests.get(
-        base_url
-        + reverse(
+    r = client.get(
+        reverse(
             "api:spatialarea_list_hzen",
             args=[
                 test_utm_hemisphere,
@@ -152,33 +119,37 @@ def test_area():
                 test_area_utm_easting_meters,
                 test_area_utm_northing_meters,
             ],
-        ),
-        headers=headers,
+        )
     )
     assert r.status_code == 200
-    assert sa_hzen.count() == len(r.json())
+    assert (
+        len(r.json())
+        == SpatialArea.objects.filter(
+            utm_hemisphere=test_utm_hemisphere,
+            utm_zone=test_utm_zone,
+            area_utm_easting_meters=test_area_utm_easting_meters,
+            area_utm_northing_meters=test_area_utm_northing_meters,
+        ).count()
+    )
     print("SpatialArea List Hemisphere Zone Easting Northing OK")
 
-    r = requests.get(
-        base_url + reverse("api:spatialarea_detail", args=[sa_hzen[0].id]),
-        headers=headers,
-    )
+    sa = SpatialArea.objects.order_by("?").first()
+    r = client.get(reverse("api:spatialarea_detail", args=[sa.id]))
     assert r.status_code == 200
-    assert r.json()["id"] == str(sa_hzen[0].id)
+    assert r.json()["id"] == str(sa.id)
     print("SpatialArea Detail by uuid OK")
 
 
 def test_context():
     # test list all spatial contexts
-    r = requests.get(base_url + reverse("api:spatialcontext_list"), headers=headers)
+    r = client.get(reverse("api:spatialcontext_list"))
     assert r.status_code == 200
-    assert all_sc.count() == len(r.json())
+    assert SpatialContext.objects.count() == len(r.json())
     print("List all SpatialContext OK")
 
     # test filtered list of spatial context
-    r = requests.get(
-        base_url
-        + reverse(
+    r = client.get(
+        reverse(
             "api:spatialcontext_list_hzen",
             args=[
                 test_utm_hemisphere,
@@ -186,12 +157,19 @@ def test_context():
                 test_area_utm_easting_meters,
                 test_area_utm_northing_meters,
             ],
-        ),
-        headers=headers,
+        )
     )
 
     assert r.status_code == 200
-    assert sc_hzen.count() == len(r.json())
+    assert (
+        len(r.json())
+        == SpatialContext.objects.filter(
+            utm_hemisphere=test_utm_hemisphere,
+            utm_zone=test_utm_zone,
+            area_utm_easting_meters=test_area_utm_easting_meters,
+            area_utm_northing_meters=test_area_utm_northing_meters,
+        ).count()
+    )
     print("List all SpatialContext Filter URL OK")
 
     # test create new spatial context
@@ -213,9 +191,7 @@ def test_context():
         or 0
     )
 
-    r = requests.post(
-        base_url + reverse("api:spatialcontext_list"), headers=headers, data=data
-    )
+    r = client.post(reverse("api:spatialcontext_list"), data=data)
     assert r.status_code == 201
     assert r.json()["context_number"] == (old_max + 1)
     sc = SpatialContext.objects.get(id=r.json()["id"])
@@ -224,9 +200,7 @@ def test_context():
 
     # test get spatial context by uuid
     sc = SpatialContext.objects.order_by("?").first()
-    r = requests.get(
-        base_url + reverse("api:spatialcontext_detail", args=[sc.id]), headers=headers
-    )
+    r = client.get(reverse("api:spatialcontext_detail", args=[sc.id]))
     assert r.status_code == 200
     assert r.json()["id"] == str(sc.id)
     print(f"SpatialContext Detail OK")
@@ -234,9 +208,8 @@ def test_context():
     # test edit spatial context
     sc = SpatialContext.objects.filter(opening_date__isnull=True).order_by("?").first()
     data = {"opening_date": datetime.date.today()}
-    r = requests.put(
-        base_url + reverse("api:spatialcontext_detail", args=[sc.id]),
-        headers=headers,
+    r = client.put(
+        reverse("api:spatialcontext_detail", args=[sc.id]),
         data=data,
     )
     assert r.status_code == 200
@@ -244,11 +217,11 @@ def test_context():
     assert sc.opening_date == datetime.date.today()
     sc.opening_date = None
     sc.save()
-    print("SpatialContext edit OK")
+    print("SpatialContext Edit OK")
 
 
 def test_types():
-    r = requests.get(base_url + reverse("api:spatialarea_types"), headers=headers)
+    r = client.get(reverse("api:spatialarea_types"))
     assert r.status_code == 200
     area_types = AreaType.objects.all()
     res = {i["type"] for i in r.json()}
@@ -256,7 +229,7 @@ def test_types():
         assert at.type in res
     print("Spatial Area Types List OK")
 
-    r = requests.get(base_url + reverse("api:spatialcontext_types"), headers=headers)
+    r = client.get(reverse("api:spatialcontext_types"))
     assert r.status_code == 200
     context_types = ContextType.objects.all()
     res = {i["type"] for i in r.json()}
@@ -266,13 +239,10 @@ def test_types():
 
 
 def test_contextphoto_upload():
-    sc = random.choice(SpatialContext.objects.all())
-    url = base_url + reverse("api:spatialcontext_photo", args=[sc.id])
-    print(url)
-    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}/*.jpg"))
-    print(photo_path)
-
-    r = requests.put(url, headers=headers, files={"photo": open(photo_path, "rb")})
+    sc = SpatialContext.objects.order_by("?").first()
+    url = reverse("api:spatialcontext_photo", args=[sc.id])
+    photo_path = th.get_test_photo()
+    r = client.put(url, data={}, files={"photo": open(photo_path, "rb")})
     assert r.status_code == 201
     p = ContextPhoto.objects.get(id=r.json()["id"])
     assert pathlib.Path(p.photo.path).exists()
@@ -281,12 +251,11 @@ def test_contextphoto_upload():
 
 def test_bagphoto_upload():
     sc = SpatialContext.objects.order_by("?").first()
-    url = base_url + reverse("api:spatialcontext_bagphoto", args=[sc.id])
-    photo_path = random.choice(glob.glob(f"{PHOTO_DIR}/*.jpg"))
-    r = requests.put(
+    url = reverse("api:spatialcontext_bagphoto", args=[sc.id])
+    photo_path = th.get_test_photo()
+    r = client.put(
         url,
         data={"source": random.choice(("F", "D"))},
-        headers=headers,
         files={"photo": open(photo_path, "rb")},
     )
     assert r.status_code == 201
@@ -300,11 +269,28 @@ def test_findphoto_upload():
     photo_path = th.get_test_photo()
     url = reverse("api:objectfind_photo", args=[objFind.id])
     r = client.put(url, data=None, files={"photo": open(photo_path, "rb")})
-    # r = th.upload_find_photo(url, headers, photo_path)
     assert r.status_code == 201
     p = FindPhoto.objects.get(id=r.json()["id"])
     assert pathlib.Path(p.photo.path).exists()
     print("Find Photo Upload OK")
+
+
+def test_multiple_findphoto_upload():
+    objFind = ObjectFind.objects.order_by("?").first()
+    extension = ".jpg"
+    photo_folder = pathlib.Path(settings.MEDIA_ROOT) / objFind.findphoto_folder
+    largest = max([int(p.stem) for p in photo_folder.glob(f"*{extension}")], default=0)
+    expected_1 = f"{largest + 1}{extension}"
+    expected_2 = f"{largest + 2}{extension}"
+    photo_paths = [th.get_test_photo() for _ in range(2)]
+    url = reverse("api:objectfind_photo", args=[objFind.id])
+    r = client.put(url, data=None, files={"photo": open(photo_paths[0], "rb")})
+    assert r.status_code == 201
+    assert pathlib.Path(photo_folder / expected_1).exists()
+    r = client.put(url, data=None, files={"photo": open(photo_paths[1], "rb")})
+    assert r.status_code == 201
+    assert pathlib.Path(photo_folder / expected_2).exists()
+    print("Multiple Find Photo Upload OK")
 
 
 def test_findphoto_list():
@@ -320,28 +306,31 @@ def test_findphoto_list():
 
 def test_objectfind():
     # test get all object finds
-    all_obj_url = base_url + reverse("api:objectfind_list")
-    r = requests.get(all_obj_url, headers=headers)
+    all_obj_url = reverse("api:objectfind_list")
+    r = client.get(all_obj_url)
     assert r.status_code == 200
     data = r.json()
-    assert all_obj.count() == data["count"]
+    assert ObjectFind.objects.count() == data["count"]
     print("List all ObjectFinds OK")
 
     # test filter object finds by hzenc
-    hzenc_url = base_url + reverse(
+    hzenc_url = reverse(
         "api:objectfind_list_hzenc",
-        args=[
-            test_utm_hemisphere,
-            test_utm_zone,
-            test_area_utm_easting_meters,
-            test_area_utm_northing_meters,
-            test_context_number,
-        ],
+        args=hzenc,
     )
-    r = requests.get(hzenc_url, headers=headers)
-    data = r.json()
+    r = client.get(hzenc_url)
+    received = r.json()
     assert r.status_code == 200
-    assert obj_hzenc.count() == data["count"]
+    assert (
+        received["count"]
+        == ObjectFind.objects.filter(
+            utm_hemisphere=test_utm_hemisphere,
+            utm_zone=test_utm_zone,
+            area_utm_easting_meters=test_area_utm_easting_meters,
+            area_utm_northing_meters=test_area_utm_northing_meters,
+            context_number=test_context_number,
+        ).count()
+    )
     print("Filter ObjectFinds list OK")
 
     # test creating new find
@@ -355,16 +344,15 @@ def test_objectfind():
         "category": "rim",
         "weight_grams": "21332.65",
     }
-    r = requests.post(all_obj_url, data, headers=headers)
-    print(r.status_code)
+    r = client.post(all_obj_url, data)
     assert r.status_code == 201
     print("Create ObjectFind OK")
 
 
 def test_objectfind_detail():
-    obj = random.choice(all_obj)
-    url = base_url + reverse("api:objectfind_detail", args=[obj.id])
-    r = requests.get(url, headers=headers)
+    obj = ObjectFind.objects.order_by("?").first()
+    url = reverse("api:objectfind_detail", args=[obj.id])
+    r = client.get(url)
     assert r.status_code == 200
     data = r.json()
     assert str(obj.id) == data["id"]
@@ -372,7 +360,7 @@ def test_objectfind_detail():
 
     new_note = obj.director_notes + " edited" if obj.director_notes else "edited"
     data = {"director_notes": new_note, "weight_grams": "99999.69"}
-    r = requests.put(url, data=data, headers=headers)
+    r = client.put(url, data=data)
     assert r.status_code == 200
     assert r.json()["director_notes"] == new_note
     assert r.json()["weight_grams"] == data["weight_grams"]
@@ -381,8 +369,8 @@ def test_objectfind_detail():
 
 def test_mc_list():
     mcs = MaterialCategory.objects.all()
-    url = base_url + reverse("api:materialcategory_list")
-    r = requests.get(url, headers=headers)
+    url = reverse("api:materialcategory_list")
+    r = client.get(url)
     assert r.status_code == 200
     assert mcs.count() == len(r.json())
     print("Material Category list OK")
@@ -398,3 +386,4 @@ def test_all():
     test_objectfind_detail()
     test_mc_list()
     test_findphoto_upload()
+    test_multiple_findphoto_upload()
