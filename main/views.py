@@ -1,7 +1,9 @@
-import json
+import pathlib
+from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -308,31 +310,41 @@ class FindPhotoUpload(APIView):
         return Response(ser.data, status=status.HTTP_201_CREATED)
 
     def post(self, request, find_id, format=None):
-        obj = ObjectFind.objects.get(id=find_id)
-        fp = FindPhoto(
-            user=request.user,
-            utm_hemisphere=obj.utm_hemisphere,
-            utm_zone=obj.utm_zone,
-            area_utm_easting_meters=obj.area_utm_easting_meters,
-            area_utm_northing_meters=obj.area_utm_northing_meters,
-            context_number=obj.context_number,
-            find_number=obj.find_number,
-            photo=request.FILES["photo"],
-        )
-        fp.save()
-        _ = ActionLog.objects.create(
-            user=request.user,
-            model_name=FindPhoto._meta.verbose_name,
-            action="C",
-            object_id=fp.id,
-        )
-        ser = FindPhotoSerializer(fp)
-        return Response(ser.data, status=status.HTTP_201_CREATED)
+        return self.put(request, find_id=find_id, format=format)
 
     def get(self, request, find_id, format=None):
         obj = ObjectFind.objects.get(id=find_id)
         photo_urls = obj.list_file_urls_from_photo_folder()
         return Response(photo_urls, status=status.HTTP_200_OK)
+
+
+class FindPhotoReplace(APIView):
+    def put(self, request, find_id, format=None):
+        obj = ObjectFind.objects.get(id=find_id)
+        try:
+            filename = request.data["filename"]
+        except KeyError:
+            return Response(
+                {"error": " No filename provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        filepath = obj.absolute_findphoto_folder / filename
+        if not filepath.exists():
+            upload_url = reverse("api:objectfind_photo", args=[find_id])
+            msg = f"{filename} not found in {obj.findphoto_folder} use PUT to {upload_url} to upload a new photo."
+            return Response({"error": msg}, status=status.HTTP_404_NOT_FOUND)
+        print(request.FILES["photo"])
+        filepath.write_bytes(request.FILES["photo"].read())
+
+        _ = ActionLog.objects.create(
+            user=request.user,
+            model_name=ObjectFind._meta.verbose_name,
+            action="U",
+            object_id=obj.id,
+        )
+        return Response(
+            {"message": f"{filename} replaced in {obj.findphoto_folder}"},
+            status=status.HTTP_200_OK,
+        )
 
 
 class AreaTypeList(ListAPIView):

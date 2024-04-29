@@ -1,5 +1,7 @@
-import random
 import glob
+import hashlib
+import pathlib
+import random
 import requests
 from django.conf import settings
 from main.models import (
@@ -29,11 +31,15 @@ def get_random_object_find():
     return ObjectFind.objects.order_by("?").first()
 
 
-def get_random_find_with_photos():
+def get_random_find_with_photos(extension=None):
     for find in ObjectFind.objects.order_by("?"):
-        if find.list_files_photo_folder():
+        if find.list_files_photo_folder(extension=extension):
             return find
     raise NoPhotosFound("No photos found in any find")
+
+
+def get_file_hash(file_path: pathlib.Path):
+    return hashlib.sha256(file_path.read_bytes()).hexdigest()
 
 
 def upload_find_photo(url, headers, photo_path):
@@ -41,8 +47,13 @@ def upload_find_photo(url, headers, photo_path):
     return r
 
 
-def get_test_photo(photo_dir=settings.TEST_PHOTOS_DIR, extension=".jpg"):
-    return random.choice(glob.glob(f"{photo_dir}/*{extension}"))
+def get_test_photo(
+    photo_dir=settings.TEST_PHOTOS_DIR, extension=".jpg", hash_is_not=None
+):
+    options = list(pathlib.Path(photo_dir).glob(f"*{extension}"))
+    if hash_is_not:
+        options = [p for p in options if get_file_hash(p) != hash_is_not]
+    return random.choice(options)
 
 
 class TestClient:

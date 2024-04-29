@@ -109,6 +109,11 @@ find_urls = [
         views.FindPhotoUpload.as_view(),
         name="objectfind_photo",
     ),
+    path(
+        "<uuid:find_id>/photo/replace",
+        views.FindPhotoReplace.as_view(),
+        name="objectfind_photo_replace",
+    ),
 ]
 
 path_urls = [

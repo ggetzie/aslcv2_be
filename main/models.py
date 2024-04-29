@@ -354,8 +354,14 @@ class ObjectFind(models.Model):
         # folder is under MEDIA_ROOT
         return build_findphoto_path(self)
 
-    def list_files_photo_folder(self):
+    @property
+    def absolute_findphoto_folder(self):
+        return pathlib.Path(settings.MEDIA_ROOT) / self.findphoto_folder
+
+    def list_files_photo_folder(self, extension=None):
         """List all photos associated with this find from the filesystem
+        optionally filtered by extension such as ".jpg".
+        Filtering is case-insensitive and must include the leading period.
 
         Returns:
             list: A list of pathlib.Path objects
@@ -367,6 +373,8 @@ class ObjectFind(models.Model):
             list([f for f in folder.iterdir() if not f.is_dir()]),
             key=lambda f: (f.suffix, f.stem),
         )
+        if extension:
+            files = [f for f in files if f.suffix.lower() == extension.lower()]
         return files
 
     def list_file_urls_from_photo_folder(self):

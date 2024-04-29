@@ -9,7 +9,6 @@ TODO: fix that
 """
 
 import datetime
-import glob
 import pathlib
 import random
 
@@ -302,6 +301,43 @@ def test_findphoto_list():
         fp = pathlib.Path(settings.MEDIA_ROOT) / p.replace(settings.MEDIA_URL, "")
         assert fp.exists()
     print("Find Photo List OK")
+
+
+def test_findphoto_replace(find_id=None, filename=None):
+    objFind = (
+        th.get_random_find_with_photos(extension=".jpg")
+        if not find_id
+        else ObjectFind.objects.get(id=find_id)
+    )
+
+    # test happy path - replace a photo with a new one
+    old_photo_path = (
+        random.choice(objFind.list_files_photo_folder(extension=".jpg"))
+        if not filename
+        else objFind.absolute_findphoto_folder / filename
+    )
+    assert old_photo_path.exists()
+    old_hash = th.get_file_hash(old_photo_path)
+    filename = old_photo_path.name
+
+    new_photo_path = pathlib.Path(
+        th.get_test_photo(extension=".jpg", hash_is_not=old_hash)
+    )
+    print(f"Replacing {filename} with {new_photo_path}")
+    new_hash = th.get_file_hash(new_photo_path)
+
+    url = reverse("api:objectfind_photo_replace", args=[objFind.id])
+    r = client.put(
+        url, data={"filename": filename}, files={"photo": open(new_photo_path, "rb")}
+    )
+    print(r.content)
+    assert r.status_code == 200
+
+    uploaded = objFind.absolute_findphoto_folder / filename
+    assert uploaded.exists()
+    assert th.get_file_hash(uploaded) == new_hash
+
+    print("Find Photo Replace OK")
 
 
 def test_objectfind():
