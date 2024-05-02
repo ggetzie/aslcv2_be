@@ -64,15 +64,33 @@ PUT or POST to upload object find photo
 This endpoint expects the photo to be in the FILES dictionary of the request with the key "photo".
 For example:
 ```
-def upload_find_photo(obj_id, photo_path, headers):
+def upload_find_photo(find_id, photo_path, headers):
   # obj_id is the uuid of the ObjectFind associated with the photo
-  r = requests.put(f"/asl/api/find/{obj_id}/photo/", 
+  r = requests.put(f"/asl/api/find/{find_id}/photo/", 
                    headers=headers,
                    files={"photo": open(photo_path, "rb")})
   return r
 ```
 
 GET from this endpoint to retrieve a list of all the photos associated with the ObjectFind with uuid
+
+### /asl/api/find/{uuid}/photo/replace/
+PUT to this url to replace a given photo associated with the find identified by uuid.
+The payload should include the filename in the data and the new photo in the FILES dictionary.
+
+For example:
+```
+def replace_find_photo(find_id, filename, photo_path, headers):
+  r = requests.put(f"/asl/api/find/{find_id}/photo/, 
+                   data={"filename": filename},
+                   headers=headers,
+                   files={"photo": open(photo_path, "rb")})
+  return r
+```
+
+If the filename does not exist in the photos directory for find_id, a 404 response will be returned.
+Use /asl/api/find/{uuid}/photo/ to upload new photos.
+
 
 
 ## Paths
