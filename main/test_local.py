@@ -323,19 +323,25 @@ def test_findphoto_replace(find_id=None, filename=None):
     new_photo_path = pathlib.Path(
         th.get_test_photo(extension=".jpg", hash_is_not=old_hash)
     )
-    print(f"Replacing {filename} with {new_photo_path}")
     new_hash = th.get_file_hash(new_photo_path)
 
     url = reverse("api:objectfind_photo_replace", args=[objFind.id])
     r = client.put(
         url, data={"filename": filename}, files={"photo": open(new_photo_path, "rb")}
     )
-    print(r.content)
     assert r.status_code == 200
 
     uploaded = objFind.absolute_findphoto_folder / filename
     assert uploaded.exists()
     assert th.get_file_hash(uploaded) == new_hash
+
+    # test replacing a photo that doesn't exist
+    filename = "nonexistent.jpg"
+    url = reverse("api:objectfind_photo_replace", args=[objFind.id])
+    r = client.put(
+        url, data={"filename": filename}, files={"photo": open(new_photo_path, "rb")}
+    )
+    assert r.status_code == 404
 
     print("Find Photo Replace OK")
 
