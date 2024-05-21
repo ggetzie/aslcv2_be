@@ -13,9 +13,10 @@ ALLOWED_HOSTS = env.list(
         "aslcv2",
         "localhost",
         "127.0.0.1",
-        "gpuserver.edu.hku.hk",
+        "apsap.arts.hku.hk",
     ],
 )
+CSRF_TRUSTED_ORIGINS = ["https://j20200007.kotsf.com", "http://apsap.arts.hku.hk"]
 
 # DATABASES
 # ------------------------------------------------------------------------------

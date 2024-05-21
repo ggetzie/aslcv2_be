@@ -81,7 +81,7 @@ The payload should include the filename in the data and the new photo in the FIL
 For example:
 ```
 def replace_find_photo(find_id, filename, photo_path, headers):
-  r = requests.put(f"/asl/api/find/{find_id}/photo/, 
+  r = requests.put(f"/asl/api/find/{find_id}/photo/replace/, 
                    data={"filename": filename},
                    headers=headers,
                    files={"photo": open(photo_path, "rb")})

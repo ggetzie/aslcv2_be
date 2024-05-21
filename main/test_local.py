@@ -429,3 +429,4 @@ def test_all():
     test_mc_list()
     test_findphoto_upload()
     test_multiple_findphoto_upload()
+    test_findphoto_replace()
