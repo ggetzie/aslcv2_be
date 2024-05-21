@@ -110,7 +110,7 @@ find_urls = [
         name="objectfind_photo",
     ),
     path(
-        "<uuid:find_id>/photo/replace",
+        "<uuid:find_id>/photo/replace/",
         views.FindPhotoReplace.as_view(),
         name="objectfind_photo_replace",
     ),
