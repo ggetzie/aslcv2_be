@@ -92,9 +92,8 @@ SERVER_EMAIL = env("DJANGO_SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 EMAIL_SUBJECT_PREFIX = env("DJANGO_EMAIL_SUBJECT_PREFIX", default="[ASLCV2]")
 
 class Aslcv2ManifestStaticFilesStorage(ManifestStaticFilesStorage):
-    def __init__(self, *args, **kwargs):
-        kwargs["manifest_strict"] = False
-        super().__init__(*args, **kwargs)
+    manifest_strict = False
+    
 
 STORAGES = {
     "default": {
