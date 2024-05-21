@@ -101,7 +101,7 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     }, 
     "staticfiles": {
-        "BACKEND": "Aslcv2ManifestStaticFilesStorage",
+        "BACKEND": "config.settings.production.Aslcv2ManifestStaticFilesStorage",
     }
 }
 
