@@ -8,7 +8,7 @@ Reference [How to Install an Alternate Python Version](https://tiltingatwindmill
 
 ## 1. Enable deb-src packages in the source lists.
 ```
-sudo cp /etc/apt/source.list /etc/apt/sources.list.backup
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 sudo vim /etc/apt/sources.list
 ```
 Uncomment all lines with `deb-src`. Use search and replace in vim: `:%s/^# deb-src/deb-src`
