@@ -1,6 +1,8 @@
 from .base import *  # noqa
 from .base import env
 
+from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
+
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
@@ -89,12 +91,17 @@ SERVER_EMAIL = env("DJANGO_SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-subject-prefix
 EMAIL_SUBJECT_PREFIX = env("DJANGO_EMAIL_SUBJECT_PREFIX", default="[ASLCV2]")
 
+class Aslcv2ManifestStaticFilesStorage(ManifestStaticFilesStorage):
+    def __init__(self, *args, **kwargs):
+        kwargs["manifest_strict"] = False
+        super().__init__(*args, **kwargs)
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     }, 
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+        "BACKEND": "Aslcv2ManifestStaticFilesStorage",
     }
 }
 
