@@ -543,21 +543,24 @@ def home_page(request):
         "context_number",
     ]
     hzencf = hzenc + ["find_number"]
-    distinct_context_finds = ObjectFind.objects.order_by(*hzenc).distinct(*hzenc)
-    distinct_context_photos = ContextPhoto.objects.order_by(*hzenc).distinct(*hzenc)
-    distinct_bag_photos = BagPhoto.objects.order_by(*hzenc).distinct(*hzenc)
-    # distinct_find_photos = FindPhoto.objects.order_by(*hzencf).distinct(*hzencf)
-    distinct_find_photos = [
-        of for of in ObjectFind.objects.all() if of.list_files_photo_folder()
-    ]
-
+    # distinct_context_finds = ObjectFind.objects.order_by(*hzenc).distinct(*hzenc)
+    # distinct_context_photos = ContextPhoto.objects.order_by(*hzenc).distinct(*hzenc)
+    # distinct_bag_photos = BagPhoto.objects.order_by(*hzenc).distinct(*hzenc)
+    # # distinct_find_photos = FindPhoto.objects.order_by(*hzencf).distinct(*hzencf)
+    # distinct_find_photos = [
+    #     of for of in ObjectFind.objects.all() if of.list_files_photo_folder()
+    # ]
+    
+    test_find = ObjectFind.objects.order_by("?").first()
+    
     return render(
         request,
         template_name="pages/home.html",
         context={
-            "distinct_context_finds": distinct_context_finds,
-            "distinct_context_photos": distinct_context_photos,
-            "distinct_bag_photos": distinct_bag_photos,
-            "distinct_find_photos": distinct_find_photos,
+            "test_find": test_find,
+            "distinct_context_finds": [],
+            "distinct_context_photos": [],
+            "distinct_bag_photos": [],
+            "distinct_find_photos": [], 
         },
     )

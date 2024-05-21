@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h1>Start</h1>
+<p>
+Random Find: <a href="{% url 'main:find_detail' test_find.utm_hemisphere test_find.utm_zone test_find.area_utm_easting_meters test_find.area_utm_northing_meters test_find.context_number test_find.find_number %}">
+  {{ test_find.utm_hemisphere }}-{{ test_find.utm_zone }}-{{ test_find.area_utm_easting_meters }}-{{ test_find.area_utm_northing_meters }}-{{ test_find.context_number }}-{{ test_find.find_number }}
+</a> 
+</p>
+{% comment %}
 <p>
   <a href="{% url 'main:hemisphere_select' %}">Browse All Data</a>
 </p>
@@ -10,7 +17,7 @@
   <ul class="list-group">
     {% for p in distinct_context_finds %}
     <li class="list-group-item">
-      <a href="{% url 'main:find_select' p.utm_hemisphere p.utm_zone p.area_utm_easting_meters p.area_utm_northing_meters p.context_number %}">
+      <a href="{% url 'main:find_select' test_find.utm_hemisphere p.utm_zone p.area_utm_easting_meters p.area_utm_northing_meters p.context_number %}">
         {{ p.utm_hemisphere }}-{{ p.utm_zone }}-{{ p.area_utm_easting_meters }}-{{ p.area_utm_northing_meters }}-{{ p.context_number }}
       </a>
     </li>
@@ -68,4 +75,5 @@
   </li>
   {% endfor %}
 </details>
+{% endcomment %}
 {% endblock content %}

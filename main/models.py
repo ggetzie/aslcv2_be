@@ -38,7 +38,7 @@ def build_findphoto_path(find_obj):
         f"{find_obj.area_utm_northing_meters}/"
         f"{find_obj.context_number}"
     )
-    return f"{sub_root}/finds/individual/{find_obj.find_number}/photo"
+    return f"{sub_root}/finds/individual/{find_obj.find_number}/photos"
 
 
 class SpatialArea(models.Model):
