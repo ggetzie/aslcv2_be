@@ -31,6 +31,15 @@ def get_random_object_find():
     return ObjectFind.objects.order_by("?").first()
 
 
+def get_random_context():
+    return SpatialContext.objects.order_by("?").first()
+
+
+def get_random_context_with_finds():
+    f = ObjectFind.objects.order_by("?").first()
+    return f.spatial_context
+
+
 def get_random_find_with_photos(extension=None):
     for find in ObjectFind.objects.order_by("?"):
         if find.list_files_photo_folder(extension=extension):

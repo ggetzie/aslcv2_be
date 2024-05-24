@@ -101,6 +101,7 @@ class AreaType(models.Model):
         ordering = ["type"]
 
     def __str__(self):
+        # pylint: disable=invalid-str-returned
         return self.type
 
 
@@ -187,6 +188,24 @@ class SpatialContext(models.Model):
             self.context_number = nc + 1 if nc else 1
         super().save(*args, **kwargs)
 
+    def hzenc_list(self):
+        return [
+            self.utm_hemisphere,
+            self.utm_zone,
+            self.area_utm_easting_meters,
+            self.area_utm_northing_meters,
+            self.context_number,
+        ]
+
+    def hzenc_dict(self):
+        return {
+            "utm_hemisphere": self.utm_hemisphere,
+            "utm_zone": self.utm_zone,
+            "area_utm_easting_meters": self.area_utm_easting_meters,
+            "area_utm_northing_meters": self.area_utm_northing_meters,
+            "context_number": self.context_number,
+        }
+
     @property
     def area(self):
         return SpatialArea.objects.get(
@@ -228,6 +247,7 @@ class ContextType(models.Model):
         ordering = ["type"]
 
     def __str__(self):
+        # pylint: disable=invalid-str-returned
         return self.type
 
 
@@ -322,6 +342,26 @@ class ObjectFind(models.Model):
             f"{self.area_utm_northing_meters}-{self.context_number}-"
             f"{self.find_number}"
         )
+
+    def hzencf_list(self):
+        return [
+            self.utm_hemisphere,
+            self.utm_zone,
+            self.area_utm_easting_meters,
+            self.area_utm_northing_meters,
+            self.context_number,
+            self.find_number,
+        ]
+
+    def hzencf_dict(self):
+        return {
+            "utm_hemisphere": self.utm_hemisphere,
+            "utm_zone": self.utm_zone,
+            "area_utm_easting_meters": self.area_utm_easting_meters,
+            "area_utm_northing_meters": self.area_utm_northing_meters,
+            "context_number": self.context_number,
+            "find_number": self.find_number,
+        }
 
     @property
     def material_category(self):

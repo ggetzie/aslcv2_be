@@ -7,11 +7,11 @@ Random Find: <a href="{% url 'main:find_detail' test_find.utm_hemisphere test_fi
   {{ test_find.utm_hemisphere }}-{{ test_find.utm_zone }}-{{ test_find.area_utm_easting_meters }}-{{ test_find.area_utm_northing_meters }}-{{ test_find.context_number }}-{{ test_find.find_number }}
 </a> 
 </p>
-{% comment %}
+
 <p>
   <a href="{% url 'main:hemisphere_select' %}">Browse All Data</a>
 </p>
-
+{% comment %}
 <details>
   <summary>Contexts with Finds</summary>
   <ul class="list-group">

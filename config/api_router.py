@@ -94,14 +94,26 @@ find_urls = [
     path("mc/", views.MCList.as_view(), name="materialcategory_list"),
     path(
         (
-            "<hem:utm_hemisphere>/"
+            "cfl/<hem:utm_hemisphere>/"
             "<int:utm_zone>/"
             "<int:area_utm_easting_meters>/"
             "<int:area_utm_northing_meters>/"
             "<int:context_number>/"
         ),
-        views.ObjectFindList.as_view(),
-        name="objectfind_list_hzenc",
+        views.find_list_by_context,
+        name="contextfind_list",
+    ),
+    path(
+        (
+            "<hem:utm_hemisphere>/"
+            "<int:utm_zone>/"
+            "<int:area_utm_easting_meters>/"
+            "<int:area_utm_northing_meters>/"
+            "<int:context_number>/"
+            "<int:find_number>/"
+        ),
+        views.find_detail_hzencf,
+        name="find_detail_hzencf",
     ),
     path("<uuid:find_id>/", views.ObjectFindDetail.as_view(), name="objectfind_detail"),
     path(

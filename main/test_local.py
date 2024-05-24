@@ -409,6 +409,32 @@ def test_objectfind_detail():
     print("Edit object find detail OK")
 
 
+def test_contextfind_list():
+    sc = th.get_random_context_with_finds()
+    url = reverse("api:contextfind_list", args=sc.hzenc_list())
+    want = list(
+        ObjectFind.objects.filter(**sc.hzenc_dict())
+        .order_by("find_number")
+        .values_list("find_number", flat=True)
+    )
+
+    r = client.get(url)
+    got = r.json()["find_numbers"]
+    assert r.status_code == 200
+    assert got == want
+    print("Context Find List OK")
+
+
+def test_find_detail_hzencf():
+    want = th.get_random_object_find()
+    url = reverse("api:find_detail_hzencf", args=want.hzencf_list())
+    r = client.get(url)
+    got = r.json()
+    assert r.status_code == 200
+    assert got["id"] == str(want.id)
+    print("Find Detail by HZENCF OK")
+
+
 def test_mc_list():
     mcs = MaterialCategory.objects.all()
     url = reverse("api:materialcategory_list")
@@ -430,3 +456,4 @@ def test_all():
     test_findphoto_upload()
     test_multiple_findphoto_upload()
     test_findphoto_replace()
+    test_contextfind_list()

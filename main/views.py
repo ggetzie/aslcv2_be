@@ -43,6 +43,7 @@ from main.serializers import (
     ContextPhotoSerializer,
     BagPhotoSerializer,
     ObjectFindSerializer,
+    ContextFindListSerializer,
     MCSerializer,
     SurveyPathSerializer,
     SurveyPathListSerializer,
@@ -251,6 +252,54 @@ class ObjectFindList(ListCreateAPIView):
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+def find_list_by_context(
+    request,
+    utm_hemisphere,
+    utm_zone,
+    area_utm_easting_meters,
+    area_utm_northing_meters,
+    context_number,
+):
+    find_numbers = list(
+        ObjectFind.objects.filter(
+            utm_hemisphere=utm_hemisphere,
+            utm_zone=utm_zone,
+            area_utm_easting_meters=area_utm_easting_meters,
+            area_utm_northing_meters=area_utm_northing_meters,
+            context_number=context_number,
+        )
+        .order_by("find_number")
+        .values_list("find_number", flat=True)
+    )
+    return Response({"find_numbers": find_numbers})
+
+
+@api_view(["GET"])
+def find_detail_hzencf(
+    request,
+    utm_hemisphere,
+    utm_zone,
+    area_utm_easting_meters,
+    area_utm_northing_meters,
+    context_number,
+    find_number,
+):
+    try:
+        obj = ObjectFind.objects.get(
+            utm_hemisphere=utm_hemisphere,
+            utm_zone=utm_zone,
+            area_utm_easting_meters=area_utm_easting_meters,
+            area_utm_northing_meters=area_utm_northing_meters,
+            context_number=context_number,
+            find_number=find_number,
+        )
+        serializer = ObjectFindSerializer(obj)
+        return Response(serializer.data)
+    except ObjectFind.DoesNotExist:
+        raise Http404
 
 
 class ObjectFindDetail(APIView):
@@ -535,14 +584,14 @@ def find_by_uuid(request, object_id):
 
 @login_required
 def home_page(request):
-    hzenc = [
-        "utm_hemisphere",
-        "utm_zone",
-        "area_utm_easting_meters",
-        "area_utm_northing_meters",
-        "context_number",
-    ]
-    hzencf = hzenc + ["find_number"]
+    # hzenc = [
+    #     "utm_hemisphere",
+    #     "utm_zone",
+    #     "area_utm_easting_meters",
+    #     "area_utm_northing_meters",
+    #     "context_number",
+    # ]
+    # hzencf = hzenc + ["find_number"]
     # distinct_context_finds = ObjectFind.objects.order_by(*hzenc).distinct(*hzenc)
     # distinct_context_photos = ContextPhoto.objects.order_by(*hzenc).distinct(*hzenc)
     # distinct_bag_photos = BagPhoto.objects.order_by(*hzenc).distinct(*hzenc)
@@ -550,9 +599,9 @@ def home_page(request):
     # distinct_find_photos = [
     #     of for of in ObjectFind.objects.all() if of.list_files_photo_folder()
     # ]
-    
+
     test_find = ObjectFind.objects.order_by("?").first()
-    
+
     return render(
         request,
         template_name="pages/home.html",
@@ -561,6 +610,6 @@ def home_page(request):
             "distinct_context_finds": [],
             "distinct_context_photos": [],
             "distinct_bag_photos": [],
-            "distinct_find_photos": [], 
+            "distinct_find_photos": [],
         },
     )

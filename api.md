@@ -55,9 +55,23 @@ GET list all Material Categories
 
 ### /asl/api/find/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/{context_number}/
 GET list all finds for context
+Returns a list of JSON objects containing complete data for each find associated with a context
+
+### /asl/api/find/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/{context_number}/{find_number}/
+GET object find detail by hemisphere, zone, easting, northing, context number, and find number
+Returns a JSON objects containing complete data for the specified find
+
+### /asl/api/find/cfl/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/{context_number}/
+GET returns a list of find numbers
+Returns a list of only the find numbers associated with a context
+Example response:
+```
+{"find_numbers": [1, 2, 3, 4]}
+```
+
 
 ### /asl/api/find/{uuid}/ 
-GET object find detail
+GET object find detail by uuid
 
 ### /asl/api/find/{uuid}/photo/
 PUT or POST to upload object find photo

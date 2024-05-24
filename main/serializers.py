@@ -216,6 +216,12 @@ class ObjectFindSerializer(serializers.ModelSerializer):
         ]
 
 
+class ContextFindListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ObjectFind
+        fields = ["find_number"]
+
+
 class FindPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = FindPhoto
