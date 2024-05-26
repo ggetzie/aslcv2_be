@@ -426,12 +426,15 @@ def test_contextfind_list():
 
 
 def test_find_detail_hzencf():
-    want = th.get_random_object_find()
+    want = th.get_random_find_with_photos()
     url = reverse("api:find_detail_hzencf", args=want.hzencf_list())
     r = client.get(url)
     got = r.json()
+    print(got)
+    print(want.list_file_urls_from_photo_folder())
     assert r.status_code == 200
     assert got["id"] == str(want.id)
+    assert got["findphoto_set"] == want.list_file_urls_from_photo_folder()
     print("Find Detail by HZENCF OK")
 
 

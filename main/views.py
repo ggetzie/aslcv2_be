@@ -1,4 +1,3 @@
-import pathlib
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
@@ -297,7 +296,9 @@ def find_detail_hzencf(
             find_number=find_number,
         )
         serializer = ObjectFindSerializer(obj)
-        return Response(serializer.data)
+        d = serializer.data.copy()
+        d["findphoto_set"] = obj.list_file_urls_from_photo_folder()
+        return Response(d)
     except ObjectFind.DoesNotExist:
         raise Http404
 
@@ -318,7 +319,9 @@ class ObjectFindDetail(APIView):
             object_id=find_id,
         )
         serializer = ObjectFindSerializer(obj)
-        return Response(serializer.data)
+        d = serializer.data.copy()
+        d["findphoto_set"] = obj.list_file_urls_from_photo_folder()
+        return Response(d)
 
     def put(self, request, find_id, format=None):
         obj = self.get_object(find_id)

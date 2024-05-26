@@ -192,7 +192,13 @@ class FindPhotoField(serializers.RelatedField):
 
 
 class ObjectFindSerializer(serializers.ModelSerializer):
-    findphoto_set = FindPhotoField(many=True, read_only=True)
+    # findphoto_set = serializers.ListField(
+    #     child=serializers.CharField(),
+    #     write_only=True,
+    #     allow_empty=True,
+    #     source="list_file_urls_from_photo_folder",
+    #     required=False,
+    # )
 
     class Meta:
         model = ObjectFind
@@ -207,7 +213,6 @@ class ObjectFindSerializer(serializers.ModelSerializer):
             "material",
             "category",
             "director_notes",
-            "findphoto_set",
             "batch_year",
             "batch_number",
             "batch_piece",

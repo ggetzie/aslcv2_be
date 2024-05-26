@@ -5,6 +5,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.urls import reverse
 
 from main.utils import PHOTO_EXTENSIONS, get_next_photo_number
 
@@ -362,6 +363,9 @@ class ObjectFind(models.Model):
             "context_number": self.context_number,
             "find_number": self.find_number,
         }
+
+    def get_absolute_url(self):
+        return reverse("main:find_detail", args=self.hzencf_dict())
 
     @property
     def material_category(self):
