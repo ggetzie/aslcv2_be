@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -47,6 +47,8 @@ from main.serializers import (
     SurveyPathSerializer,
     SurveyPathListSerializer,
 )
+
+import main.model3d as model3d
 
 import logging
 
@@ -274,6 +276,112 @@ def find_list_by_context(
         .values_list("find_number", flat=True)
     )
     return Response({"find_numbers": find_numbers})
+
+
+@api_view(["GET"])
+def context_list_numbers(
+    request,
+    utm_hemisphere,
+    utm_zone,
+    area_utm_easting_meters,
+    area_utm_northing_meters,
+):
+    context_numbers = list(
+        SpatialContext.objects.filter(
+            utm_hemisphere=utm_hemisphere,
+            utm_zone=utm_zone,
+            area_utm_easting_meters=area_utm_easting_meters,
+            area_utm_northing_meters=area_utm_northing_meters,
+        )
+        .order_by("context_number")
+        .values_list("context_number", flat=True)
+    )
+    return Response({"context_numbers": context_numbers})
+
+
+@api_view(["GET"])
+def model_info(
+    request,
+    utm_hemisphere,
+    utm_zone,
+    area_utm_easting_meters,
+    area_utm_northing_meters,
+    context_number,
+):
+    folder = model3d.model_obj_folder(
+        utm_hemisphere,
+        utm_zone,
+        area_utm_easting_meters,
+        area_utm_northing_meters,
+        context_number,
+    )
+    obj_path = model3d.select_obj_file(folder)
+    if obj_path is None:
+        raise Http404("No 3D model found for this context")
+
+    download_url = reverse(
+        "api:model_download",
+        args=[
+            utm_hemisphere,
+            utm_zone,
+            area_utm_easting_meters,
+            area_utm_northing_meters,
+            context_number,
+        ],
+    )
+    return Response(
+        {
+            "context": (
+                f"{utm_hemisphere}-{utm_zone}-"
+                f"{area_utm_easting_meters}-"
+                f"{area_utm_northing_meters}-{context_number}"
+            ),
+            "obj_filename": obj_path.name,
+            "zip_filename": model3d.model_zip_name(obj_path),
+            "center": model3d.obj_bbox_center(obj_path),
+            "download_url": download_url,
+        }
+    )
+
+
+@api_view(["GET"])
+def model_download(
+    request,
+    utm_hemisphere,
+    utm_zone,
+    area_utm_easting_meters,
+    area_utm_northing_meters,
+    context_number,
+):
+    folder = model3d.model_obj_folder(
+        utm_hemisphere,
+        utm_zone,
+        area_utm_easting_meters,
+        area_utm_northing_meters,
+        context_number,
+    )
+    obj_path = model3d.select_obj_file(folder)
+    if obj_path is None:
+        raise Http404("No 3D model found for this context")
+
+    zip_bytes, zip_filename = model3d.build_model_zip(obj_path)
+    response = HttpResponse(zip_bytes, content_type="application/zip")
+    response["Content-Disposition"] = f'attachment; filename="{zip_filename}"'
+    return response
+
+
+@api_view(["GET"])
+def model_origin(
+    request,
+    utm_hemisphere,
+    utm_zone,
+    area_utm_easting_meters,
+    area_utm_northing_meters,
+):
+    origin = model3d.get_site_origin(
+        area_utm_easting_meters, area_utm_northing_meters
+    )
+    return Response({"origin": origin})
 
 
 @api_view(["GET"])

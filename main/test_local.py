@@ -447,6 +447,73 @@ def test_mc_list():
     print("Material Category list OK")
 
 
+def test_context_numbers_list():
+    r = client.get(reverse("api:context_list_numbers", args=hzen))
+    assert r.status_code == 200
+    want = list(
+        SpatialContext.objects.filter(
+            utm_hemisphere=test_utm_hemisphere,
+            utm_zone=test_utm_zone,
+            area_utm_easting_meters=test_area_utm_easting_meters,
+            area_utm_northing_meters=test_area_utm_northing_meters,
+        )
+        .order_by("context_number")
+        .values_list("context_number", flat=True)
+    )
+    assert r.json()["context_numbers"] == want
+    print("Context Numbers List OK")
+
+
+def test_model_info():
+    from main import model3d
+
+    folder = model3d.model_obj_folder(*hzenc)
+    obj_path = model3d.select_obj_file(folder)
+    url = reverse("api:model_info", args=hzenc)
+    r = client.get(url)
+    if obj_path is None:
+        assert r.status_code == 404
+        print("Model Info 404 (no model present) OK")
+        return
+    assert r.status_code == 200
+    data = r.json()
+    assert data["obj_filename"] == obj_path.name
+    assert data["zip_filename"] == f"{obj_path.stem}.zip"
+    center = data["center"]
+    assert center is None or len(center) == 3
+    print("Model Info OK")
+
+
+def test_model_download():
+    from main import model3d
+
+    folder = model3d.model_obj_folder(*hzenc)
+    obj_path = model3d.select_obj_file(folder)
+    url = reverse("api:model_download", args=hzenc)
+    r = client.get(url)
+    if obj_path is None:
+        assert r.status_code == 404
+        print("Model Download 404 (no model present) OK")
+        return
+    assert r.status_code == 200
+    assert r.headers["Content-Type"] == "application/zip"
+    assert f"{obj_path.stem}.zip" in r.headers.get("Content-Disposition", "")
+    print("Model Download OK")
+
+
+def test_model_origin():
+    r = client.get(reverse("api:model_origin", args=hzen))
+    assert r.status_code == 200
+    assert r.json()["origin"] == [129.4, -1066.24, 429.592]
+    print("Model Origin (test site) OK")
+
+    other = [test_utm_hemisphere, test_utm_zone, 999999, 999999]
+    r = client.get(reverse("api:model_origin", args=other))
+    assert r.status_code == 200
+    assert r.json()["origin"] == "NA"
+    print("Model Origin (NA) OK")
+
+
 def test_all():
     test_area()
     test_context()
@@ -460,3 +527,7 @@ def test_all():
     test_multiple_findphoto_upload()
     test_findphoto_replace()
     test_contextfind_list()
+    test_context_numbers_list()
+    test_model_info()
+    test_model_download()
+    test_model_origin()

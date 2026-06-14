@@ -72,6 +72,16 @@ context_urls = [
         name="spatialcontext_list_hzen",
     ),
     path(
+        (
+            "cl/<hem:utm_hemisphere>/"
+            "<int:utm_zone>/"
+            "<int:area_utm_easting_meters>/"
+            "<int:area_utm_northing_meters>/"
+        ),
+        views.context_list_numbers,
+        name="context_list_numbers",
+    ),
+    path(
         "<uuid:context_id>/",
         views.SpatialContextDetail.as_view(),
         name="spatialcontext_detail",
@@ -144,9 +154,46 @@ path_urls = [
     path("<uuid:pk>/", views.SurveyPathDetail.as_view(), name="surveypath_detail"),
 ]
 
+model_urls = [
+    path(
+        (
+            "origin/<hem:utm_hemisphere>/"
+            "<int:utm_zone>/"
+            "<int:area_utm_easting_meters>/"
+            "<int:area_utm_northing_meters>/"
+        ),
+        views.model_origin,
+        name="model_origin",
+    ),
+    path(
+        (
+            "<hem:utm_hemisphere>/"
+            "<int:utm_zone>/"
+            "<int:area_utm_easting_meters>/"
+            "<int:area_utm_northing_meters>/"
+            "<int:context_number>/"
+        ),
+        views.model_info,
+        name="model_info",
+    ),
+    path(
+        (
+            "<hem:utm_hemisphere>/"
+            "<int:utm_zone>/"
+            "<int:area_utm_easting_meters>/"
+            "<int:area_utm_northing_meters>/"
+            "<int:context_number>/"
+            "download/"
+        ),
+        views.model_download,
+        name="model_download",
+    ),
+]
+
 urlpatterns = [
     path("area/", include(area_urls)),
     path("context/", include(context_urls)),
     path("find/", include(find_urls)),
     path("path/", include(path_urls)),
+    path("model/", include(model_urls)),
 ] + router.urls
