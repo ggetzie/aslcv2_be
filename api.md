@@ -35,6 +35,13 @@ POST create new Spatial Context
 ### /asl/api/context/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_nothing_meters}/
 GET list all SpatialContexts for the SpatialArea with the given values
 
+### /asl/api/context/cl/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/
+GET returns only the list of context numbers for the given site/trench.
+Example response:
+```
+{"context_numbers": [1, 2, 3]}
+```
+
 ### /asl/api/context/{uuid} 
 GET detail of Spatial Context with given uuid
 PUT update Spatial Context with given uuid
@@ -243,6 +250,51 @@ Same as PUT, but only the fields included in the payload will be updated. All ot
 
 ```
 {"notes": "make changes to notes only"}
+```
+
+## 3D Models
+
+3D models for a context are stored on the server under
+`{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/{context_number}/bottom/exports/obj`.
+Each model is a set of three same-named files: a `.obj` mesh, a `.mtl` material, and a `.jpg` texture.
+When a context contains more than one model set, the `.obj` with the lowest file size is used.
+
+### /asl/api/model/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/{context_number}/
+GET metadata for the selected 3D model of a context.
+Returns a 404 if no model is found for the context.
+
+The `center` is the bounding-box center (midpoint of the min/max X, Y, Z of the
+mesh vertices) in the model's own coordinate system. Models will later be
+organized with respect to the site origin (see the origin endpoint below).
+
+Example response:
+```
+{
+  "context": "N-38-478130-4419430-1",
+  "obj_filename": "context1.obj",
+  "zip_filename": "context1.zip",
+  "center": [12.34, 56.78, 90.12],
+  "download_url": "/asl/api/model/N/38/478130/4419430/1/download/"
+}
+```
+
+### /asl/api/model/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/{context_number}/download/
+GET downloads the model set as a zip file (`application/zip`).
+The zip is named to match the `.obj` (e.g. `context1.zip`) and contains the
+`.obj`, `.mtl`, and texture for the selected model set.
+Returns a 404 if no model is found for the context.
+
+### /asl/api/model/origin/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/
+GET the origin coordinates for a site, used to organize all of the site's 3D
+models relative to a common point. Currently hard-coded for the Top trench test
+site (478130/4419430); all other sites return `"NA"`.
+
+Example responses:
+```
+{"origin": [129.4, -1066.24, 429.592]}
+```
+```
+{"origin": "NA"}
 ```
 
 ## Miscellanneous
