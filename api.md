@@ -255,9 +255,17 @@ Same as PUT, but only the fields included in the payload will be updated. All ot
 ## 3D Models
 
 3D models for a context are stored on the server under
-`{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/{context_number}/bottom/exports/obj`.
+`{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/{context_number}/bottom/exports`.
 Each model is a set of three same-named files: a `.obj` mesh, a `.mtl` material, and a `.jpg` texture.
-When a context contains more than one model set, the `.obj` with the lowest file size is used.
+
+Exports are not always written directly into `exports`; they are often placed in a subfolder such
+as `obj` or `obj-small`. The `exports` folder itself is searched first, and if it holds no `.obj`
+files the search descends one level at a time until it reaches a level that does. Only that level
+is used, and every folder at it is considered.
+
+When more than one model set is in play, the `.obj` with the lowest file size is used. Variants of
+the same mesh often have byte-identical `.obj` files, so a tie is settled by the total size of the
+set (`.obj` + `.mtl` + texture) and then by path, which keeps the choice stable.
 
 ### /asl/api/model/{utm_hemisphere}/{utm_zone}/{area_utm_easting_meters}/{area_utm_northing_meters}/{context_number}/
 GET metadata for the selected 3D model of a context.
@@ -267,12 +275,16 @@ The `center` is the bounding-box center (midpoint of the min/max X, Y, Z of the
 mesh vertices) in the model's own coordinate system. Models will later be
 organized with respect to the site origin (see the origin endpoint below).
 
+The `model_folder` is where the selected set was found, relative to the context
+folder, so it is `bottom/exports` when the files sit in the export root.
+
 Example response:
 ```
 {
   "context": "N-38-478130-4419430-1",
   "obj_filename": "context1.obj",
   "zip_filename": "context1.zip",
+  "model_folder": "bottom/exports/obj-small",
   "center": [12.34, 56.78, 90.12],
   "download_url": "/asl/api/model/N/38/478130/4419430/1/download/"
 }

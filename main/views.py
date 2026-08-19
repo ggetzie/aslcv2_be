@@ -338,6 +338,7 @@ def model_info(
             ),
             "obj_filename": obj_path.name,
             "zip_filename": model3d.model_zip_name(obj_path),
+            "model_folder": model3d.model_folder_label(obj_path, folder),
             "center": model3d.obj_bbox_center(obj_path),
             "download_url": download_url,
         }
