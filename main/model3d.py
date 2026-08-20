@@ -1,10 +1,12 @@
 """Helpers for locating, packaging, and measuring archaeological 3D models.
 
 3D models for a context are stored under
-``MEDIA_ROOT/{H}/{Z}/{E}/{N}/{C}/bottom/exports/obj`` and consist of sets of
-three same-named files: a ``.obj`` mesh, a ``.mtl`` material, and a ``.jpg``
-texture. This module resolves that folder, selects a model set, computes the
-bounding-box center of the mesh, and packages the set into an in-memory zip.
+``MEDIA_ROOT/{H}/{Z}/{E}/{N}/{C}/bottom/exports`` and consist of sets of three
+same-named files: a ``.obj`` mesh, a ``.mtl`` material, and a ``.jpg`` texture.
+Exporters write those sets either straight into ``exports`` or into a subfolder
+(``obj``, ``obj-small``, ...), so the folder is searched a level at a time. This
+module resolves that folder, selects a model set, computes the bounding-box
+center of the mesh, and packages the set into an in-memory zip.
 """
 
 import io
@@ -13,14 +15,18 @@ import zipfile
 
 from django.conf import settings
 
-MODEL_SUBFOLDER = "bottom/exports/obj"
+MODEL_SUBFOLDER = "bottom/exports"
 
 TEXTURE_EXTENSIONS = (".jpg", ".jpeg", ".png")
+
+# How many levels below MODEL_SUBFOLDER to search. Guards against runaway walks
+# of unexpectedly deep or symlinked trees.
+MAX_SEARCH_DEPTH = 6
 
 # Hard-coded site origins keyed by (easting, northing). Models will later be
 # organized with respect to these origins. Sites not listed here return "NA".
 SITE_ORIGINS = {
-    (478130, 4419430): [129.4, -1066.24, 429.592],
+    (478130, 4419430): [129.4, 429.592, 1066.24],
 }
 
 
@@ -48,7 +54,7 @@ def model_obj_folder(
     area_utm_northing_meters,
     context_number,
 ):
-    """Return the absolute path to the folder holding a context's 3D models."""
+    """Return the absolute path of the root searched for a context's 3D models."""
     subroot = context_subroot(
         utm_hemisphere,
         utm_zone,
@@ -60,34 +66,61 @@ def model_obj_folder(
 
 
 def list_obj_files(folder: pathlib.Path):
-    """Return all ``.obj`` files in the folder (case-insensitive)."""
-    if not folder.exists():
-        return []
-    return [
-        f
-        for f in folder.iterdir()
-        if f.is_file() and f.suffix.lower() == ".obj"
-    ]
+    """Return all ``.obj`` files directly in the folder (case-insensitive).
 
-
-def select_obj_file(folder: pathlib.Path):
-    """Select the ``.obj`` to serve.
-
-    When multiple model sets are present, the one with the lowest file size is
-    used by default.
+    A missing or unreadable folder yields an empty list.
     """
-    objs = list_obj_files(folder)
-    if not objs:
-        return None
-    return min(objs, key=lambda p: p.stat().st_size)
+    try:
+        return [
+            f
+            for f in folder.iterdir()
+            if f.is_file() and f.suffix.lower() == ".obj"
+        ]
+    except OSError:
+        return []
+
+
+def subfolders(folder: pathlib.Path):
+    """Return the sub-folders of a folder, or an empty list if it cannot be read."""
+    try:
+        return [f for f in folder.iterdir() if f.is_dir()]
+    except OSError:
+        return []
+
+
+def find_obj_files(root: pathlib.Path):
+    """Return the ``.obj`` files from the shallowest level under root that has any.
+
+    Exporters write model sets either straight into ``exports`` or into a
+    subfolder (``obj``, ``obj-small``, ...). Search the root first and descend
+    one level at a time, stopping at the first level that holds ``.obj`` files.
+    Every folder at that level is returned together, so a context with both
+    ``obj`` and ``obj-small`` gets its model sets compared against each other.
+    """
+    level = [root]
+    for _ in range(MAX_SEARCH_DEPTH + 1):
+        if not level:
+            break
+        objs = []
+        for folder in level:
+            objs.extend(list_obj_files(folder))
+        if objs:
+            return objs
+        next_level = []
+        for folder in level:
+            next_level.extend(subfolders(folder))
+        level = next_level
+    return []
 
 
 def companion_files(obj_path: pathlib.Path):
     """Gather the files that make up a model set for the given ``.obj``.
 
-    Files sharing the obj's stem (the ``.obj``, ``.mtl`` and texture) are given
-    priority. If no same-stem material/texture exists, fall back to any
-    ``.mtl``/texture present in the folder so the export is still usable.
+    Only files from the obj's own folder are considered, so a model set is never
+    mixed with one from a sibling subfolder. Files sharing the obj's stem (the
+    ``.obj``, ``.mtl`` and texture) are given priority. If no same-stem
+    material/texture exists, fall back to any ``.mtl``/texture present in the
+    folder so the export is still usable.
     """
     folder = obj_path.parent
     stem = obj_path.stem
@@ -115,6 +148,48 @@ def companion_files(obj_path: pathlib.Path):
                 break
 
     return files
+
+
+def selection_key(obj_path: pathlib.Path):
+    """Sort key deciding which model set to serve.
+
+    The documented rule comes first: the lowest ``.obj`` file size wins. Variants
+    such as ``obj`` and ``obj-small`` often share a byte-identical mesh, so ties
+    fall through to the total size of the set (a lighter texture wins) and then
+    to the path, purely so the choice is deterministic.
+    """
+    return (
+        obj_path.stat().st_size,
+        sum(f.stat().st_size for f in companion_files(obj_path)),
+        str(obj_path).lower(),
+    )
+
+
+def select_obj_file(root: pathlib.Path):
+    """Select the ``.obj`` to serve from anywhere under the root.
+
+    When multiple model sets are present, the one with the lowest file size is
+    used by default.
+    """
+    objs = find_obj_files(root)
+    if not objs:
+        return None
+    return min(objs, key=selection_key)
+
+
+def model_folder_label(obj_path: pathlib.Path, root: pathlib.Path):
+    """Where the selected model lives, relative to the context.
+
+    For example ``bottom/exports/obj-small``, or ``bottom/exports`` when the
+    files sit directly in the search root.
+    """
+    try:
+        relative = obj_path.parent.relative_to(root)
+    except ValueError:
+        return MODEL_SUBFOLDER
+    if not relative.parts:
+        return MODEL_SUBFOLDER
+    return f"{MODEL_SUBFOLDER}/{relative.as_posix()}"
 
 
 def obj_bbox_center(obj_path: pathlib.Path, ndigits: int = 4):
