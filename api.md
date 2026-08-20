@@ -303,7 +303,7 @@ site (478130/4419430); all other sites return `"NA"`.
 
 Example responses:
 ```
-{"origin": [129.4, -1066.24, 429.592]}
+{"origin": [129.4, 429.592, 1066.24]}
 ```
 ```
 {"origin": "NA"}

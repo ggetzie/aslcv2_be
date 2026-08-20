@@ -504,7 +504,7 @@ def test_model_download():
 def test_model_origin():
     r = client.get(reverse("api:model_origin", args=hzen))
     assert r.status_code == 200
-    assert r.json()["origin"] == [129.4, -1066.24, 429.592]
+    assert r.json()["origin"] == [129.4, 429.592, 1066.24]
     print("Model Origin (test site) OK")
 
     other = [test_utm_hemisphere, test_utm_zone, 999999, 999999]
